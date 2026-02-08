@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load extras %}
+
+{% block title %} Saisie abences par mois {% endblock %}
+{% block main %}
+
+
+
+<style>
+  .suivi-wrap{background:#fff;border:1px solid #eef1f5;border-radius:10px;padding:16px;}
+  .tabs{display:flex;gap:28px;border-bottom:1px solid #eef1f5;margin-bottom:18px;}
+  .tabs a{padding:10px 0;text-decoration:none;color:#222;font-weight:500;}
+  .tabs a.active{color:#24b36b;border-bottom:2px solid #24b36b;margin-bottom:-1px;}
+  .title{font-size:20px;font-weight:600;margin:12px 0 18px;}
+  .filters{display:grid;grid-template-columns: 1fr 1fr 1fr 220px;gap:22px;align-items:end;}
+  .f-label{font-weight:600;margin-bottom:6px;}
+  .req{color:#e74c3c}
+  .btn-filter{background:#3bc67a;border:none;color:#fff;border-radius:8px;padding:12px 16px;font-weight:600;}
+  .btn-filter:hover{filter:brightness(.98);}
+  .btn-save{background:#2d74ff;border:none;color:#fff;border-radius:10px;padding:12px 18px;font-weight:700;}
+  .table thead th{background:#d8effb !important;}
+  .table td,.table th{vertical-align:middle;}
+  .print-row{display:flex;justify-content:flex-end;margin:14px 0;}
+  .btn-print{background:#2d74ff;border:none;color:#fff;border-radius:10px;padding:10px 16px;font-weight:700;}
+  .inp-cell{width:70px;text-align:center;}
+  @media print {
+    .no-print{display:none !important;}
+    .suivi-wrap{border:none;}
+  }
+</style>
+
+<div class="suivi-wrap">
+  <div class="tabs no-print">
+    <a href="{% url 'absences_mois_saisie' %}" class="{% if tab == 'saisie' %}active{% endif %}">Saisie des présences par mois</a>
+    <a href="{% url 'absences_mois_voir' %}" class="{% if tab == 'voir' %}active{% endif %}">Voir les présences par mois</a>
+  </div>
+
+  <div class="title">Saisie des présences par mois</div>
+
+  <!-- FILTRE (même visuel capture) -->
+  <form method="get" class="no-print">
+    <div class="filters">
+      <div>
+        <div class="f-label">Niveaux<span class="req">*</span></div>
+        <select class="form-select" name="niveau" id="niveauSelect" required>
+          <option value="">—</option>
+          {% for n in niveaux %}
+            <option value="{{ n.id }}" {% if niveau_id|add:"" == n.id|add:"" %}selected{% endif %}>{{ n.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <div class="f-label">La liste des classes<span class="req">*</span></div>
+        <select class="form-select" name="classe" id="classeSelect" required>
+          <option value="">—</option>
+          {% for c in classes %}
+            <option value="{{ c.id }}" data-niveau="{{ c.niveau_id }}" {% if classe_id|add:"" == c.id|add:"" %}selected{% endif %}>
+              {{ c.nom }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <div class="f-label">Période<span class="req">*</span></div>
+        <select class="form-select" name="periode" required>
+          <option value="">—</option>
+          {% for p in periodes %}
+            <option value="{{ p.id }}" {% if periode_id|add:"" == p.id|add:"" %}selected{% endif %}>{{ p.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button class="btn-filter" type="submit">Filtrer</button>
+    </div>
+  </form>
+
+  {% if periode and classe_id %}
+  <!-- TABLE + ENREGISTRER -->
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="niveau_id" value="{{ niveau_id }}">
+    <input type="hidden" name="classe_id" value="{{ classe_id }}">
+    <input type="hidden" name="periode_id" value="{{ periode_id }}">
+
+    <div class="table-responsive mt-3">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th style="min-width:280px">Élève</th>
+            <th style="min-width:160px">La liste des classes</th>
+
+            {% for y,m,label in months %}
+              <th style="min-width:110px;text-align:center">{{ label }}</th>
+            {% endfor %}
+
+            <th style="min-width:90px;text-align:center">Total</th>
+            <!-- ✅ ABJ supprimé -->
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td>{{ r.i }}</td>
+              <td style="font-weight:700;text-transform:uppercase">{{ r.eleve.nom }}</td>
+              <td>{{ r.classe_label }}</td>
+
+              {% for y,m,label in months %}
+                <td style="text-align:center">
+                  <!-- input unique par eleve + mois -->
+                  <input class="form-control inp-cell"
+                         type="number"
+                         min="0"
+                         name="m_{{ y }}_{{ m }}_{{ r.eleve.id }}"
+                         value="{{ r.counts|get_item:y|get_item:m }}"
+
+                  <!-- on met une liste des eleves -->
+                </td>
+              {% endfor %}
+
+              <td style="text-align:center;font-weight:700">{{ r.total }}</td>
+            </tr>
+
+            <input type="hidden" name="eleve_id[]" value="{{ r.eleve.id }}">
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ✅ Bouton ENREGISTRER en bas -->
+    <div class="no-print" style="display:flex;justify-content:flex-end;margin-top:14px;">
+      <button class="btn-save" type="submit">Enregistrer</button>
+    </div>
+  </form>
+  {% endif %}
+
+</div>
+
+<script>
+  // Filtrer "classe" selon niveau (sans AJAX)
+  (function(){
+    const niveau = document.getElementById("niveauSelect");
+    const classe = document.getElementById("classeSelect");
+    if(!niveau || !classe) return;
+
+    function applyFilter(){
+      const niv = niveau.value;
+      let hasSelected = false;
+
+      [...classe.options].forEach((opt, idx) => {
+        if(idx === 0) return; // option —
+        const ok = !niv || opt.dataset.niveau === niv;
+        opt.hidden = !ok;
+        if(opt.selected && !ok){
+          opt.selected = false;
+        }
+        if(opt.selected && ok) hasSelected = true;
+      });
+
+      // si la classe sélectionnée ne correspond plus, reset
+      if(!hasSelected){
+        classe.value = "";
+      }
+    }
+
+    niveau.addEventListener("change", applyFilter);
+    applyFilter();
+  })();
+</script>
+
+
+{% endblock %}

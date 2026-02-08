@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Clôture Caisse{% endblock %}
+{% block main %}
+<div class="container-fluid px-4 py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold m-0">CLÔTURE DE CAISSE</h6>
+    <div class="text-muted small">Finance › Caisse › Clôture</div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold">Jour</div>
+    <div class="card-body">
+      <form method="GET" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Date</label>
+          <input type="date" class="form-control" name="day" value="{{ day }}" required>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button class="btn btn-success fw-bold">Afficher</button>
+        </div>
+        <div class="col-md-6 text-end">
+          <div class="text-muted small">Total (validé)</div>
+          <div class="fw-bold fs-5">{{ grand_total }}</div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold">Totaux par mode</div>
+    <div class="card-body">
+      <div class="row g-2">
+        {% for t in totals %}
+          <div class="col-md-3">
+            <div class="border rounded p-2">
+              <div class="text-muted small">{{ t.mode }}</div>
+              <div class="fw-bold">{{ t.total }}</div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">Aucun paiement.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">Détails du jour</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>N°</th>
+              <th>Heure</th>
+              <th>Élève</th>
+              <th>Total</th>
+              <th>Mode</th>
+              <th>Caissier</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td class="fw-semibold">{{ r.numero }}</td>
+                <td>{{ r.date_operation|date:"H:i" }}</td>
+                <td>{{ r.eleve.nom }}</td>
+                <td class="fw-bold">{{ r.total }} {{ r.devise }}</td>
+                <td>{{ r.mode }}</td>
+                <td>{{ r.caissier }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-muted py-4">Aucun reçu.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

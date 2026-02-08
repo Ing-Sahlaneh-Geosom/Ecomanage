@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %} Liste de parent {% endblock %}
+{% block main %}
+
+<div class="container-fluid py-3">
+  <div class="d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-between mb-3">
+    <div>
+      <h4 class="mb-0">Liste des parents</h4>
+      <small class="text-muted">Total : {{ total }}</small>
+    </div>
+
+    <form class="d-flex gap-2" method="get" style="max-width:520px; width:100%;">
+      <input
+        type="text"
+        class="form-control"
+        name="q"
+        value="{{ q }}"
+        placeholder="Rechercher (nom, username, email, téléphone)..."
+      />
+      <button class="btn btn-primary" type="submit">Rechercher</button>
+      {% if q %}
+        <a class="btn btn-outline-secondary" href="{% url 'liste_parents' %}">Reset</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width:70px;">#</th>
+              <th>Parent</th>
+              <th>Username</th>
+              <th>Téléphone</th>
+              <th>Email</th>
+              <th class="text-center" style="width:140px;">Enfants</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in page_obj %}
+              <tr>
+                <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                <td>
+                  <div class="fw-semibold">{{ p.nom_complet|default:"-" }}</div>
+                  <div class="text-muted small">Rôle : {{ p.get_role_display }}</div>
+                </td>
+                <td>{{ p.username }}</td>
+                <td>{{ p.num_tel|default:"-" }}</td>
+                <td>{{ p.email|default:"-" }}</td>
+                <td class="text-center">
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    {{ p.nb_enfants }}
+                  </span>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">
+                  Aucun parent trouvé{% if q %} pour “{{ q }}”{% endif %}.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="mt-3">
+      <ul class="pagination justify-content-center flex-wrap">
+
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?q={{ q|urlencode }}&page=1">«</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">Précédent</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">«</span></li>
+          <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+        {% endif %}
+
+        {# Fenêtre de pages (±2) #}
+        {% for num in page_obj.paginator.page_range %}
+          {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+            {% if page_obj.number == num %}
+              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% else %}
+              <li class="page-item">
+                <a class="page-link" href="?q={{ q|urlencode }}&page={{ num }}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">Suivant</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?q={{ q|urlencode }}&page={{ page_obj.paginator.num_pages }}">»</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+          <li class="page-item disabled"><span class="page-link">»</span></li>
+        {% endif %}
+
+      </ul>
+
+      <p class="text-center text-muted small mb-0">
+        Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+      </p>
+    </nav>
+  {% endif %}
+</div>
+
+{% endblock %}

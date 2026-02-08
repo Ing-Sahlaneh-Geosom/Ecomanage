@@ -1,0 +1,38 @@
+{% extends 'base.html'%}
+{% block title %} Les Classes {% endblock %}
+{% block main %}
+
+
+<div class="containerEleve">
+  <a href="{% url 'ListeDesAbsences'%}" class="btn btn-outline-primary mb-3">Tous les Absences </a>
+  <h3>Listes des Absences</h3>
+  <table>
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">Id</th>
+        <th onclick="sortTable(1)">Eleve</th>
+          <th onclick="sortTable(2)">Date</th>
+        <th>Motif</th>
+        <th>Justifiee</th>
+        <th>Modifier</th>
+        <th>Supprimer</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td>{{ absence.id}}</td>
+        <td>{{ absence.eleve }}</td>
+        <td>{{ absence.date}}</td>
+        <td>{{ absence.motif }}</td>
+        <td>{{ absence.justifiee }}</td>
+        <td><a href="" class="btn btn-sm btn-outline-success">Modifier</a></td>
+        <td><a href="" class="btn btn-sm btn-outline-danger">Supprimer</a></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+</div>
+
+{% endblock %}

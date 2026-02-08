@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Envoyer une ressource{% endblock %}
+
+{% block main %}
+<div class="container-fluid px-4 py-3">
+    
+
+  <div class="d-flex">
+  <a class="btn btn-sm btn-outline-secondary" href="{% url 'ressources'%}">X</a>
+  <h6 class="fw-bold mx-4 ">Envoyer une ressource</h6>
+</div>
+  <div  style="background-color: rgb(43, 43, 46);" class="card text-light">
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data" class="row g-3">
+        {% csrf_token %}
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-light" for="{{ form.professeur.id_for_label }}">Enseignant</label>
+          {{ form.professeur }}
+          {% if form.professeur.errors %}
+            <div class="text-danger small text-light">{{ form.professeur.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-light" for="{{ form.matier.id_for_label }}">Matières</label>
+          {{ form.matier }}
+          <div class="small text-muted d-none text-light" id="loadingMatieres">Chargement…</div>
+          <div class="small text-danger d-none text-light id="matierError">Erreur de chargement.</div>
+          {% if form.matier.errors %}
+            <div class="text-danger small text-light">{{ form.matier.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-light" for="{{ form.fichier.id_for_label }}">Fichier</label>
+          {{ form.fichier }}
+          {% if form.fichier.errors %}
+            <div class="text-danger small text-light">{{ form.fichier.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-light" for="{{ form.description.id_for_label }}">Description</label>
+          {{ form.description }}
+          {% if form.description.errors %}
+            <div class="text-danger small text-light">{{ form.description.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-12 d-flex justify-content-end gap-2">
+          <button class="btn btn-dark" type="submit">Sauvegarder</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const professeurSelect = document.getElementById("{{ form.professeur.auto_id }}");
+  const matierSelect = document.getElementById("{{ form.matier.auto_id }}");
+
+  const loading = document.getElementById("loadingMatieres");
+  const errorBox = document.getElementById("matierError");
+
+  // ✅ même URL que la page (une seule url)
+  const SAME_URL = "{% url 'ressource_create' %}";
+
+  function setLoading(on){ loading.classList.toggle("d-none", !on); }
+  function setError(on){ errorBox.classList.toggle("d-none", !on); }
+
+  function resetMatier(){
+    matierSelect.innerHTML = '<option value="">Sélectionner...</option>';
+  }
+
+  async function loadMatieres(profId){
+    setError(false);
+
+    if(!profId){ resetMatier(); return; }
+
+    setLoading(true);
+    matierSelect.disabled = true;
+
+    try{
+      const url = new URL(SAME_URL, window.location.origin);
+      url.searchParams.set("ajax", "matieres");
+      url.searchParams.set("professeur_id", profId);
+
+      const res = await fetch(url.toString(), {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      });
+
+      if(!res.ok) throw new Error("bad");
+      matierSelect.innerHTML = await res.text();
+    }catch(e){
+      resetMatier();
+      setError(true);
+    }finally{
+      matierSelect.disabled = false;
+      setLoading(false);
+    }
+  }
+
+  professeurSelect.addEventListener("change", (e) => loadMatieres(e.target.value));
+
+  // Si prof déjà choisi (après erreur validation)
+  if (professeurSelect.value) loadMatieres(professeurSelect.value);
+</script>
+{% endblock %}

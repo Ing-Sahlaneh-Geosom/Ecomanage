@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% block title %} DashPort {% endblock %}
+    {% block main %}
+    
+{% if mode == "parent" %}
+  <h5 class="mb-3">
+    <span class="text-primary">Parent :</span> {{ user.nom_complet|default:user.username }}
+  </h5>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h6 class="fw-bold mb-3">Mes enfants</h6>
+
+      {% if enfants %}
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead class="table-primary">
+              <tr>
+                <th>Nom</th>
+                <th>Classe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for e in enfants %}
+              <tr>
+                <td>{{ e.nom }}</td>
+                <td>{{ e.classe }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-muted">Aucun enfant lié à ce compte.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="fw-bold">Paiements récents</h6>
+          {% for p in paiements %}
+            <div class="d-flex justify-content-between border-bottom py-2 small">
+              <span>{{ p.eleve }}</span>
+              <span>{{ p.total }} | {{ p.date_operation|date:"d/m/Y" }}</span>
+            </div>
+          {% empty %}
+            <div class="text-muted small">Aucun paiement.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="fw-bold">Absences récentes</h6>
+          {% for a in apsences %}
+            <div class="border-bottom py-2 small">
+              <div class="fw-semibold">{{ a.eleve }}</div>
+              <div class="text-muted">{{ a.date|date:"d/m/Y" }} | {{ a.get_statut_display }}</div>
+            </div>
+          {% empty %}
+            <div class="text-muted small">Aucune absence.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="fw-bold">Notes récentes</h6>
+          {% for n in notes %}
+            <div class="d-flex justify-content-between border-bottom py-2 small">
+              <span>{{ n.matiere }}</span>
+              <span class="fw-bold">{{ n.note }}</span>
+            </div>
+          {% empty %}
+            <div class="text-muted small">Aucune note.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+{% elif mode == "Prof" %}
+
+
+
+ <div class="cards">
+    <div class="card">
+      <h3>Nombres des classes </h3>
+      <p>{{ classes.count }}</p>
+    </div>
+    <div class="card">
+      <h3>Nombres des heures/semaine </h3>
+      <p>{{ classes.count }}</p>
+    </div>
+    <div class="card">
+      <h3>???????</h3>
+      <p>? idees</p>
+     
+      
+    </div>
+  </div>
+
+<div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-primary">
+      <tr>
+        <th onclick="sortTable(0)">Id</th>
+        <th onclick="sortTable(1)">Nom</th>
+          <th onclick="sortTable(2)">Annee scolaire </th>
+        <th>Nombres d'eleves</th>
+        <th>Detaille</th>
+        <th>Modifier</th>
+        <th>Supprimer</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for classe in classes %}
+      <tr>
+        <td>{{ classe.id}}</td>
+        <td>{{ classe.nom }}</td>
+        <td>{{ classe.annee_scolaire}}</td>
+        <td>{{ classe.eleves.count }}</td>
+        <td><a href="{% url 'Detaille_d_une_classe' classe.pk %}" class="btn btn-sm btn-outline-primary">Voir</a></td>
+        <td><a href="{% url 'ModifierDesClasses' classe.pk %}" class="btn btn-sm btn-outline-success">Modifier</a></td>
+        <td><a href="{% url 'SupprimerDesClasses' classe.pk %}" class="btn btn-sm btn-outline-danger">Supprimer</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">Aucune Classes trouve.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+
+
+
+
+
+   
+
+
+
+{% elif mode == "admin" %}
+<h1 style="color: black;">{% trans "Tableau de bord" %}</h1>
+
+<div class="cards">
+  <div class="card">
+    <h3>{% trans "Étudiants" %}</h3>
+    <p>{{ total_eleves }}</p>
+  </div>
+
+  <div class="card">
+    <h3>{% trans "Utilisateurs" %}</h3>
+    <p>{{ utilisateur.count }}</p>
+  </div>
+
+  <div class="card">
+    <h3>{% trans "Revenus total / an" %}</h3>
+    <p>{{ Total_montant }} (fr)</p>
+  </div>
+</div>
+
+  <div class="charts">
+  <div class="chart-container">
+    <h3 class="text-primary">
+      <span style="font-size: 22px;">📊</span> {% trans "Absences par mois" %}
+    </h3>
+    <canvas id="absencesChart_{{ mode }}"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h3 class="text-primary">
+      <span style="font-size: 22px;">📊</span> {% trans "Revenus par mois" %}
+    </h3>
+    <canvas id="paiementsChart_{{ mode }}"></canvas>
+  </div>
+</div>
+<div class="cards mt-5">
+  <div class="card">
+    <h3>{% trans "Paiements récents" %}</h3>
+    <ul>
+      {% for p in paiments_recents %}
+      <div style="display: flex; justify-content: space-around;" class="eleve mt-3">
+    
+         <span> <a href="">{{ p.eleve}}</a> <br>
+         <span style="font-size: small;">{{ p.total}}</span></span>
+         <span style="font-size: small;">{{ p.date_operation}}</span>
+      </div>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h3>{% trans "Absences récentes" %} </h3>
+     <ul>
+      {% for absence in absenceRecent %}
+      <div style="display: flex; justify-content: space-around;" class="eleve mt-3">
+         <span><a href="{% url 'AbsenceDetaille' absence.pk %}"> {{ absence.eleve}} </a> <br>
+         <span style="font-size: x-small;">{{absence.eleve.classe}}</span></span>
+         <span class="mx-3" style="font-size: small;">{{ absence.date}}</span>
+        
+
+      </div>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% else %}
+
+
+<div class="container">
+  <h1>Bienvenue utilisateur <span class="text-primary" style="font-family: sans-serif; font-size: medium;">{{ user.nom_complet }} </span></h1>
+  <p>Veuillez demander a votre direction de vous donner votre role !</p>
+</div>
+
+{% endif %}
+  
+  
+<script>
+ 
+
+ let ctx = document.getElementById('absencesChart_{{ mode }}');
+ let ctxpay = document.getElementById('paiementsChart_{{ mode }}');
+
+  // 📊 Graphique Absences
+  if (ctxpay) {
+    new Chart(ctxpay, {
+      type: 'line',
+      data: {
+        labels: {{ mois_abs|safe }},
+        datasets: [{
+          label: "{% trans 'Paiements' %}",
+          data: {{ totaux_paie|safe }},
+          fill: true,
+          backgroundColor: '#6fa2e4',
+          borderColor: 'blue',
+          borderWidth: 1,
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+  }
+
+  // 📊 Graphique Paiements
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ mois_abs|safe }},
+        datasets: [{
+          label: "{% trans 'Absences' %}",
+          data: {{ totaux_abs|safe }},
+          fill: false,
+          backgroundColor: '#6fa2e4',
+          borderColor: 'blue',
+          borderWidth: 1
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+  }
+  
+
+</script>
+
+    {% endblock %}

@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block title %}  <title>Parametres</title>   {% endblock %}
+     <link rel="stylesheet" href="{% static 'css/css/bootstrap.min.css'%}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <div class="topbar">
+    <button class="hamburger" id="toggleSidebar">☰</button>
+    <h5 class="m-0 text-primary fw-bold">Ecomanage</h5>
+    <span class="text-light">Bienvenue, {{ user.username }}</span>
+  </div>
+    
+  <div class="sidebar" id="sidebarMenu">
+   <div style="display: flex; margin-left: 1rem;">
+    
+    <h4> <a id="closeSidebar">✖</a> <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png' %}" alt="logo" width="25"> Parametres </h4>
+   </div>
+    <a href="{% url 'AjouteAnnee'%}">📊 Ajouter Une annee</a>
+    <a href="{% url 'parametre_annee'%}">📊 Changer l'annee en cour</a>
+
+    <a href="{% url 'parametre_a_propos'%}">📊 A propos </a>
+    
+   
+    
+    </div>
+
+    <div class="main-content">
+    {% block main %}
+
+    {% endblock %}
+    </div>
+    
+     <script>
+    // Toggle sidebar for mobile
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const closeBtn = document.getElementById('closeSidebar');
+    const sidebar = document.getElementById('sidebarMenu');
+
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    closeBtn.addEventListener('click', ()=>{
+      sidebar.classList.remove('active');
+    })
+    
+  </script>
+
+   
+    <script src="{% static 'js/js/bootstrap.bundle.min.js'%}"></script>
+    <script src="{% static 'js/script.js'%}"></script>
+</body>
+</html>

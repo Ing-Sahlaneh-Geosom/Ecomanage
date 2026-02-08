@@ -1,0 +1,86 @@
+{% load i18n %}
+{# Notifications dropdown #}
+<div class="dropdown">
+  <button class="btn btn-light position-relative rounded-pill px-3"
+          type="button"
+          data-bs-toggle="dropdown"
+          data-bs-display="static"
+          aria-expanded="false">
+    <span class="nav-ico">🔔</span>
+    <span id="notifBadge"
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+      {{ notif_count|default:0 }}
+    </span>
+  </button>
+
+  <ul class="dropdown-menu {{ notif_menu_align }} shadow-sm" style="min-width: 320px;">
+    <li class="px-3 py-2 small text-muted">{% trans "Notifications (non lues)" %}</li>
+    <li><hr class="dropdown-divider"></li>
+
+    <div id="notifList">
+      {% if notifications %}
+        {% for n in notifications %}
+          <li>
+            <a class="dropdown-item py-2" href="{{ n.url }}">
+              <div class="fw-semibold">{{ n.titre }}</div>
+              <div class="small text-muted">{{ n.message }}</div>
+            </a>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li class="px-3 py-3 text-muted small">{% trans "Aucun nouveau message" %}</li>
+      {% endif %}
+    </div>
+
+    <li><hr class="dropdown-divider"></li>
+    <li class="px-3 pb-2">
+      <a class="btn btn-sm btn-outline-primary w-100" href="{% url 'messagerie_home' %}">
+        {% trans "Ouvrir la messagerie" %}
+      </a>
+    </li>
+  </ul>
+</div>
+
+{# Profil dropdown #}
+<div class="dropdown">
+  <button class="btn btn-primary rounded-pill px-3"
+          type="button"
+          data-bs-toggle="dropdown"
+          data-bs-display="static"
+          aria-expanded="false">
+    {% trans "Profil" %}
+  </button>
+
+  <ul class="dropdown-menu {{ prof_menu_align }} shadow-sm" style="min-width: 240px;">
+    <li class="px-3 py-2 small text-muted">
+      {% trans "Bienvenue" %} <b>{{ user.username }}</b>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+
+    <li>
+      <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'changer_mdp' %}">
+        🔒 {% trans "Changer le mot de passe" %}
+      </a>
+    </li>
+
+    <li>
+      <a class="dropdown-item d-flex align-items-center gap-2" href="">
+        <span>⚙️</span> {% trans "Réglages" %}
+      </a>
+    </li>
+
+    <li>
+      <a class="dropdown-item d-flex align-items-center gap-2" href="">
+        <span>👤</span> {% trans "Utilisateur" %}
+      </a>
+    </li>
+
+    <li><hr class="dropdown-divider"></li>
+
+    <li>
+      <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="{% url 'deconnection' %}">
+        <span>⏻</span> {% trans "Se déconnecter" %}
+      </a>
+    </li>
+  </ul>
+</div>

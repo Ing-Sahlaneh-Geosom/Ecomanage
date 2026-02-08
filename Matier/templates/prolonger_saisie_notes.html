@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block main %}
+<div class="container py-3">
+  <h5 class="mb-3">CONFIGURATION DES APPRÉCIATIONS</h5>
+  {% include "_tabs.html" %}
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="mb-4">Prolonger la saisie des notes</h4>
+
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label">Niveau *</label>
+          <select name="niveau" class="form-select" required>
+            <option value="">Sélectionner...</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}" {% if niveau_id == n.id|stringformat:"s" %}selected{% endif %}>{{ n.nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Période *</label>
+          <select name="periode" class="form-select" required>
+            <option value="">Sélectionner...</option>
+            {% for p in periodes %}
+              <option value="{{ p.id }}" {% if periode_id == p.id|stringformat:"s" %}selected{% endif %}>{{ p.nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 d-grid">
+          <button class="btn btn-success" type="submit">Filtrer</button>
+        </div>
+      </form>
+
+      {% if rows %}
+      <div class="table-responsive mt-4">
+        <table class="table table-bordered align-middle">
+          <thead class="text-white" style="background:#2b97d1;">
+            <tr>
+              <th>Nom</th>
+              <th>Temps de début</th>
+              <th>Temps de fin</th>
+              <th style="width:140px;">Statut</th>
+              <th style="width:220px;">Prolonger les jours</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+            <tr>
+              <td>{{ r.professeur.nom_conplet }}</td>
+              <td>{{ r.debut|date:"d/m/Y" }}</td>
+              <td>{{ r.fin|date:"d/m/Y" }}</td>
+              <td>
+                <form method="post" action="{% url 'prolonger_update' r.id %}">
+                  {% csrf_token %}
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="actif" {% if r.actif %}checked{% endif %} onchange="this.form.submit()">
+                    <label class="form-check-label">{% if r.actif %}Actif{% else %}Inactif{% endif %}</label>
+                  </div>
+                  <input type="hidden" name="prolonger_jours" value="{{ r.prolonger_jours }}">
+                </form>
+              </td>
+              <td>
+                <form method="post" action="{% url 'prolonger_update' r.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="actif" value="{% if r.actif %}on{% endif %}">
+                  <input class="form-control" type="number" min="0" name="prolonger_jours" value="{{ r.prolonger_jours }}"
+                         onchange="this.form.submit()">
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

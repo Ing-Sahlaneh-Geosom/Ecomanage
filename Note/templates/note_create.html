@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Ajouter un eleve {% endblock %}
+{% block main %}
+
+
+<div class="containaire">
+    <h2>{{Title}} </h2>
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+          <div>
+            <label for="eleve">Eleve :</label>
+              {{ form.eleve }}
+        </div>
+           <div>
+            <label for="matiere">Matiere :</label>
+               {{ form.matiere}}
+        </div>
+        <div>
+            <label for="periode">Trimestre :</label>
+            {{ form.trimestre }}
+        </div>
+        <div>
+            <label for="note">Note :</label>
+            {{ form.note }}
+        </div>
+
+        <div class="full-width">
+            <button type="submit" class="submit-btn">{{submit_text}}</button>
+        </div>
+
+    </form>
+    </div>
+{% endblock %}

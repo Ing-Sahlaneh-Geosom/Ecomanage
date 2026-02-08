@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+
+<h4 class="mb-3">Créer un devoir</h4>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">{{ form.nom.label_tag }}{{ form.nom }}</div>
+        <div class="col-md-6">{{ form.niveau.label_tag }}{{ form.niveau }}</div>
+
+        <div class="col-md-6">{{ form.professeur.label_tag }}{{ form.professeur }}</div>
+        <div class="col-md-6">{{ form.matiere.label_tag }}{{ form.matiere }}</div>
+
+        <div class="col-md-6">{{ form.periode.label_tag }}{{ form.periode }}</div>
+        <div class="col-md-3">{{ form.points.label_tag }}{{ form.points }}</div>
+        <div class="col-md-3">{{ form.coefficient.label_tag }}{{ form.coefficient }}</div>
+
+        <div class="col-md-12">{{ form.classes.label_tag }}{{ form.classes }}</div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2">
+        <button class="btn btn-primary">Enregistrer</button>
+        <a class="btn btn-outline-secondary" href="{% url 'devoir_list' %}">Retour</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

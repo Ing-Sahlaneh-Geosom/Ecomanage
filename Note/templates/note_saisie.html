@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <div>
+    <h4 class="mb-0">Saisie des notes</h4>
+    <div class="text-muted">{{ devoir.nom }} — {{ classe.nom }} — {{ devoir.matiere.nom }} ({{ devoir.periode.nom }})</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'note_saisie_setup' %}">Retour</a>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  <div class="card">
+    <div class="card-body table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Élève</th>
+            <th style="width:160px;">Note / {{ devoir.points }}</th>
+            <th style="width:120px;">Coef</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in eleves %}
+          <tr>
+            <td>{{ e.nom }}</td>
+            <td>
+              <input class="form-control" type="number" step="0.01" min="0" max="{{ devoir.points }}"
+                     name="note_{{ e.id }}"
+                     value="{% if exist.e.id %}{{ exist.e.id.note }}{% endif %}">
+            </td>
+            <td>
+              <input class="form-control" type="number" min="1"
+                     name="coef_{{ e.id }}"
+                     value="{% if exist.e.id %}{{ exist.e.id.coefficient }}{% else %}{{ devoir.coefficient }}{% endif %}">
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <button class="btn btn-success">Enregistrer</button>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

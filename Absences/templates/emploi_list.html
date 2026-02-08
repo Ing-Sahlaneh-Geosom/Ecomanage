@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %} Ajoute emploi {% endblock %}
+{% block main %}
+
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Créneaux Emploi du temps - {{ annee_active.nom }}</h4>
+    <a class="btn btn-primary" href="{% url 'emploi_create_auto' %}">+ Ajouter</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Classe</th>
+          <th>Jour</th>
+          <th>Heure</th>
+          <th>Matière</th>
+          <th>Professeur</th>
+          <th>Salle</th>
+          <th style="width:180px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in emplois %}
+        <tr>
+          <td>{{ e.classe }}</td>
+          <td>{{ e.jour }}</td>
+          <td>{{ e.heure_debut|time:"H:i" }} - {{ e.heure_fin|time:"H:i" }}</td>
+          <td>{{ e.matiere.nom }}</td>
+          <td>{{ e.professeur.nom_conplet }}</td>
+          <td>{{ e.salle }}</td>
+          <td class="text-nowrap">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'emploi_update_auto' e.id %}">Modifier</a>
+
+            <form method="post" action="{% url 'emploi_delete' e.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" type="submit"
+                onclick="return confirm('Supprimer ce créneau ?');">
+                Supprimer
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted">Aucun créneau.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

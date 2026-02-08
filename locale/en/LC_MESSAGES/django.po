@@ -1,0 +1,546 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-02 10:28+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\Ecomanage\templates\home_page.html:158
+msgid "Tableau de bord"
+msgstr "Dashboard"
+
+
+
+msgid "Tableau de Bord"
+msgstr "Dashboard"
+
+msgid "Emplois du temps"
+msgstr "Timetable"
+
+msgid "Vie Scolaire"
+msgstr "Student Life"
+
+msgid "Attestation Scolaire"
+msgstr "School Certificate"
+
+msgid "saisie des absences par mois"
+msgstr "Monthly absence entry"
+
+msgid "Violences des eleves"
+msgstr "Student Violence"
+
+msgid "Degradation des eleves"
+msgstr "Student Damage"
+
+msgid "Gestion des Étudiants"
+msgstr "Student Management"
+
+msgid "Liste des étudiants"
+msgstr "Student List"
+
+msgid "Ajouter un étudiant"
+msgstr "Add Student"
+
+msgid "Carte Scolaire"
+msgstr "Student ID Card"
+
+msgid "Gestion des Classes"
+msgstr "Class Management"
+
+msgid "Ajouter une classe"
+msgstr "Add Class"
+
+msgid "Liste des classes"
+msgstr "Class List"
+
+msgid "Enseignant"
+msgstr "Teachers"
+
+msgid "Envoiyer un document"
+msgstr "Send a document"
+
+msgid "Liste des professeurs"
+msgstr "Teacher List"
+
+msgid "Saisi quotidienne des apsences"
+msgstr "Daily absence entry"
+
+msgid "Coordinateur par discipline"
+msgstr "Subject Coordinator"
+
+msgid "Matières"
+msgstr "Subjects"
+
+msgid "Ajouter une matière"
+msgstr "Add Subject"
+
+msgid "Liste des matière"
+msgstr "Subject List"
+
+msgid "Examen"
+msgstr "Exams"
+
+msgid "Gestion des notes"
+msgstr "Grades Management"
+
+msgid "Configuration des apreciation"
+msgstr "Appreciation Settings"
+
+msgid "Conseille de classe"
+msgstr "Class Council"
+
+msgid "Resultat BEF"
+msgstr "BEF Results"
+
+msgid "Administrateur"
+msgstr "Administration"
+
+msgid "Employés"
+msgstr "Employees"
+
+msgid "Absences enseignants"
+msgstr "Teacher Absences"
+
+msgid "Suivie des Absences enseignants"
+msgstr "Teacher Absences Tracking"
+
+msgid "Absences employés"
+msgstr "Staff Absences"
+
+msgid "Suivie des Absences employés"
+msgstr "Staff Absences Tracking"
+
+msgid "Liste de parents"
+msgstr "Parents List"
+
+msgid "Finance & Gestionnaire"
+msgstr "Finance & Management"
+
+msgid "Configuration des frais"
+msgstr "Fees Setup"
+
+msgid "Frais par classe"
+msgstr "Fees by Class"
+
+msgid "Exonéraition"
+msgstr "Exemption"
+
+msgid "Fiche du Paiments"
+msgstr "Payment Record"
+
+msgid "Caisse"
+msgstr "Cash Desk"
+
+msgid "Historique"
+msgstr "History"
+
+msgid "Cloture de la Caisse"
+msgstr "Close Cash Desk"
+
+msgid "Réglages"
+msgstr "Settings"
+
+msgid "Ajouter une Specialite"
+msgstr "Add Specialty"
+
+msgid "Ajouter une Niveau"
+msgstr "Add Level"
+
+msgid "Les Batiments"
+msgstr "Buildings"
+
+msgid "Les salles des batiments"
+msgstr "Building Rooms"
+
+msgid "Messagerie"
+msgstr "Messaging"
+
+msgid "Utilisateurs"
+msgstr "Users"
+
+msgid "Déconnexion"
+msgstr "Logout"
+
+
+
+
+
+
+msgid "Parent" 
+msgstr "Parent"
+
+
+
+msgid "Certificat scolaire"
+msgstr "School certificate"
+
+msgid "Certificat de scolarité"
+msgstr "School certificate"
+
+msgid "Honorifique"
+msgstr "Title"
+
+msgid "Chef d'établissement"
+msgstr "Head of school"
+
+msgid "Titre"
+msgstr "Position"
+
+msgid "Niveaux"
+msgstr "Levels"
+
+msgid "Élève"
+msgstr "Student"
+
+msgid "Sélectionner..."
+msgstr "Select..."
+
+msgid "Imprimer"
+msgstr "Print"
+
+msgid "REPUBLIQUE DE DJIBOUTI"
+msgstr "REPUBLIC OF DJIBOUTI"
+
+msgid "Unité - Égalité - Paix"
+msgstr "Unity - Equality - Peace"
+
+msgid "MINISTERE DE L’ÉDUCATION"
+msgstr "MINISTRY OF EDUCATION"
+
+msgid "NATIONALE ET DE LA"
+msgstr "NATIONAL AND"
+
+msgid "FORMATION"
+msgstr "TRAINING"
+
+msgid "PROFESSIONNELLE"
+msgstr "PROFESSIONAL"
+
+msgid "Logo École"
+msgstr "School logo"
+
+msgid "CEM ARTA"
+msgstr "CEM ARTA"
+
+msgid "Téléphone"
+msgstr "Phone"
+
+msgid "E-mail"
+msgstr "Email"
+
+msgid "Année scolaire"
+msgstr "School year"
+
+msgid "Fait à Djibouti, le"
+msgstr "Issued in Djibouti on"
+
+msgid "CERTIFICAT DE SCOLARITE"
+msgstr "SCHOOL CERTIFICATE"
+
+msgid "Je soussigné,"
+msgstr "I, the undersigned,"
+
+msgid "Utilisateur inconnu"
+msgstr "Unknown user"
+
+msgid "certifie que l’élève :"
+msgstr "certify that the student:"
+
+msgid "Matricule"
+msgstr "Registration number"
+
+msgid "Né(e) :"
+msgstr "Born on:"
+
+msgid "À :"
+msgstr "At:"
+
+msgid "Poursuit ses études dans notre établissement."
+msgstr "Is pursuing his/her studies at our institution."
+
+msgid "En classe de :"
+msgstr "In class:"
+
+msgid "Année scolaire :"
+msgstr "School year:"
+
+msgid "Le présent certificat est délivré à la demande de l'intéressé(e) pour servir et valoir ce que de droit."
+msgstr "This certificate is issued upon the request of the person concerned for any legal purpose."
+
+msgid "Signature"
+msgstr "Signature"
+
+msgid "Année"
+msgstr "Year"
+
+msgid "Dr"
+msgstr "Dr"
+
+msgid "Monsieur"
+msgstr "Mr"
+
+msgid "Madame"
+msgstr "Mrs"
+
+msgid "Mademoiselle"
+msgstr "Miss"
+
+
+msgid "Chers parents,"
+msgstr "Dear parents,"
+
+msgid "Vous êtes priés de vous présenter le"
+msgstr "You are kindly requested to appear on"
+
+msgid "au bureau du Chef d’établissement"
+msgstr "at the headmaster's office"
+
+msgid "Motif"
+msgstr "Reason"
+
+msgid "Chef d’établissement"
+msgstr "Headmaster"
+
+
+
+
+
+
+
+
+
+msgid "Responsables"
+msgstr "Responsible staff"
+
+
+
+
+msgid "temps"
+msgstr "Time"
+
+
+
+msgid "No"
+msgstr "No"
+
+msgid "Raison"
+msgstr "Reason"
+
+msgid "Aucune raison"
+msgstr "No reason"
+
+
+
+msgid "Unité - Egalité - Paix"
+msgstr "Unity - Equality - Peace"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Téléphone:"
+msgstr "Phone:"
+
+msgid "E-mail:"
+msgstr "Email:"
+
+msgid "Année scolaire:"
+msgstr "School year:"
+
+msgid "Le"
+msgstr "On"
+
+msgid "CONVOCATION DES PARENTS"
+msgstr "PARENTS CONVOCATION"
+
+
+
+msgid "Vous êtes priés de vous présenter le:"
+msgstr "You are requested to appear on:"
+
+msgid "à:"
+msgstr "at:"
+
+msgid "au bureau du Chef d'établissement"
+msgstr "at the headmaster's office"
+
+msgid "pour une affaire concernant l’élève"
+msgstr "for a matter concerning the student"
+
+msgid "pour une affaire concernant votre enfant"
+msgstr "for a matter concerning your child"
+
+msgid "de la classe de"
+msgstr "from the class"
+
+msgid "Motif :"
+msgstr "Reason:"
+
+msgid "Responsable d’établissement"
+msgstr "School responsible"
+
+msgid "Ajouter une raison"
+msgstr "Add a reason"
+
+msgid "Libellé"
+msgstr "Label"
+
+msgid "Ex: Absence répétitive"
+msgstr "e.g.: Repeated absence"
+
+msgid "Annuler"
+msgstr "Cancel"
+
+msgid "Enregistrer"
+msgstr "Save"
+
+msgid "Libellé obligatoire."
+msgstr "Label is required."
+
+msgid "Erreur: impossible d’ajouter la raison."
+msgstr "Error: unable to add the reason."
+
+msgid "Convocation de parent"
+msgstr "Parent convocation"
+
+
+
+msgid "Motif (sélectionnez le motif approprié)"
+msgstr "Reason (select the appropriate reason)"
+
+
+
+
+
+
+
+
+msgid "Violences élèves"
+msgstr "Student violence"
+
+msgid "Violence pour les élèves"
+msgstr "Violence for students"
+
+msgid "Ajouter"
+msgstr "Add"
+
+msgid "Excel"
+msgstr "Excel"
+
+msgid "PDF"
+msgstr "PDF"
+
+msgid "Rechercher ici"
+msgstr "Search here"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "l'agresseur (euse)"
+msgstr "Perpetrator"
+
+msgid "Forme d’agression"
+msgstr "Type of aggression"
+
+msgid "Cause de la violence"
+msgstr "Cause of violence"
+
+msgid "Dommage corporel"
+msgstr "Bodily injury"
+
+msgid "Moyens de résolution"
+msgstr "Resolution methods"
+
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Modifier"
+msgstr "Edit"
+
+msgid "Supprimer"
+msgstr "Delete"
+
+msgid "Aucun enregistrement"
+msgstr "No records"
+
+
+
+msgid "La liste des classes"
+msgstr "Class list"
+
+msgid "Sélectionner"
+msgstr "Select"
+
+
+
+msgid "Fermer"
+msgstr "Close"
+
+msgid "Sauvegarder"
+msgstr "Save"
+
+msgid "Supprimer cet enregistrement ?"
+msgstr "Delete this record?"
+
+msgid "Erreur chargement."
+msgstr "Loading error."
+
+msgid "Erreur sauvegarde."
+msgstr "Save error."
+
+msgid "Erreur réseau."
+msgstr "Network error."
+
+
+
+
+msgid "Violences scolaires — Rapport"
+msgstr "School Violence Report"
+
+msgid "Recherche"
+msgstr "Search"
+
+msgid "Agresseur"
+msgstr "Perpetrator"
+
+msgid "Classe"
+msgstr "Class"
+
+msgid "Victime"
+msgstr "Victim"
+
+msgid "Forme"
+msgstr "Type"
+
+msgid "Cause"
+msgstr "Cause"
+
+msgid "Dommage"
+msgstr "Damage"
+
+msgid "Résolution"
+msgstr "Resolution"
+
+msgid "Date"
+msgstr "Date"
+
+
+msgid "Classe agresseur"
+msgstr "Classe agresseur"
+
+
+msgid "Classe victime"
+msgstr "Classe victime"

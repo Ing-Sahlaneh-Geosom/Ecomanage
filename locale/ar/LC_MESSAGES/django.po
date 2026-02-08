@@ -1,0 +1,1002 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-02 10:28+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+#: .\Ecomanage\templates\base.html:245
+
+
+#: .\Ecomanage\templates\home_page.html:158
+msgid "Tableau de bord"
+msgstr "لوحة التحكم"
+
+msgid "Tableau de Bord"
+msgstr "لوحة التحكم"
+
+msgid "Emplois du temps"
+msgstr "الجدول الزمني"
+
+msgid "Vie Scolaire"
+msgstr "الحياة المدرسية"
+
+msgid "Attestation Scolaire"
+msgstr "شهادة مدرسية"
+
+msgid "Convocation des parents"
+msgstr "استدعاء أولياء الأمور"
+
+msgid "saisie des absences par mois"
+msgstr "إدخال الغياب الشهري"
+
+msgid "Violences des eleves"
+msgstr "عنف الطلاب"
+
+msgid "Degradation des eleves"
+msgstr "تخريب الطلاب"
+
+msgid "Gestion des Étudiants"
+msgstr "إدارة الطلاب"
+
+msgid "Liste des étudiants"
+msgstr "قائمة الطلاب"
+
+msgid "Ajouter un étudiant"
+msgstr "إضافة طالب"
+
+msgid "Carte Scolaire"
+msgstr "البطاقة المدرسية"
+
+msgid "Gestion des Classes"
+msgstr "إدارة الصفوف"
+
+msgid "Ajouter une classe"
+msgstr "إضافة صف"
+
+msgid "Liste des classes"
+msgstr "قائمة الصفوف"
+
+msgid "Enseignant"
+msgstr "المعلمون"
+
+msgid "Envoiyer un document"
+msgstr "إرسال وثيقة"
+
+msgid "Liste des professeurs"
+msgstr "قائمة المعلمين"
+
+msgid "Saisi quotidienne des apsences"
+msgstr "إدخال الغياب اليومي"
+
+msgid "Coordinateur par discipline"
+msgstr "منسق حسب المادة"
+
+msgid "Matières"
+msgstr "المواد"
+
+msgid "Ajouter une matière"
+msgstr "إضافة مادة"
+
+msgid "Liste des matière"
+msgstr "قائمة المواد"
+
+msgid "Examen"
+msgstr "الامتحانات"
+
+msgid "Gestion des notes"
+msgstr "إدارة الدرجات"
+
+msgid "Configuration des apreciation"
+msgstr "إعدادات التقييم"
+
+msgid "Conseille de classe"
+msgstr "مجلس القسم"
+
+msgid "Resultat BEF"
+msgstr "نتائج BEF"
+
+msgid "Administrateur"
+msgstr "الإدارة"
+
+msgid "Employés"
+msgstr "الموظفون"
+
+msgid "Absences enseignants"
+msgstr "غياب المعلمين"
+
+msgid "Suivie des Absences enseignants"
+msgstr "متابعة غياب المعلمين"
+
+msgid "Absences employés"
+msgstr "غياب الموظفين"
+
+msgid "Suivie des Absences employés"
+msgstr "متابعة غياب الموظفين"
+
+msgid "Liste de parents"
+msgstr "قائمة أولياء الأمور"
+
+msgid "Finance & Gestionnaire"
+msgstr "المالية والإدارة"
+
+msgid "Configuration des frais"
+msgstr "إعداد الرسوم"
+
+msgid "Frais par classe"
+msgstr "الرسوم حسب الصف"
+
+msgid "Exonéraition"
+msgstr "الإعفاء"
+
+msgid "Fiche du Paiments"
+msgstr "سجل الدفع"
+
+msgid "Caisse"
+msgstr "الصندوق"
+
+msgid "Historique"
+msgstr "السجل"
+
+msgid "Cloture de la Caisse"
+msgstr "إغلاق الصندوق"
+
+msgid "Réglages"
+msgstr "الإعدادات"
+
+msgid "Ajouter une Specialite"
+msgstr "إضافة تخصص"
+
+msgid "Ajouter une Niveau"
+msgstr "إضافة مستوى"
+
+msgid "Les Batiments"
+msgstr "المباني"
+
+msgid "Les salles des batiments"
+msgstr "قاعات المباني"
+
+msgid "Messagerie"
+msgstr "الرسائل"
+
+msgid "Utilisateurs"
+msgstr "المستخدمون"
+
+msgid "Déconnexion"
+msgstr "تسجيل الخروج"
+
+msgid "Parent"
+msgstr "ولي الأمر"
+
+msgid "Mes enfants"
+msgstr "أبنائي"
+
+msgid "Nom"
+msgstr "الاسم"
+
+msgid "Classe"
+msgstr "الصف"
+
+msgid "Aucun enfant lié à ce compte."
+msgstr "لا يوجد طالب مرتبط بهذا الحساب."
+
+msgid "Paiements récents"
+msgstr "آخر المدفوعات"
+
+msgid "Aucun paiement."
+msgstr "لا توجد مدفوعات."
+
+msgid "Absences récentes"
+msgstr "آخر الغيابات"
+
+msgid "Aucune absence."
+msgstr "لا توجد غيابات."
+
+msgid "Notes récentes"
+msgstr "آخر الدرجات"
+
+msgid "Aucune note."
+msgstr "لا توجد درجات."
+
+msgid "Nombre de classes"
+msgstr "عدد الصفوف"
+
+msgid "Nombre d'heures / semaine"
+msgstr "عدد الساعات / أسبوع"
+
+msgid "Année scolaire"
+msgstr "السنة الدراسية"
+
+msgid "Nombre d'élèves"
+msgstr "عدد الطلاب"
+
+msgid "Détail"
+msgstr "التفاصيل"
+
+msgid "Voir"
+msgstr "عرض"
+
+msgid "Modifier"
+msgstr "تعديل"
+
+msgid "Supprimer"
+msgstr "حذف"
+
+msgid "Aucune classe trouvée."
+msgstr "لم يتم العثور على أي صف."
+
+msgid "Revenus total / an"
+msgstr "إجمالي الإيرادات / سنة"
+
+msgid "Absences par mois"
+msgstr "الغيابات حسب الشهر"
+
+msgid "Revenus par mois"
+msgstr "الإيرادات حسب الشهر"
+
+msgid "Paiements"
+msgstr "المدفوعات"
+
+msgid "Absences"
+msgstr "الغيابات"
+
+msgid "Bienvenue utilisateur"
+msgstr "مرحباً بالمستخدم"
+
+msgid "Veuillez demander à votre direction de vous attribuer un rôle !"
+msgstr "يرجى طلب تحديد دورك من الإدارة."
+
+msgid "Profil"
+msgstr "الملف الشخصي"
+
+msgid "Bienvenue"
+msgstr "مرحباً"
+
+msgid "Changer le mot de passe"
+msgstr "تغيير كلمة المرور"
+
+msgid "Utilisateur"
+msgstr "المستخدم"
+
+msgid "Se déconnecter"
+msgstr "تسجيل الخروج"
+
+msgid "Notifications (non lues)"
+msgstr "الإشعارات (غير المقروءة)"
+
+msgid "Aucun nouveau message"
+msgstr "لا توجد رسائل جديدة"
+
+msgid "Ouvrir la messagerie"
+msgstr "فتح الرسائل"
+
+msgid "Certificat scolaire"
+msgstr "شهادة مدرسية"
+
+msgid "Certificat de scolarité"
+msgstr "شهادة مدرسية"
+
+msgid "Honorifique"
+msgstr "اللقب"
+
+msgid "Titre"
+msgstr "الصفة"
+
+msgid "Niveaux"
+msgstr "المستويات"
+
+
+msgid "Élève"
+msgstr "التلميذ"
+
+msgid "Responsables"
+msgstr "المسؤولون"
+
+msgid "Sélectionner..."
+msgstr "اختر..."
+
+msgid "Date"
+msgstr "التاريخ"
+
+msgid "temps"
+msgstr "الوقت"
+
+msgid "Imprimer"
+msgstr "طباعة"
+
+msgid "Ajouter"
+msgstr "إضافة"
+
+msgid "No"
+msgstr "رقم"
+
+msgid "Raison"
+msgstr "السبب"
+
+msgid "Aucune raison"
+msgstr "لا يوجد سبب"
+
+msgid "REPUBLIQUE DE DJIBOUTI"
+msgstr "جمهورية جيبوتي"
+
+msgid "Unité - Égalité - Paix"
+msgstr "وحدة - مساواة - سلام"
+
+msgid "Unité - Egalité - Paix"
+msgstr "وحدة - مساواة - سلام"
+
+msgid "MINISTERE DE L’ÉDUCATION"
+msgstr "وزارة التربية"
+
+msgid "NATIONALE ET DE LA"
+msgstr "الوطنية و"
+
+msgid "FORMATION"
+msgstr "التكوين"
+
+msgid "PROFESSIONNELLE"
+msgstr "المهني"
+
+msgid "Logo École"
+msgstr "شعار المدرسة"
+
+msgid "CEM ARTA"
+msgstr "CEM ARTA"
+
+msgid "Téléphone"
+msgstr "الهاتف"
+
+msgid "Téléphone:"
+msgstr "الهاتف:"
+
+msgid "E-mail"
+msgstr "البريد الإلكتروني"
+
+msgid "E-mail:"
+msgstr "البريد الإلكتروني:"
+
+msgid "Fait à Djibouti, le"
+msgstr "حرر في جيبوتي بتاريخ"
+
+msgid "CERTIFICAT DE SCOLARITE"
+msgstr "شهادة مدرسية"
+
+msgid "Je soussigné,"
+msgstr "أنا الموقع أدناه،"
+
+msgid "Utilisateur inconnu"
+msgstr "مستخدم غير معروف"
+
+msgid "certifie que l’élève :"
+msgstr "أشهد أن التلميذ:"
+
+
+msgid "Né(e) :"
+msgstr "تاريخ الميلاد:"
+
+msgid "À :"
+msgstr "مكان الميلاد:"
+
+msgid "Poursuit ses études dans notre établissement."
+msgstr "يتابع دراسته في مؤسستنا."
+
+msgid "En classe de :"
+msgstr "في الصف:"
+
+msgid "Année scolaire :"
+msgstr "السنة الدراسية:"
+
+msgid "Le présent certificat est délivré à la demande de l'intéressé(e) pour servir et valoir ce que de droit."
+msgstr "تُسلَّم هذه الشهادة بناءً على طلب المعني(ة) للاستعمال القانوني."
+
+msgid "Signature"
+msgstr "التوقيع"
+
+msgid "Année"
+msgstr "السنة"
+
+msgid "Dr"
+msgstr "د."
+
+msgid "Monsieur"
+msgstr "السيد"
+
+msgid "Madame"
+msgstr "السيدة"
+
+msgid "Mademoiselle"
+msgstr "الآنسة"
+
+msgid "Chers parents,"
+msgstr "أولياء الأمور الكرام،"
+
+msgid "Vous êtes priés de vous présenter le"
+msgstr "يرجى الحضور بتاريخ"
+
+msgid "Vous êtes priés de vous présenter le:"
+msgstr "يرجى الحضور بتاريخ:"
+
+msgid "à:"
+msgstr "على الساعة:"
+
+msgid "au bureau du Chef d’établissement"
+msgstr "إلى مكتب مدير المؤسسة"
+
+msgid "au bureau du Chef d'établissement"
+msgstr "إلى مكتب مدير المؤسسة"
+
+msgid "pour une affaire concernant l’élève"
+msgstr "بخصوص أمر يتعلق بالتلميذ"
+
+msgid "pour une affaire concernant votre enfant"
+msgstr "بخصوص أمر يتعلق بابنكم/ابنتكم"
+
+msgid "de la classe de"
+msgstr "من قسم"
+
+msgid "Motif :"
+msgstr "السبب:"
+
+msgid "Motif (sélectionnez le motif approprié)"
+msgstr "السبب (اختر السبب المناسب)"
+
+msgid "Responsable d’établissement"
+msgstr "مسؤول المؤسسة"
+
+msgid "Chef d’établissement"
+msgstr "مدير المؤسسة"
+
+msgid "Chef d'établissement"
+msgstr "مدير المؤسسة"
+
+msgid "Ajouter une raison"
+msgstr "إضافة سبب"
+
+msgid "Libellé"
+msgstr "التسمية"
+
+msgid "Ex: Absence répétitive"
+msgstr "مثال: غياب متكرر"
+
+msgid "Annuler"
+msgstr "إلغاء"
+
+msgid "Enregistrer"
+msgstr "حفظ"
+
+msgid "Libellé obligatoire."
+msgstr "التسمية مطلوبة."
+
+msgid "Erreur: impossible d’ajouter la raison."
+msgstr "خطأ: لا يمكن إضافة السبب."
+
+
+
+msgid "Saisie absences par mois"
+msgstr "إدخال الغياب شهريًا"
+
+msgid "Voir les présences par mois"
+msgstr "عرض الحضور شهريًا"
+
+
+
+
+msgid "Période"
+msgstr "الفترة"
+
+
+
+msgid "Filtrer"
+msgstr "تصفية"
+
+
+
+
+msgid "Total"
+msgstr "المجموع"
+
+msgid "AJ"
+msgstr "غياب مبرر"
+
+msgid "Aucune donnée."
+msgstr "لا توجد بيانات."
+
+msgid "Choisis Niveau, Classe et Période puis clique sur Filtrer."
+msgstr "اختر المستوى والفصل والفترة ثم اضغط على تصفية."
+
+
+
+msgid "Violences élèves"
+msgstr "العنف لدى التلاميذ"
+
+msgid "Violence pour les élèves"
+msgstr "العنف للتلاميذ"
+
+
+
+msgid "Excel"
+msgstr "تصدير Excel"
+
+msgid "PDF"
+msgstr "تصدير PDF"
+
+
+
+msgid "Rechercher ici"
+msgstr "ابحث هنا"
+
+msgid "OK"
+msgstr "حسناً"
+
+msgid "L'agresseur (euse)"
+msgstr "المعتدي"
+
+msgid "Forme d'agression"
+msgstr "نوع العدوان"
+
+msgid "Cause de la violence"
+msgstr "سبب العنف"
+
+msgid "Dommage corporel"
+msgstr "الإصابات الجسدية"
+
+msgid "Moyens de résolution"
+msgstr "وسائل الحل"
+
+
+
+msgid "Actions"
+msgstr "الإجراءات"
+
+
+
+msgid "Aucun enregistrement"
+msgstr "لا توجد سجلات"
+
+
+
+msgid "La liste des classes"
+msgstr "قائمة الفصول"
+
+msgid "Sélectionner"
+msgstr "اختر"
+
+msgid "Victime"
+msgstr "الضحية"
+
+msgid "Fermer"
+msgstr "إغلاق"
+
+msgid "Sauvegarder"
+msgstr "حفظ"
+
+msgid "Supprimer cet enregistrement ?"
+msgstr "حذف هذا السجل؟"
+
+msgid "Erreur chargement."
+msgstr "خطأ في التحميل."
+
+msgid "Erreur sauvegarde."
+msgstr "خطأ في الحفظ."
+
+msgid "Erreur réseau."
+msgstr "خطأ في الشبكة."
+
+
+
+
+
+msgid "Violences scolaires — Rapport"
+msgstr "تقرير — العنف المدرسي"
+
+msgid "Recherche"
+msgstr "بحث"
+
+msgid "Agresseur"
+msgstr "المعتدي"
+
+
+
+
+
+msgid "Forme"
+msgstr "النوع"
+
+msgid "Cause"
+msgstr "السبب"
+
+msgid "Dommage"
+msgstr "الأضرار"
+
+msgid "Résolution"
+msgstr "طريقة الحل"
+
+
+
+
+msgid "Classe agresseur"
+msgstr "قسم المعتدي"
+
+
+msgid "Classe victime"
+msgstr "قسم الضحية"
+
+
+
+
+
+
+msgid "Dégradation de l'école"
+msgstr "تخريب المدرسة"
+
+msgid "Dégradation commise"
+msgstr "التخريب المرتكب"
+
+
+
+
+
+
+msgid "Décision prise"
+msgstr "القرار المتخذ"
+
+
+
+
+msgid "Aucun enregistrement à afficher"
+msgstr "لا توجد بيانات للعرض"
+
+msgid "Ajouter une dégradation"
+msgstr "إضافة تخريب"
+
+msgid "Select..."
+msgstr "اختر..."
+
+
+msgid "Autre (personnalisée)"
+msgstr "أخرى (مخصصة)"
+
+msgid "Ajouter autre décision"
+msgstr "إضافة قرار آخر"
+
+msgid "Autre décision"
+msgstr "قرار آخر"
+
+msgid "Ex: Nettoyage + réparation..."
+msgstr "مثال: تنظيف + إصلاح..."
+
+
+
+msgid "Modifier une dégradation"
+msgstr "تعديل تخريب"
+
+
+
+
+
+
+msgid "Dégradations"
+msgstr "التخريبات"
+
+msgid "Rapport — Dégradations commises"
+msgstr "تقرير — التخريبات المرتكبة"
+
+
+
+
+
+msgid "Dégradation"
+msgstr "التخريب"
+
+msgid "Décision"
+msgstr "القرار"
+
+
+
+msgid "Nom de l'élève"
+msgstr "اسم التلميذ"
+
+
+
+msgid "Liste des eleves"
+msgstr "قائمة التلاميذ"
+
+
+
+msgid "Tous les Étudiants"
+msgstr "جميع التلاميذ"
+
+msgid "Étudiants/Homme"
+msgstr "ذكور"
+
+msgid "Étudiants/Femme"
+msgstr "إناث"
+
+msgid "Liste des Etudiants"
+msgstr "قائمة التلاميذ"
+
+msgid "Nom de l'eleve"
+msgstr "اسم التلميذ"
+
+msgid "Matricule"
+msgstr "الرقم"
+
+msgid "Tout les classes"
+msgstr "كل الأقسام"
+
+msgid "Id"
+msgstr "المعرف"
+
+msgid "Nom complet"
+msgstr "الاسم الكامل"
+
+msgid "Image"
+msgstr "الصورة"
+
+msgid "Date de naissance"
+msgstr "تاريخ الميلاد"
+
+msgid "Sexe"
+msgstr "الجنس"
+
+msgid "Addresse"
+msgstr "العنوان"
+
+msgid "N° de Telephone"
+msgstr "رقم الهاتف"
+
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+msgid "Classe (Niveau)"
+msgstr "القسم (المستوى)"
+
+msgid "Status"
+msgstr "الحالة"
+
+
+msgid "Le photo de l'eleve"
+msgstr "صورة التلميذ"
+
+
+msgid "Aucun Etudiants trouve."
+msgstr "لا يوجد تلاميذ."
+
+msgid "Page navigation"
+msgstr "التنقل بين الصفحات"
+
+msgid "Première"
+msgstr "الأولى"
+
+msgid "Précédent"
+msgstr "السابق"
+
+msgid "Suivant"
+msgstr "التالي"
+
+msgid "Dernière"
+msgstr "الأخيرة"
+
+
+
+
+
+
+
+
+msgid "Nom Complete"
+msgstr "الاسم الكامل"
+
+
+
+
+msgid "Format"
+msgstr "الصيغة"
+
+msgid "jj/mm/aaaa"
+msgstr "يوم/شهر/سنة"
+
+msgid "Adrress"
+msgstr "العنوان"
+
+msgid "Telephone"
+msgstr "الهاتف"
+
+
+
+msgid "Aucun fichier choisi"
+msgstr "لم يتم اختيار ملف"
+
+
+
+msgid "Select"
+msgstr "اختر"
+
+msgid "Nom du mere"
+msgstr "اسم الأم"
+
+msgid "Telephone Parent"
+msgstr "هاتف ولي الأمر"
+
+msgid "Email parent"
+msgstr "بريد ولي الأمر"
+
+
+
+
+
+msgid "musculin"
+msgstr "ذكر"
+
+msgid "feminin"
+msgstr "أنثى"
+
+
+
+msgid "Ajouter un eleve"
+msgstr "إضافة تلميذ"
+
+msgid "Modifier un eleve"
+msgstr "تعديل تلميذ"
+
+
+
+msgid "Admis"
+msgstr "ناجح"
+
+msgid "Redouble"
+msgstr "معيد"
+
+
+
+
+msgid "Page de detaille"
+msgstr "تفاصيل التلميذ"
+
+msgid "Ajouter une Absence"
+msgstr "إضافة غياب"
+
+msgid "Ajouter un Paiement"
+msgstr "إضافة دفع"
+
+msgid "Ajouter une Note"
+msgstr "إضافة نقطة"
+
+msgid "Envoyer un message"
+msgstr "إرسال رسالة"
+
+msgid "Exporter en PDF"
+msgstr "تصدير PDF"
+
+msgid "Imprimer la fiche"
+msgstr "طباعة البطاقة"
+
+msgid "Generer un Bulletin"
+msgstr "إنشاء كشف النقاط"
+
+msgid "Information de l'eleve"
+msgstr "معلومات التلميذ"
+
+
+
+msgid "Ecole"
+msgstr "المدرسة"
+
+msgid "Adresse"
+msgstr "العنوان"
+
+msgid "Nom du parent"
+msgstr "اسم الولي"
+
+msgid "Contact primaire"
+msgstr "الهاتف الرئيسي"
+
+msgid "Contact secondaire"
+msgstr "الهاتف الثانوي"
+
+msgid "Paiement de la scolarite"
+msgstr "دفع الرسوم الدراسية"
+
+msgid "Scolarite a Payer"
+msgstr "الرسوم المطلوبة"
+
+msgid "Scolarite Payee"
+msgstr "الرسوم المدفوعة"
+
+msgid "Reste a Payer"
+msgstr "المتبقي للدفع"
+
+msgid "Fiche eleve"
+msgstr "بطاقة التلميذ"
+
+
+
+
+
+
+msgid "Resume des frais"
+msgstr "ملخص الرسوم"
+
+msgid "Total a payer"
+msgstr "إجمالي المطلوب"
+
+msgid "Total paye"
+msgstr "إجمالي المدفوع"
+
+msgid "Reste a payer"
+msgstr "المتبقي للدفع"
+
+msgid "Frais par type de paiement"
+msgstr "الرسوم حسب نوع الدفع"
+
+msgid "Type"
+msgstr "النوع"
+
+msgid "Montant"
+msgstr "المبلغ"
+
+msgid "Paye"
+msgstr "المدفوع"
+
+msgid "Reste"
+msgstr "المتبقي"
+
+msgid "Aucun frais defini"
+msgstr "لا توجد رسوم محددة"
+
+msgid "Historique des paiements"
+msgstr "سجل المدفوعات"
+
+
+
+msgid "Mode"
+msgstr "طريقة الدفع"
+
+msgid "Reference"
+msgstr "المرجع"
+
+msgid "Aucun paiement"
+msgstr "لا توجد مدفوعات"
+
+
+
+
+
+
+
+
+msgid "Élèves"
+msgstr "التلاميذ"
+
+msgid "Statut"
+msgstr "الحالة"
+
+msgid "Détails"
+msgstr "التفاصيل"
+
+
+
+
+
+
+
+
+
+
+
+
+
+

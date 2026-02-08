@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Caisse{% endblock %}
+{% block main %}
+<div class="container-fluid px-4 py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold m-0">CAISSE</h6>
+    <div class="text-muted small">Finance/Gestionnaire &nbsp;›&nbsp; Caisse</div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} py-2 mb-3">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold">Sélection</div>
+    <div class="card-body">
+
+      <form method="GET" class="row g-3 align-items-end">
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Niveau</label>
+          <select class="form-select" id="niveauSelect" name="niveau">
+            <option value="">Sélectionner...</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}" {% if niveau_id|stringformat:"s" == n.id|stringformat:"s" %}selected{% endif %}>{{ n.nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Classe</label>
+          <select class="form-select" id="classeSelect" name="classe">
+            <option value="">Sélectionner...</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Élève</label>
+          <select class="form-select" id="eleveSelect" name="eleve">
+            <option value="">Sélectionner...</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-success w-100 fw-bold">Filtrer</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  {% if eleve %}
+  <div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-bold">{{ eleve.nom }}</div>
+        <div class="text-muted small">{{ eleve.classe.niveau }} - {{ eleve.classe.nom }}</div>
+      </div>
+      <div class="text-muted small">Prépare le paiement puis valide</div>
+    </div>
+
+    <div class="card-body">
+
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="eleve" value="{{ eleve.id }}">
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Mode paiement</label>
+            <select class="form-select" name="mode">
+              <option value="especes">Espèces</option>
+              <option value="mobile">Mobile money</option>
+              <option value="virement">Virement</option>
+              <option value="cheque">Chèque</option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Référence</label>
+            <input class="form-control" value="Générée automatiquement" disabled>
+          </div>
+
+
+          <div class="col-md-2">
+            <label class="form-label fw-bold">Devise</label>
+            <select class="form-select" name="devise">
+              <option value="DJF">DJF</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Note</label>
+            <input class="form-control" name="note" placeholder="Optionnel">
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Type frais</th>
+                <th>Facturé</th>
+                <th>Payé</th>
+                <th>Restant</th>
+                <th style="width:180px;">Montant à payer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in frais_rows %}
+              <tr>
+                <td class="fw-semibold">{{ f.type }}</td>
+                <td>{{ f.facture }} {{ f.devise }}</td>
+                <td>{{ f.paye }} {{ f.devise }}</td>
+                <td class="{% if f.restant|floatformat:2 == '0.00' %}text-success fw-bold{% else %}text-danger fw-bold{% endif %}">
+                  {{ f.restant }} {{ f.devise }}
+                </td>
+                <td>
+                <input type="number"
+                      step="0.01"
+                      min="0"
+                      class="form-control"
+                      name="pay_amount_{{ f.id }}"
+                      placeholder="0"
+                      {% if f.restant <= 0 %}disabled{% endif %}
+                      {% if f.restant > 0 %}max="{{ f.restant }}"{% endif %}>
+                {% if f.restant <= 0 %}
+                  <div class="text-muted small mt-1">Déjà soldé</div>
+                {% else %}
+                  <div class="text-muted small mt-1">Max: {{ f.restant }} {{ f.devise }}</div>
+                {% endif %}
+              </td>
+
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">Aucun frais généré pour cet élève.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-dark px-4">Valider Paiement & Générer Reçu</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+  const URL_CLASSES = "{% url 'ajax_classes_by_niveau_paiment' %}";
+  const URL_ELEVES  = "{% url 'ajax_eleves_by_classe_paiment' %}";
+
+  const niveauSelect = document.getElementById("niveauSelect");
+  const classeSelect = document.getElementById("classeSelect");
+  const eleveSelect  = document.getElementById("eleveSelect");
+
+  const clsCurrent   = "{{ classe_id|default:''|escapejs }}";
+  const eleveCurrent = "{{ eleve_id|default:''|escapejs }}";
+
+  function setLoading(selectEl, label="Chargement..."){
+    selectEl.innerHTML = `<option value="">${label}</option>`;
+  }
+
+  async function loadClasses(niveauId){
+    classeSelect.innerHTML = '<option value="">Sélectionner...</option>';
+    eleveSelect.innerHTML  = '<option value="">Sélectionner...</option>';
+    if(!niveauId) return;
+
+    setLoading(classeSelect);
+
+    const url = `${URL_CLASSES}?niveau_id=${encodeURIComponent(niveauId)}`;
+    const res = await fetch(url, { cache: "no-store" });
+
+    if(!res.ok){
+      console.error("Erreur classes:", res.status, await res.text());
+      classeSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      return;
+    }
+
+    // ✅ classes renvoie HTML <option>
+    classeSelect.innerHTML = await res.text();
+
+    if(clsCurrent) classeSelect.value = clsCurrent;
+
+    if(classeSelect.value){
+      await loadEleves(classeSelect.value);
+    }
+  }
+
+  async function loadEleves(classeId){
+    eleveSelect.innerHTML = '<option value="">Sélectionner...</option>';
+    if(!classeId) return;
+
+    setLoading(eleveSelect);
+
+    const url = `${URL_ELEVES}?classe_id=${encodeURIComponent(classeId)}`;
+    const res = await fetch(url, { cache: "no-store" });
+
+    if(!res.ok){
+      console.error("Erreur eleves:", res.status, await res.text());
+      eleveSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      return;
+    }
+
+    // ✅ eleves renvoie HTML <option>
+    eleveSelect.innerHTML = await res.text();
+
+    if(eleveCurrent) eleveSelect.value = eleveCurrent;
+  }
+
+  niveauSelect.addEventListener("change", async () => {
+    await loadClasses(niveauSelect.value);
+  });
+
+  classeSelect.addEventListener("change", async () => {
+    await loadEleves(classeSelect.value);
+  });
+
+  // init
+  if(niveauSelect.value){
+    loadClasses(niveauSelect.value);
+  }
+</script>
+
+{% endblock %}

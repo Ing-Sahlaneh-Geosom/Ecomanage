@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load dict_tools %}
+
+{% block title %}Saisie Absences EDT{% endblock %}
+
+{% block main %}
+<div class="container-fluid px-4 py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold m-0">SAISIE DES ABSENCES DES ÉLÈVES (EDT)</h6>
+    <div class="text-muted small">Enseignant &nbsp;›&nbsp; Saisie des absences des élèves (EDT)</div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} py-2 mb-3">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- FILTRE (GET) -->
+  <form method="GET" class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Enseignant</label>
+          <select class="form-select" name="prof" id="profSelect" required>
+            <option value="">Sélectionner...</option>
+            {% for p in profs %}
+              <option value="{{ p.id }}" {% if prof_id|stringformat:"s" == p.id|stringformat:"s" %}selected{% endif %}>
+                {{ p.nom_conplet }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Matière</label>
+          <select class="form-select" name="matier" id="matierSelect">
+            <option value="">Sélectionner...</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">La liste des classes</label>
+          <select class="form-select" name="classe" id="classeSelect" required>
+            <option value="">Sélectionner...</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Date</label>
+          <input type="date" class="form-control" name="date" value="{{ date }}" required>
+        </div>
+
+        <div class="col-md-1">
+          <label class="form-label fw-bold">À partir</label>
+          <input type="time" class="form-control" name="h_debut" value="{{ h_debut }}" required>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Le temps de</label>
+          <input type="time" class="form-control" name="h_fin" value="{{ h_fin }}" required>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-success w-100 fw-bold">Filtrer</button>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  <!-- TABLE (POST) -->
+  <form method="POST" class="card">
+    {% csrf_token %}
+    <input type="hidden" name="prof" value="{{ prof_id }}">
+    <input type="hidden" name="matier" value="{{ matier_id }}">
+    <input type="hidden" name="classe" value="{{ classe_id }}">
+    <input type="hidden" name="date" value="{{ date }}">
+    <input type="hidden" name="h_debut" value="{{ h_debut }}">
+    <input type="hidden" name="h_fin" value="{{ h_fin }}">
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width:80px;">ID</th>
+              <th>Nom</th>
+              <th style="width:520px;">Statut</th>
+              <th style="width:260px;">Motif</th>
+            </tr>
+          </thead>
+
+          <tbody>
+          {% for e in eleves %}
+            {% with a=abs_map|get:e.id %}
+            <tr>
+              <td>{{ e.id }}</td>
+              <td class="fw-semibold">{{ e.nom }}</td>
+
+              <td>
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+
+                  <label class="d-flex align-items-center gap-2">
+                    <input class="form-check-input" type="radio" name="statut_{{ e.id }}" value="present"
+                           {% if not a %}checked{% elif a.statut == "present" %}checked{% endif %}>
+                    <span class="badge bg-success">Présent</span>
+                  </label>
+
+                  <label class="d-flex align-items-center gap-2">
+                    <input class="form-check-input" type="radio" name="statut_{{ e.id }}" value="absence"
+                           {% if a and a.statut == "absence" %}checked{% endif %}>
+                    <span class="badge bg-danger">Absence</span>
+                  </label>
+
+                  <label class="d-flex align-items-center gap-2">
+                    <input class="form-check-input" type="radio" name="statut_{{ e.id }}" value="retard"
+                           {% if a and a.statut == "retard" %}checked{% endif %}>
+                    <span class="badge bg-warning text-dark">Retard</span>
+                  </label>
+
+                  <label class="d-flex align-items-center gap-2">
+                    <input class="form-check-input" type="checkbox" name="justifiee_{{ e.id }}" value="1"
+                           {% if a and a.justifiee %}checked{% endif %}>
+                    <span class="badge bg-primary">Justifier</span>
+                  </label>
+
+                </div>
+              </td>
+
+              <td>
+                <input class="form-control form-control-sm" name="motif_{{ e.id }}" value="{% if a %}{{ a.motif }}{% endif %}">
+              </td>
+            </tr>
+            {% endwith %}
+          {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">
+                Choisissez Enseignant + Classe + Date + Heure, puis cliquez sur Filtrer.
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+
+    <div class="card-footer d-flex justify-content-end">
+      <button class="btn btn-dark px-4" {% if not eleves %}disabled{% endif %}>Enregistrer</button>
+    </div>
+  </form>
+
+</div>
+
+<script>
+  const URL_PROF_DATA = "{% url 'ajax_prof_data' %}";
+  const profSelect = document.getElementById("profSelect");
+  const matierSelect = document.getElementById("matierSelect");
+  const classeSelect = document.getElementById("classeSelect");
+
+  async function loadProfData(profId){
+    matierSelect.innerHTML = '<option value="">Sélectionner...</option>';
+    classeSelect.innerHTML = '<option value="">Sélectionner...</option>';
+    if(!profId) return;
+
+    const url = new URL(URL_PROF_DATA, window.location.origin);
+    url.searchParams.set("prof_id", profId);
+
+    const res = await fetch(url.toString(), {headers: {"X-Requested-With":"XMLHttpRequest"}});
+    const text = await res.text();
+
+    const parts = text.split("<!--CLS-->");
+    const matPart = parts[0].replace("<!--MAT-->", "");
+    const clsPart = parts[1] || "";
+
+    matierSelect.innerHTML = matPart;
+    classeSelect.innerHTML = clsPart;
+
+    // restore selected
+    const matCurrent = "{{ matier_id }}";
+    const clsCurrent = "{{ classe_id }}";
+    if(matCurrent) matierSelect.value = matCurrent;
+    if(clsCurrent) classeSelect.value = clsCurrent;
+  }
+
+  profSelect.addEventListener("change", () => loadProfData(profSelect.value));
+
+  // init
+  if(profSelect.value) loadProfData(profSelect.value);
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'parametre.html'%}
+{% load static %}
+{% block title %} <title> Ajouter une annee </title> {% endblock %}
+{% block main %}
+
+<div class="containaire">
+    <h2>{{ Title }} </h2>
+    {% if form.errors %}
+        <div class="error-messages bg-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+        <div>
+            <label for="nom">Nom :</label>
+            {{ form.nom }}
+        </div>
+        <div>
+            <label for="date_debut">Date de debut :</label>
+            {{ form.debut }}
+        </div>
+         <div>
+            <label for="date_fin">Date de fin :</label>
+            {{ form.fin }}
+        </div>
+
+
+        <div class="full-width">
+            <button type="submit" class="submit-btn">{{ submit_text }}</button>
+        </div>
+
+    </form>
+
+</div>
+<div id="anneeModal" class="modal">
+  <div class="modalcontent">
+    <span class="close">&times;</span>
+    <h2>Ajouter une année</h2>
+
+    <form method="post">
+      {% csrf_token %}
+      <label for="nom">Nom :</label>
+      <input type="text" id="nom" name="nom" required>
+
+      <label for="date_fin">Date de fin :</label>
+      <input type="date" id="date_fin" name="date_fin" required>
+
+      <button type="submit" class="btn-submit">Ajouter</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

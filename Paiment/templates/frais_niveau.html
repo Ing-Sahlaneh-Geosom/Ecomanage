@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Frais{% endblock %}
+
+{% block main %}
+<div class="container-fluid px-4 py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold m-0">FRAIS</h6>
+    <div class="text-muted small">Finance/Gestionnaire &nbsp;›&nbsp; Frais</div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} py-2 mb-3">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">Frais</div>
+    <div class="card-body">
+
+      <!-- FILTRE (GET) -->
+      <form method="GET" class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Année scolaire <span class="text-danger">*</span></label>
+          <select class="form-select" name="annee" required>
+            <option value="">Sélectionner...</option>
+            {% for a in annees %}
+              <option value="{{ a.id }}" {% if annee_id|stringformat:"s" == a.id|stringformat:"s" %}selected{% endif %}>
+                {{ a }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Niveau <span class="text-danger">*</span></label>
+          <select class="form-select" name="niveau" required>
+            <option value="">Sélectionner...</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}" {% if niveau_id|stringformat:"s" == n.id|stringformat:"s" %}selected{% endif %}>
+                {{ n.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Type de frais <span class="text-danger">*</span></label>
+          <select class="form-select" name="type" required>
+            <option value="">Sélectionner...</option>
+            {% for t in types %}
+              <option value="{{ t.id }}" {% if type_id|stringformat:"s" == t.id|stringformat:"s" %}selected{% endif %}>
+                {{ t.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Frais</label>
+          <input class="form-control" value="{% if tarif %}{{ tarif.montant }} - {{ tarif.devise }}{% endif %}" readonly>
+        </div>
+
+        <div class="col-md-1 d-grid">
+          <button class="btn btn-dark">Filtrer</button>
+        </div>
+
+      </form>
+
+      <hr class="my-4">
+
+      <!-- GENERER (POST) -->
+      <form method="POST" class="d-flex justify-content-end">
+        {% csrf_token %}
+        <input type="hidden" name="annee" value="{{ annee_id }}">
+        <input type="hidden" name="niveau" value="{{ niveau_id }}">
+        <input type="hidden" name="type" value="{{ type_id }}">
+
+        <button class="btn btn-dark px-4"
+                {% if not annee_id or not niveau_id or not type_id %}disabled{% endif %}>
+          Y Montrer aux élèves
+        </button>
+      </form>
+
+      <!-- TABLE ELEVE -->
+      <div class="table-responsive mt-3">
+        <table class="table table-bordered align-middle">
+          <thead style="background:#4b39b7;color:white;">
+            <tr>
+              <th style="width:70px;">#</th>
+              <th>Élève</th>
+              <th style="width:220px;">Niveau</th>
+              <th style="width:140px;">Montant</th>
+              <th style="width:120px;">Devise</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in frais_list %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="fw-semibold">{{ f.eleve.nom }}</td>
+                <td>{{ f.eleve.classe.niveau }} - {{ f.eleve.classe.nom }}</td>
+                <td>{{ f.montant }}</td>
+                <td>{{ f.devise }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  Filtre d’abord (Année + Niveau + Type), puis clique sur “Montrer aux élèves”.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

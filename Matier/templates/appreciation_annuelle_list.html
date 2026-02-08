@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block main %}
+<div class="container py-3">
+  <h5 class="mb-3">CONFIGURATION DES APPRÉCIATIONS</h5>
+  {% include "_tabs.html" %}
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Appréciations annuelles</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Ajouter</button>
+      </div>
+
+      <div class="d-flex justify-content-end mb-3">
+        <form method="get" class="d-flex" style="max-width:320px;">
+          <input class="form-control" name="q" value="{{ q }}" placeholder="Rechercher ici">
+        </form>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nom</th>
+              <th>à partir de marques</th>
+              <th>Pour les marques</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in items %}
+              <tr>
+                <td>{{ it.nom }}</td>
+                <td>{{ it.note_min }}</td>
+                <td>{{ it.note_max }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ it.id }}">✏️</button>
+                  <form method="post" action="{% url 'annuelle_delete' it.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ?')">🗑️</button>
+                  </form>
+                </td>
+              </tr>
+
+              <div class="modal fade" id="editModal{{ it.id }}" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Modifier l'appréciation annuelle</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="post" action="{% url 'annuelle_update' it.id %}">
+                      {% csrf_token %}
+                      <div class="modal-body">
+                        <div class="mb-3">
+                          <label class="form-label">Nom*</label>
+                          <input class="form-control" name="nom" value="{{ it.nom }}" required>
+                        </div>
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <label class="form-label">à partir de marques</label>
+                            <input class="form-control" type="number" step="0.01" name="note_min" value="{{ it.note_min }}">
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">Pour les marques</label>
+                            <input class="form-control" type="number" step="0.01" name="note_max" value="{{ it.note_max }}">
+                          </div>
+                        </div>
+                        <div class="form-check mt-3">
+                          <input class="form-check-input" type="checkbox" name="actif" {% if it.actif %}checked{% endif %}>
+                          <label class="form-check-label">Actif</label>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button class="btn btn-light" type="button" data-bs-dismiss="modal">Fermer</button>
+                        <button class="btn btn-dark" type="submit">Sauvegarder</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <tr><td colspan="4" class="text-muted">Aucun élément.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ajouter l'appréciation annuelle</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'annuelle_create' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Nom*</label>{{ form.nom }}</div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">à partir de marques</label>{{ form.note_min }}</div>
+            <div class="col-md-6"><label class="form-label">Pour les marques</label>{{ form.note_max }}</div>
+          </div>
+          <div class="form-check mt-3">{{ form.actif }} <label class="form-check-label">Actif</label></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-light" type="button" data-bs-dismiss="modal">Fermer</button>
+          <button class="btn btn-dark" type="submit">Sauvegarder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

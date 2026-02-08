@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block branding %}
+<div class="logo">
+    <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" height="40" width="40" alt=""><h4>EcoAdmin</h4>
+</div>
+{% endblock %}
+{% block extrastyle %}
+
+<style>
+#header{
+    background-color: #7ca7f2;
+    color: black;
+}
+
+.logo{
+      display: flex;
+    }
+.logo h4{
+      font-size: 22px;
+      color: #1c263a;
+      margin-top: 5px;
+      margin-left: 5px;
+    }
+</style>
+{% endblock %}

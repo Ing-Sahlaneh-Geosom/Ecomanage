@@ -1,0 +1,842 @@
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="{{ request.LANGUAGE_CODE }}" dir="{% if request.LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/css/bootstrap.min.css'%}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="icon" type="image/png" href="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}">
+
+  <title>{% block title %}{% endblock %}</title>
+
+  <!-- ✅ AJOUT MINIMAL: ACTIVE + RTL sidebar -->
+  <style>
+
+    .navbar { overflow: visible !important; }
+.navbar .dropdown-menu { z-index: 2000 !important; }
+
+/* si un parent bloque (très fréquent) */
+body, .main-content, .content, .page-content {
+  overflow-x: visible;
+}
+
+/* petit style icônes */
+.nav-ico{ font-size:18px; line-height:1; }
+
+    /* ===== ACTIVE LINKS (menu + submenu + buttons) ===== */
+    .sidebar a.active,
+    .sidebar .btn.active {
+      
+      color: blue !important;
+      font-weight: 300;
+      border-radius: 3px;
+    }
+    .sidebar .submenu a.active {
+      background: grey;
+      color: black !important;
+    }
+    /* sous-menu (LTR) */
+.submenu a {
+  display: block;
+  padding-left: 28px;   /* indentation */
+  padding-right: 12px;
+}
+
+/* RTL : inversion indentation */
+[dir="rtl"] .submenu a {
+  padding-left: 12px;
+  padding-right: 28px;  /* indentation à droite */
+  text-align: right;
+}
+
+
+    /* ===== SIDEBAR À DROITE SI AR (RTL) ===== */
+    html[dir="rtl"] .sidebar {
+      left: auto !important;
+      right: 0 !important;
+    }
+    /* option: si ton style.css met margin-left, on inverse en RTL */
+    html[dir="rtl"] .main-content {
+      margin-left: 0 !important;
+      margin-right: 250px; /* ajuste si ta sidebar a une autre largeur */
+    }
+    @media (max-width: 992px){
+      html[dir="rtl"] .main-content{
+        margin-right: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+{% with current=request.resolver_match.url_name %}
+
+   
+  {% load i18n %}
+
+<nav style="background-color: white;" class="navbar navbar-expand border-bottom px-3 py-3">
+  <div class="d-flex align-items-center w-100 justify-content-between">
+
+    <!-- LEFT -->
+    <div class="d-flex align-items-center gap-3">
+
+      <button class="btn btn-link text-primary p-0 d-lg-none" id="toggleSidebar" type="button" aria-label="Menu">
+        <span style="font-size: 22px; line-height: 1;">☰</span>
+      </button>
+
+      <!-- Nom + logo : AR => nom puis logo, sinon logo puis nom -->
+      <div class="d-flex align-items-center gap-2">
+        {% if request.LANGUAGE_CODE == 'ar' %}
+          <h4 class="fw-bold text-dark mb-0">{{ user.ecole.nom }}</h4>
+          {% if user.ecole.logo %}
+            <img src="{{ user.ecole.logo.url }}" alt="{{ user.ecole.nom }}" width="30" height="21" style="border-radius:4px;">
+          {% endif %}
+        {% else %}
+          {% if user.ecole.logo %}
+            <img src="{{ user.ecole.logo.url }}" alt="{{ user.ecole.nom }}" width="30" height="21" style="border-radius:4px;">
+          {% endif %}
+          <h4 class="fw-bold text-dark mb-0">{{ user.ecole.nom }}</h4>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="d-flex align-items-center gap-3">
+
+      <!-- School small name + flag/logo (optional) -->
+      <div style="margin-right: 20rem;" class="d-none d-md-flex align-items-center gap-2 text-light">
+        {% if request.LANGUAGE_CODE == 'ar' %}
+          <h5 class="mt-1 fw-semibold text-dark mb-0">{{ user.ecole.nom }}</h5>
+          {% if user.ecole.logo %}
+            <img src="{{ user.ecole.logo.url }}" alt="{{ user.ecole.nom }}" width="30" height="21" style="border-radius:4px;">
+          {% endif %}
+        {% else %}
+          {% if user.ecole.logo %}
+            <img src="{{ user.ecole.logo.url }}" alt="{{ user.ecole.nom }}" width="30" height="21" style="border-radius:4px;">
+          {% endif %}
+          <h5 class="mt-1 fw-semibold text-dark mb-0">{{ user.ecole.nom }}</h5>
+        {% endif %}
+      </div>
+
+      {# ✅ classe dropdown align: en AR on utilise dropdown-menu-start #}
+      {% if request.LANGUAGE_CODE == 'ar' %}
+        {% with notif_menu_align="dropdown-menu-start" prof_menu_align="dropdown-menu-start" %}
+          {% include "partials/_nav_dropdowns.html" %}
+        {% endwith %}
+      {% else %}
+        {% with notif_menu_align="dropdown-menu-end" prof_menu_align="dropdown-menu-end" %}
+          {% include "partials/_nav_dropdowns.html" %}
+        {% endwith %}
+      {% endif %}
+
+    </div>
+  </div>
+</nav>
+
+
+
+ 
+  <div  class="sidebar" id="sidebarMenu">
+   {% load i18n %}
+
+<div class="d-flex align-items-center" style="margin-left: 1rem; gap:8px;">
+  <a id="closeSidebar" style="text-decoration:none;">✖</a>
+
+  {% if request.LANGUAGE_CODE == 'ar' %}
+    <h4 class="m-3">
+      {% trans "Ecomanage" %}
+      <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" alt="Logo" width="25">
+    </h4>
+  {% else %}
+    <h4 class="m-3">
+      <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" alt="Logo" width="25">
+      {% trans "Ecomanage" %}
+    </h4>
+  {% endif %}
+</div>
+
+  {% if user.role %}
+  {% if user.role == "parent" %}
+
+    <a class="{% if current == 'Acceuil' %}active{% endif %}" href="{% url 'Acceuil'%}">📊 Tableau de Bord</a>
+    <a class="{% if current == 'emploi_grille' %}active{% endif %}" href="{% url 'emploi_grille'%}">📅 Emplois du temps</a>
+    <a class="{% if current == 'messagerie_home' %}active{% endif %}" href="{% url 'messagerie_home' %}">✉️ Messagerie</a>
+
+    <a class="{% if current == 'parametre' %}active{% endif %}" href="{% url 'parametre'%}">✉️ Parametres </a>
+    <a href="{% url 'deconnection'%}" class="text-danger">🚪 Déconnexion</a>
+
+  {% endif %}
+  {% if user.role == "proffesseur" %}
+
+    <a class="{% if current == 'Acceuil' %}active{% endif %}" href="{% url 'Acceuil'%}">📊 Tableau de Bord</a>
+
+    {% if current == 'ListeDesAbsences' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuAbsences" aria-expanded="true">
+        🕓 Absences <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuAbsences">
+        <a class="active" href="{% url 'ListeDesAbsences'%}">👨‍🎓 Étudiants</a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuAbsences" aria-expanded="false">
+        🕓 Absences <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuAbsences">
+        <a href="{% url 'ListeDesAbsences'%}">👨‍🎓 Étudiants</a>
+      </div>
+    {% endif %}
+
+    {% if current == 'CreationdesNotes' or current == 'ListeDesNotes' or current == 'choisir_bulletin' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuNotes" aria-expanded="true">
+        📋 Notes <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuNotes">
+        <a class="{% if current == 'CreationdesNotes' %}active{% endif %}" href="{% url 'CreationdesNotes'%}">✏️ Attribuer des notes</a>
+        <a class="{% if current == 'ListeDesNotes' %}active{% endif %}" href="{% url 'ListeDesNotes'%}">📊 Liste des notes</a>
+        <a class="{% if current == 'choisir_bulletin' %}active{% endif %}" href="{% url 'choisir_bulletin'%}">📊 Genere un bulletin</a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuNotes" aria-expanded="false">
+        📋 Notes <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuNotes">
+        <a href="{% url 'CreationdesNotes'%}">✏️ Attribuer des notes</a>
+        <a href="{% url 'ListeDesNotes'%}">📊 Liste des notes</a>
+        <a href="{% url 'choisir_bulletin'%}">📊 Genere un bulletin</a>
+      </div>
+    {% endif %}
+   
+    <a class="{% if current == 'messagerie_home' %}active{% endif %}" href="{% url 'messagerie_home'%}">✉️ Messagerie</a>
+
+    <a class="{% if current == 'Liste_des_emplois_grille' %}active{% endif %}" href="{% url 'Liste_des_emplois_grille'%}">📅 Emplois du temps</a>
+    <a class="{% if current == 'parametre' %}active{% endif %}" href="{% url 'parametre'%}">✉️ Parametres </a>
+    <a href="{% url 'deconnection'%}" class="text-danger">🚪 Déconnexion</a>
+
+  {% endif %}
+
+  {% if user.role == "admin" %}
+
+    <a class="{% if current == 'Acceuil' %}active{% endif %}" href="{% url 'Acceuil'%}">📊 {% trans "Tableau de Bord" %}</a>
+    
+    {% if current == 'certificat_scolarite' or current == 'convocation_parent' or current == 'suivi_absences_par_mois' or current == 'violence_list' or current == 'degradation_page' %}
+      <button class="btn d-flex justify-content-between align-items-center {% if ... %}active{% endif %}"
+        data-bs-toggle="collapse" data-bs-target="#menuScolaire"
+        aria-expanded="{% if ... %}true{% else %}false{% endif %}">
+  👨‍🎓 {% trans "Vie Scolaire" %} <span class="arrow">▾</span>
+</button>
+
+      <div class="collapse submenu show" id="menuScolaire">
+        <a class="{% if current == 'certificat_scolarite' %}active{% endif %}" href="{% url 'certificat_scolarite'%}">- {% trans "Attestation Scolaire" %}</a>
+        <a class="{% if current == 'convocation_parent' %}active{% endif %}" href="{% url 'convocation_parent'%}">- {% trans " Convocation des parents " %} </a>
+        <a class="{% if current == 'suivi_absences_par_mois' %}active{% endif %}" href="{% url 'suivi_absences_par_mois'%}">- {% trans "saisie des absences par mois" %} </a>
+        <a class="{% if current == 'violence_list' %}active{% endif %}" href="{% url 'violence_list'%}">- {% trans "Violences des eleves" %}</a>
+        <a class="{% if current == 'degradation_page' %}active{% endif %}" href="{% url 'degradation_page'%}">- {% trans "Degradation des eleves" %}</a>
+      </div>
+    {% else %}
+      <button class="btn d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#menuScolaire" aria-expanded="false">
+        👨‍🎓{% trans "Vie Scolaire" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuScolaire">
+        <a href="{% url 'certificat_scolarite'%}">- {% trans "Attestation Scolaire" %}</a>
+        <a href="{% url 'convocation_parent'%}">-{% trans "Convocation des parents" %}  </a>
+        <a href="{% url 'suivi_absences_par_mois'%}"> - {% trans "saisie des absences par mois" %} </a>
+        <a href="{% url 'violence_list'%}">- {% trans "Violences des eleves" %} </a>
+        <a href="{% url 'degradation_page'%}">- {% trans "Degradation des eleves" %} </a>
+      </div>
+    {% endif %}
+
+
+    {% if current == 'les_eleves' or current == 'Ajouter' or current == 'cartes_scolaires' %}
+      <button class="btn d-flex justify-content-between align-items-center active" data-bs-toggle="collapse" data-bs-target="#menuEtudiants" aria-expanded="true">
+        👥 {% trans "Gestion des Étudiants" %}<span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuEtudiants">
+        <a class="{% if current == 'les_eleves' %}active{% endif %}" href="{% url 'les_eleves'%}">👉 {% trans "Liste des étudiants" %} </a>
+        <a class="{% if current == 'Ajouter' %}active{% endif %}" href="{% url 'Ajouter'%}">👉 {% trans "Ajouter un étudiant" %} </a>
+        <a class="{% if current == 'cartes_scolaires' %}active{% endif %}" href="{% url 'cartes_scolaires'%}">👉 {% trans "Carte Scolaire" %} </a>
+      </div>
+    {% else %}
+      <button class="btn d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#menuEtudiants" aria-expanded="false">
+        👥 {% trans "Gestion des Étudiants" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuEtudiants">
+        <a href="{% url 'les_eleves'%}">👉 {% trans "Liste des étudiants" %} </a>
+        <a href="{% url 'Ajouter'%}">👉{% trans "Ajouter un étudiant" %}  </a>
+        <a href="{% url 'cartes_scolaires'%}">👉 {% trans "Carte Scolaire" %} </a>
+      </div>
+    {% endif %}
+
+   
+    {% if current == 'CreeDesClasses' or current == 'ListeDesClasse' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuClasses" aria-expanded="true">
+         🏫 {% trans "Gestion des Classes" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuClasses">
+        <a class="{% if current == 'CreeDesClasses' %}active{% endif %}" href="{% url 'CreeDesClasses'%}">👉{% trans "Ajouter une classe" %}</a> 
+        <a class="{% if current == 'ListeDesClasse' %}active{% endif %}" href="{% url 'ListeDesClasse'%}">👉{% trans "Liste des classes" %} </a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuClasses" aria-expanded="false">
+         🏫 {% trans "Gestion des Classes" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuClasses">
+        <a href="{% url 'CreeDesClasses'%}">👉 {% trans "Ajouter une classe" %}</a> 
+        <a href="{% url 'ListeDesClasse'%}">👉 {% trans "Liste des classes" %} </a>
+      </div>
+    {% endif %}
+
+   
+    {% if current == 'ressources' or current == 'Lesensiegnants' or current == 'absences_edt' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuProfs" aria-expanded="true">
+        👨‍🏫 {% trans "Enseignant" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuProfs">
+        <a class="{% if current == 'ressources' %}active{% endif %}" href="{% url 'ressources'%}">👉 {% trans "Envoiyer un document" %}</a>
+        <!-- <a href="{% url 'AjouteProf'%}">LesMessagerie 👉 Ajouter un professeur</a> -->
+        <a class="{% if current == 'Lesensiegnants' %}active{% endif %}" href="{% url 'Lesensiegnants'%}">👉 {% trans "Liste des professeurs" %}</a>
+        <a class="{% if current == 'absences_edt' %}active{% endif %}" href="{% url 'absences_edt'%}">👉 {% trans "Saisi quotidienne des apsences" %}</a>
+        <a href="">👉 {% trans "Coordinateur par discipline" %}</a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuProfs" aria-expanded="false">
+        👨‍🏫 {% trans "Enseignant" %}  <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuProfs">
+        <a href="{% url 'ressources'%}">👉 {% trans "Envoiyer un document" %}</a>
+        <!-- <a href="{% url 'AjouteProf'%}">LesMessagerie 👉 Ajouter un professeur</a> -->
+        <a href="{% url 'Lesensiegnants'%}">👉 {% trans "Liste des professeurs" %}</a>
+        <a href="{% url 'absences_edt'%}">👉 {% trans "Saisi quotidienne des apsences" %}</a>
+        <a href="">👉 {% trans "Coordinateur par discipline" %}</a>
+      </div>
+    {% endif %}
+
+   
+    {% if current == 'AjouterDesMatiere' or current == 'listesdesmetier' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuMatiere" aria-expanded="true">
+        📘 {% trans "Matières" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuMatiere">
+        <a class="{% if current == 'AjouterDesMatiere' %}active{% endif %}" href="{% url 'AjouterDesMatiere'%}"> {% trans " - Ajouter une matière" %}</a>
+        <a class="{% if current == 'listesdesmetier' %}active{% endif %}" href="{% url 'listesdesmetier'%}">👉 {% trans " - Liste des matière" %}</a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuMatiere" aria-expanded="false">
+        📘 {% trans "Matières" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuMatiere">
+        <a href="{% url 'AjouterDesMatiere'%}">👉 {% trans "Ajouter une matière" %}</a>
+        <a href="{% url 'listesdesmetier'%}">👉 {% trans "Liste des matière" %}</a>
+      </div>
+    {% endif %}
+
+    
+    {% if current == 'periode_list' or current == 'annuelle_list' or current == 'rapport_conseil_classe' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuNotes" aria-expanded="true">
+        📋{% trans "Examen" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuNotes">
+        <a class="{% if current == 'periode_list' %}active{% endif %}" href="{% url 'periode_list'%}">👉 {% trans "Gestion des notes" %}</a>
+        <a class="{% if current == 'annuelle_list' %}active{% endif %}" href="{% url 'annuelle_list'%}">👉 {% trans "Configuration des apreciation" %}</a>
+        <a class="{% if current == 'rapport_conseil_classe' %}active{% endif %}" href="{% url 'rapport_conseil_classe'%}">👉 {% trans "Conseille de classe" %}</a>
+        <a href="{% url 'rapport_conseil_classe'%}">👉 {% trans "Resultat BEF" %}</a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuNotes" aria-expanded="false">
+        📋 {% trans "Examen" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuNotes">
+        <a href="{% url 'periode_list'%}">👉 {% trans "Gestion des notes" %}</a>
+        <a href="{% url 'annuelle_list'%}">👉 {% trans "Configuration des apreciation" %}</a>
+        <a href="{% url 'rapport_conseil_classe'%}">👉 {% trans "Conseille de classe" %}</a>
+        <a href="{% url 'rapport_conseil_classe'%}">👉 {% trans "Resultat BEF" %}</a>
+      </div>
+    {% endif %}
+
+    
+    
+
+    {% if current == 'employe_list' or current == 'absences_enseignants' or current == 'suivi_absences_enseignants' or current == 'absences_employes' or current == 'suivi_absences_employes' or current == 'liste_parents' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuAdministrateur" aria-expanded="true">
+         👨‍🏫 {% trans "Administrateur" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuAdministrateur">
+        <a class="{% if current == 'employe_list' %}active{% endif %}" href="{% url 'employe_list'%}">✉️ {% trans "Employés" %} </a>
+        <a class="{% if current == 'absences_enseignants' %}active{% endif %}" href="{% url 'absences_enseignants'%}">🕓  {% trans "Absences enseignants" %} </a>
+        <a class="{% if current == 'suivi_absences_enseignants' %}active{% endif %}" href="{% url 'suivi_absences_enseignants'%}">🕓 {% trans "Suivie des Absences enseignants" %} </a>
+        <a class="{% if current == 'absences_employes' %}active{% endif %}" href="{% url 'absences_employes'%}">🕓  {% trans "Absences employés" %} </a>
+        <a class="{% if current == 'suivi_absences_employes' %}active{% endif %}" href="{% url 'suivi_absences_employes'%}">🕓 {% trans "Suivie des Absences employés" %} </a>
+        <a class="{% if current == 'liste_parents' %}active{% endif %}" href="{% url 'liste_parents'%}">🕓 {% trans "Liste de parents" %} </a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuAdministrateur" aria-expanded="false">
+         👨‍🏫 {% trans "Administrateur" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuAdministrateur">
+        <a href="{% url 'employe_list'%}">✉️ {% trans "Employés" %}</a>
+        <a href="{% url 'absences_enseignants'%}">🕓  {% trans "Absences enseignants" %} </a>
+        <a href="{% url 'suivi_absences_enseignants'%}">🕓 {% trans "Suivie des Absences enseignants" %} </a>
+        <a href="{% url 'absences_employes'%}">🕓  {% trans "Absences employés" %} </a>
+        <a href="{% url 'suivi_absences_employes'%}">🕓 {% trans "Suivie des Absences employés" %} </a>
+        <a href="{% url 'liste_parents'%}">🕓 {% trans "Liste de parents" %} </a>
+      </div>
+    {% endif %}
+    
+    {% if current == 'ConfDePaiment' or current == 'finance_frais' or current == 'liste_de_paiment' or current == 'paiement_frais' or current == 'caisse' or current == 'journal_caisse' or current == 'cloture_caisse' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuPaiements" aria-expanded="true">
+        💳 {% trans "Finance & Gestionnaire" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuPaiements">
+        <a class="{% if current == 'ConfDePaiment' %}active{% endif %}" href="{% url 'ConfDePaiment'%}">👉 {% trans "Configuration des frais" %}</a>
+        <a class="{% if current == 'finance_frais' %}active{% endif %}" href="{% url 'finance_frais'%}">👉 {% trans "Frais par classe" %}</a>
+        <a class="{% if current == 'liste_de_paiment' %}active{% endif %}" href="{% url 'liste_de_paiment'%}">👉 {% trans "Exonéraition" %}</a>
+        <a class="{% if current == 'paiement_frais' %}active{% endif %}" href="{% url 'paiement_frais'%}">👉 {% trans "Fiche du Paiments" %}</a>
+        <a class="{% if current == 'caisse' %}active{% endif %}" href="{% url 'caisse'%}">👉 {% trans "Caisse" %}</a>     
+        <a class="{% if current == 'journal_caisse' %}active{% endif %}" href="{% url 'journal_caisse'%}">👉 {% trans "Historique" %}</a>
+        <a class="{% if current == 'cloture_caisse' %}active{% endif %}" href="{% url 'cloture_caisse'%}">👉{% trans "Cloture de la Caisse" %}</a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuPaiements" aria-expanded="false">
+        💳 {% trans "Finance & Gestionnaire" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuPaiements">
+        <a href="{% url 'ConfDePaiment'%}">👉 {% trans "Configuration des frais" %}</a>
+        <a href="{% url 'finance_frais'%}">👉 {% trans "Frais par classe" %}</a>
+        <a href="{% url 'liste_de_paiment'%}">👉 {% trans "Exonéraition" %}</a>
+        <a href="{% url 'paiement_frais'%}">👉 {% trans "Fiche du Paiments" %}</a>
+        <a href="{% url 'caisse'%}">👉 {% trans "Caisse" %}</a>     
+        <a href="{% url 'journal_caisse'%}">👉{% trans "Historique" %}</a>
+        <a href="{% url 'cloture_caisse'%}">👉{% trans "Cloture de la Caisse" %}</a>
+      </div>
+    {% endif %}
+
+    
+
+    {% if current == 'AjouterDesMatiere' or current == 'CreeDesSpecialite' or current == 'CreeDesNiveau' or current == 'batiments_page' or current == 'salles_page' %}
+      <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuParametre" aria-expanded="true">
+        ⚙️ {% trans "Réglages" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu show" id="menuParametre">
+        <a class="{% if current == 'AjouterDesMatiere' %}active{% endif %}" href="{% url 'AjouterDesMatiere'%}">👉 {% trans "Ajouter une matière" %}</a>
+        <a class="{% if current == 'CreeDesSpecialite' %}active{% endif %}" href="{% url 'CreeDesSpecialite'%}">👉 {% trans "Ajouter une Specialite" %}</a>
+        <a class="{% if current == 'CreeDesNiveau' %}active{% endif %}" href="{% url 'CreeDesNiveau'%}">👉 {% trans "Ajouter une Niveau" %}</a>
+        <a class="{% if current == 'batiments_page' %}active{% endif %}" href="{% url 'batiments_page'%}">👉 {% trans "Les Batiments" %} </a>
+        <a class="{% if current == 'salles_page' %}active{% endif %}" href="{% url 'salles_page'%}">👉 {% trans "Les salles des batiments" %} </a>
+        <a class="{% if current == 'emploi_list' %}active{% endif %}" href="{% url 'emploi_list'%}">📅 {% trans "Emplois du temps" %}</a>
+      </div>
+    {% else %}
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuParametre" aria-expanded="false">
+        ⚙️ {% trans "Réglages" %} <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuParametre">
+        <a href="{% url 'AjouterDesMatiere'%}">👉 {% trans "Ajouter une matière" %}</a>
+        <a href="{% url 'CreeDesSpecialite'%}">👉 {% trans "Ajouter une Specialite" %}</a>
+        <a href="{% url 'CreeDesNiveau'%}">👉 {% trans "Ajouter une Niveau" %}</a>
+        <a href="{% url 'batiments_page'%}">👉 {% trans "Les Batiments" %} </a>
+        <a href="{% url 'salles_page'%}">👉 {% trans "Les salles des batiments" %} </a>
+        <a class="{% if current == 'emploi_list' %}active{% endif %}" href="{% url 'emploi_list'%}">📅 {% trans "Emplois du temps" %}</a>
+
+      </div>
+    {% endif %}
+
+   
+       
+       <a class="{% if current == 'messagerie_home' %}active{% endif %}" href="{% url 'messagerie_home'%}">✉️{% trans  "Messagerie" %}</a>
+       
+    
+
+    <a class="{% if current == 'Les_Utlisateur' %}active{% endif %}" href="{% url 'Les_Utlisateur' %}">👥 {% trans "Utilisateurs" %}</a>
+
+    <a href="{% url 'deconnection'%}" class="text-danger">🚪 {% trans "Déconnexion" %}</a>
+  {% endif %}
+
+  {% else %}
+
+  <a class="{% if current == 'Acceuil' %}active{% endif %}" href="{% url 'Acceuil'%}">📊 Tableau de Bord</a>
+  <a href="{% url 'deconnection'%}" class="text-danger">🚪 Déconnexion</a>
+
+ {% endif %}
+  
+ </div>
+ 
+  
+<!-- <button class="toggle-btn" onclick="toggleSidebar()"><img id="btn_toggle" src="{% static 'img/Hamburger_icon.svg.png' %}" height="30" width="30" alt=""></button>
+  <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" height="40" width="40" alt=""><h4>  Ecomanage</h4>
+        </div>
+      {% if user.role == "eleve" %}
+
+
+    <a href="{% url 'Acceuil'%}"><img src="{% static 'img/dashboard.png'%}" height="20" width="20" alt=""> Tableau de Bord</a>
+    <a href="{% url 'les_eleves'%}"><img src="{% static 'img/education.png'%}" height="20" width="20" alt=""> Etidiants</a>
+    <a href=""><img src="{% static 'img/grade.png'%}" height="20" width="20" alt=""> Parametres</a>
+        {% endif %}
+       {% if user.role == "proffesseur" %}
+
+            <a href="{% url 'Acceuil'%}"><img src="{% static 'img/dashboard.png'%}" height="20" width="20" alt=""> Tableau de Bord</a>
+            <a href="#containerEleve"><img src="{% static 'img/education.png'%}" height="20" width="20" alt=""> Etidiants</a>
+            <a href="{% url 'ListeDesClasse'%}"><img src="{% static 'img/classroom.png'%}" height="20" width="20" alt=""> Classes</a>
+
+       {% endif %}
+      {% if user.role == "admin" %}
+
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menueClasse">Gestion des classes </button>
+      <div class="collapse submenue" id="menueClasse">
+          <a href="">Ajoute des classes</a>
+          <a href="">Details des classes</a>
+      </div>
+
+     <a href="{% url 'Acceuil'%}"><img src="{% static 'img/dashboard.png'%}" height="20" width="20" alt=""> Tableau de Bord</a>
+
+          <a href="{% url 'les_eleves'%}"><img src="{% static 'img/education.png'%}" height="20" width="20" alt=""> Gestion des Etidiants</a>
+    <a href="{% url 'ListeDesClasse'%}"><img src="{% static 'img/classroom.png'%}" height="20" width="20" alt=""> Gestion des Classes</a>
+    <a href="{% url 'Lesensiegnants' %}"><img src="{% static 'img/teacher.png'%}" height="20" width="20" alt=""> Profeseurs</a>
+    <a href="{% url 'listesdesmetier'%}"><img src="{% static 'img/grade.png'%}" height="20" width="20" alt=""> Matiere</a>
+    <a href="{% url 'ListeDesNotes' %}"><img src="{% static 'img/grade.png'%}" height="20" width="20" alt=""> Notes</a>
+    <a href="{% url 'ListeDesAbsences' %}"><img src="{% static 'img/absent.png'%}" height="20" width="20" alt=""> Absences</a>
+    <a href="{% url 'liste_de_paiment' %}"><img src="{% static 'img/plan.png'%}" height="20" width="20" alt=""> Paiments</a>
+    <a href="{% url 'inbox'%}"><img src="{% static 'img/mailing.png'%}" height="20" width="20" alt=""> Massagerie</a>
+    <a href="{% url 'Les_Utlisateur'%}"><img src="{% static 'img/profile.png'%}" height="20" width="20" alt=""> Utilisateurs</a>
+      {% endif %}
+
+
+    {% if user.is_authenticated %}
+
+    <hr>
+    <a href="{% url 'deconnection'%}"> <img src="{% static 'img/user-logout.png'%}" height="20" width="20" alt=""> Deconnecte</a>
+   {% endif %}
+
+  </div>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+
+
+<div class="main" id="main">
+   {% if user.is_authenticated %}
+    <div class="header" style="display:flex; justify-content:space-between;">
+      <p>Bienvenue, {{user.username}}</p>
+        <button id="ouvrirModal" class="bouton-ouvrir">
+        <i class="fa-solid fa-gear"></i> <img src="{% static 'img/setting.png'%}" height="30" width="30" alt="">
+       </button>
+        <div id="maModal" class="modal-overlay">
+
+        <div class="modal-content">
+
+            <span id="fermerModal" class="bouton-fermer">&times;</span>
+
+            <div class="modal-header">
+                <h2>Parametre</h2>
+            </div>
+
+            <div class="form-group">
+               <form action="{% url 'changer_annee'%}" method="POST">
+                    {% csrf_token %}
+                     <label style="font-size: small;" for="annee_scolaire_id">Changer l'annee</label>
+                     <select name="annee_scolaire_id" id="annee_scolaire_id" onchange="this.form.submit()">
+                        {% for annee in annees %}
+                          <option value="{{ annee.id }}" {% if annee.id == annee_active.id %} selected {% endif %}>
+                            {{ annee.nom }}
+                          </option>
+                        {% endfor %}
+                     </select>
+                     </form>
+            </div>
+            <br>
+
+            <div class="form-group">
+                <label style="font-size: small;" for="ajoute_annee">Ajouter une annee</label>
+                <a id="ajoute_annee" href="{% url 'AjouteAnnee'%}" style="background-color:#dbeafe;" class="btn">Ajouter une annee</a>
+            </div>
+
+        </div>
+
+    </div>
+
+        <aside>
+            <ul>
+                <li>Ajouter Annee </li>
+                <li>HELLO</li>
+                <li>
+                    <form action="{% url 'changer_annee'%}" method="POST">
+                    {% csrf_token %}
+
+                     <select name="annee_scolaire_id" onchange="this.form.submit()" class="form-select w-auto d-inline">
+                        <label for="annee_scolaire_id">Changer l'annee</label>
+                        {% for annee in annees %}
+                          <option value="{{ annee.id }}" {% if annee.id == annee_active.id %} selected {% endif %}>
+                            {{ annee.nom }}
+                          </option>
+                        {% endfor %}
+                     </select>
+                     </form>
+                </li>
+
+                <li>HelloHELLO</li>
+            </ul>
+        </aside>
+    </div>
+    {% if messages %}
+      <div class="container mt-3">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          {% endfor %}
+           </div>
+      </div>
+    {% endif %}
+   
+
+
+   <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Parametres</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+
+
+     <hr class="my-4">
+     <form action="{% url 'changer_annee'%}" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">Changer l'annee</label>
+          <input type="text" name="nom" class="form-control" placeholder="2025-2026">
+        </div>
+        <button type="submit" class="btn btn-success w-100">Ajouter</button>
+  </form>
+    </div>
+   </div>
+
+
+    {% endif %} -->
+   
+
+<div class="main-content">
+{% block main %}
+     <form action="{% url 'changer_annee'%}" method="POST">
+        {% csrf_token %}
+
+      <select name="annee_scolaire_id" onchange="this.form.submit()" class="form-select w-auto d-inline">
+        <label for="annee_scolaire_id">Changer l'annee</label>
+        {% for annee in annees %}
+          <option value="{{ annee.id }}" {% if annee.id == annee_active.id %} selected {% endif %}>
+            {{ annee.nom }}
+          </option>
+        {% endfor %}
+      </select>
+     </form>
+<form action="{% url 'changer_annee'%}" method="POST">
+        {% csrf_token %}
+
+      <select name="annee_scolaire_id" onchange="this.form.submit()" class="form-select w-auto d-inline">
+        <label for="annee_scolaire_id">Changer l'annee</label>
+        {% for annee in annees %}
+          <option value="{{ annee.id }}" {% if annee.id == annee_active.id %} selected {% endif %}>
+            {{ annee.nom }}
+          </option>
+        {% endfor %}
+      </select>
+  </form>
+{% endblock %}
+</div>
+  
+
+<!-- ✅ POPUP NOUVEAUX MESSAGES -->
+<div style="z-index: 10000;" class="modal fade" id="unreadPopupModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h6 class="modal-title">📩 Nouveaux messages</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="unreadPopupBody" class="small text-muted">
+          Chargement...
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a href="{% url 'messagerie_home' %}" class="btn btn-primary">
+          Ouvrir la messagerie
+        </a>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          Fermer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+     <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  // ===============================
+  // ✅ Sidebar mobile (SAFE)
+  // ===============================
+  const toggleSidebarBtn = document.getElementById("toggleSidebar");
+const closeSidebarBtn  = document.getElementById("closeSidebar");
+const sidebar          = document.getElementById("sidebarMenu");
+const overlay          = document.getElementById("sidebarOverlay");
+
+function openSidebar() {
+  if (!sidebar) return;
+  sidebar.classList.add("active");
+  sidebar.classList.remove("collapsed");
+  if (overlay) overlay.style.display = "block";
+}
+
+function closeSidebar() {
+  if (!sidebar) return;
+  sidebar.classList.remove("active");
+  sidebar.classList.add("collapsed");
+  if (overlay) overlay.style.display = "none";
+}
+
+// ✅ Au chargement : en mobile on cache par défaut
+function initSidebarState() {
+  if (!sidebar) return;
+  if (window.matchMedia("(max-width: 991.98px)").matches) {
+    sidebar.classList.add("collapsed");
+    sidebar.classList.remove("active");
+    if (overlay) overlay.style.display = "none";
+  } else {
+    // desktop: visible
+    sidebar.classList.remove("collapsed");
+    sidebar.classList.add("active");
+    if (overlay) overlay.style.display = "none";
+  }
+}
+
+if (toggleSidebarBtn) toggleSidebarBtn.addEventListener("click", () => {
+  if (!sidebar) return;
+  const isOpen = sidebar.classList.contains("active") && !sidebar.classList.contains("collapsed");
+  if (isOpen) closeSidebar();
+  else openSidebar();
+});
+
+if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
+if (overlay) overlay.addEventListener("click", closeSidebar);
+
+window.addEventListener("resize", initSidebarState);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeSidebar();
+});
+
+initSidebarState();
+
+
+  // ===============================
+  // ✅ Dropdown Notifications (AJAX)
+  // ===============================
+  const urlNotif = "{% url 'ajax_notifications' %}";
+
+  async function loadNotif(){
+    const badge = document.getElementById("notifBadge");
+    const box   = document.getElementById("notifList");
+
+    // si la page n'a pas la cloche => pas d'erreur
+    if(!badge || !box) return;
+
+    try{
+      const r = await fetch(urlNotif, {cache:"no-store"});
+      const d = await r.json();
+
+      if(!d.ok){
+        badge.textContent = "0";
+        box.innerHTML = `<li class="px-3 py-3 text-muted small">Aucune notification.</li>`;
+        return;
+      }
+
+      badge.textContent = d.count || 0;
+
+      if((d.items||[]).length === 0){
+        box.innerHTML = `<li class="px-3 py-3 text-muted small">Aucun nouveau message.</li>`;
+        return;
+      }
+
+      box.innerHTML = (d.items||[]).slice(0,4).map(n => `
+        <li>
+          <a class="dropdown-item py-2" href="${n.url}">
+            <div class="fw-semibold">${n.titre}</div>
+            <div class="small text-muted">${n.message}</div>
+          </a>
+        </li>
+      `).join("");
+
+    }catch(e){
+      badge.textContent = "0";
+      box.innerHTML = `<li class="px-3 py-3 text-danger small">Erreur de chargement.</li>`;
+    }
+  }
+
+  loadNotif();
+  setInterval(loadNotif, 20000);
+
+  // ===============================
+  // ✅ Popup auto (si nouveaux non lus)
+  // ===============================
+  const urlPopup = "{% url 'ajax_popup_unread' %}";
+  const sessionKey = "unread_popup_shown_v1";
+
+  async function runPopup(){
+    // si pas de modal sur la page => on ignore
+    const modalEl = document.getElementById("unreadPopupModal");
+    const bodyEl  = document.getElementById("unreadPopupBody");
+    if(!modalEl || !bodyEl) return;
+
+    if(sessionStorage.getItem(sessionKey) === "1") return;
+
+    try{
+      const r = await fetch(urlPopup, {cache:"no-store", credentials:"same-origin"});
+      const d = await r.json();
+
+      if(!d.ok || !d.count || d.count <= 0) return;
+
+      bodyEl.innerHTML = `
+        <div class="mb-2"><b>${d.count}</b> nouveau(x) message(s) non lu(s)</div>
+        ${(d.items||[]).slice(0,3).map(it => `
+          <div class="border rounded p-2 mb-2">
+            <div class="fw-semibold">${it.titre}</div>
+            <div class="small text-muted">${it.message}</div>
+          </div>
+        `).join("")}
+        <a class="btn btn-primary btn-sm w-100" href="{% url 'messagerie_home' %}">Lire maintenant</a>
+      `;
+
+      if (typeof bootstrap === "undefined") return;
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+      sessionStorage.setItem(sessionKey, "1");
+
+    }catch(e){
+      // silence
+    }
+  }
+
+  runPopup();
+
+});
+</script>
+
+
+
+
+
+   
+    <script src="{% static 'js/js/bootstrap.bundle.min.js'%}"></script>
+    <script src="{% static 'js/script.js'%}"></script>
+
+{% endwith %}
+
+</body>
+</html>

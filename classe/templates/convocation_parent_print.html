@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Convocation de parent" %}{% endblock %}
+
+{% block main %}
+
+  <style>
+    @page{ size:A4; margin:12mm; }
+    body{ background:#fff; color:#111; }
+    .doc{
+      border:1px solid #d9d9d9;
+      border-radius:10px;
+      padding:24px;
+      max-width:210mm;
+      margin:0 auto;
+    }
+    .grid-top{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      gap:12px;
+      align-items:start;
+    }
+    .leftblock{ font-size:13px; }
+    .leftblock strong{ font-weight:800; }
+    .arabic{ direction:rtl; text-align:right; font-size:13px; font-weight:600; }
+    .logo-mid img{ max-height:70px; max-width:90px; object-fit:contain; }
+    .hr{ height:1px; background:#d9d9d9; margin:14px 0; }
+    .school{ font-size:13px; }
+    .title{ font-weight:900; text-transform:uppercase; text-align:center; margin:14px 0 10px; }
+    .small{ font-size:13px; }
+    .tbl th, .tbl td{ font-size:13px; }
+  </style>
+
+
+<div onload="window.print()" class="doc">
+
+  <div class="grid-top">
+    <div class="leftblock">
+      <strong>REPUBLIQUE DE DJIBOUTI</strong><br>
+      Unité - Egalité - Paix<br><br>
+      <!-- <strong>{% trans "MINISTERE DE L’ÉDUCATION" %}</strong><br>
+      {% trans "NATIONALE ET DE LA" %}<br>
+      {% trans "FORMATION" %}<br>
+      {% trans "PROFESSIONNELLE" %} -->
+    </div>
+
+    <div class="logo-mid" style="display:flex; justify-content:center;">
+      {% if ecole and ecole.logo %}
+        <img src="{{ ecole.logo.url }}" alt="{% trans 'Logo' %}">
+      {% else %}
+        <img src="{% static 'img/logo-ecole.png' %}" alt="{% trans 'Logo' %}">
+      {% endif %}
+    </div>
+
+    <div class="arabic">
+      جمهورية جيبوتي وحدة – مساواة – سالم<br>
+      وزارة التربية الوطنية والتكوين المهني
+    </div>
+  </div>
+
+  <div class="hr"></div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div class="school">
+      <div><strong>{% if ecole and ecole.type_etablissement %}{{ ecole.type_etablissement }}{% endif %}</strong></div>
+      <div><strong>{% if ecole %}{{ ecole.nom }}{% endif %}</strong></div>
+      <div>{% trans "Téléphone:" %} {% if ecole and ecole.telephone %}{{ ecole.telephone }}{% else %}21{% endif %}</div>
+      <div>{% trans "E-mail:" %} {% if ecole and ecole.email %}{{ ecole.email }}{% else %}—{% endif %}</div>
+    </div>
+    <div class="school" style="text-align:right;">
+      <div><strong>{% trans "Le" %} {{ date_|default:today|date:"d-m-Y" }}</strong></div>
+    </div>
+  </div>
+
+  <div class="title">{% trans "Convocation des parents" %}</div>
+
+  <div class="small" style="margin-top:10px;">
+    <strong>{% trans "Chers parents," %}</strong><br>
+    {% trans "Vous êtes priés de vous présenter le:" %} <strong>{{ date_ }}</strong> {% trans "à:" %} <strong>{{ time_ }}</strong>
+    {% trans "au bureau du Chef d'établissement" %}<br>
+    {% trans "pour une affaire concernant votre enfant" %} <strong>{{ eleve_name }}</strong>
+    {% trans "de la classe de" %} <strong>{{ classe_label }}</strong>
+  </div>
+
+  <div class="small" style="margin-top:14px;">
+    <strong>{% trans "Motif (sélectionnez le motif approprié)" %}</strong>
+  </div>
+
+  <table class="table table-bordered tbl mt-2">
+    <thead>
+      <tr>
+        <th style="width:70px;">{% trans "No" %}</th>
+        <th>{% trans "Raison" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in raisons %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ r.libelle }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">—</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="margin-top:18px;">
+    <strong>{% trans "Chef d'établissement" %}</strong><br>
+    M: <strong>{{ responsable|default:chef_name }}</strong>
+  </div>
+
+  <div style="margin-top:14px;">
+    <strong>{% trans "Fait à Djibouti, le" %}</strong> {{ date_|default:today|date:"d-m-Y" }}
+  </div>
+
+</div>
+
+<script>
+  window.print();
+</script>
+
+{% endblock %}

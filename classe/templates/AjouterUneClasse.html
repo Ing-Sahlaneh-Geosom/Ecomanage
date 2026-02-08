@@ -1,0 +1,88 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block title %} Ajouter Une classe {% endblock %}
+{% block main %}
+
+<div class="containaire">
+    <h2>{{ Title }} </h2>
+    {% if form.errors %}
+        <div class="error-messages bg-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+<form method="post" id="classeForm">
+  {% csrf_token %}
+
+  <div class="row g-3">
+
+    <div class="col-md-6">
+      <label class="form-label">Niveau <span class="text-danger">*</span></label>
+      {{ form.niveau }}
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Classe avec spécialité ? <span class="text-danger">*</span></label>
+      {{ form.a_specialite }}
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Nom de la classe <span class="text-danger">*</span></label>
+      {{ form.nom }}
+    </div>
+     <!-- <div class="col-md-6">
+      <label class="form-label">Ecole <span class="text-danger">*</span></label>
+      {{ form.ecole }}
+    </div> -->
+    <div class="col-md-6">
+      <label class="form-label">Status <span class="text-danger">*</span></label>
+      {{ form.actif }}
+    </div>
+    <!-- Spécialité (cachée par défaut) -->
+    
+   
+    <div class="col-md-6" id="specialite-field">
+      <label class="form-label">Spécialité <span class="text-danger">*</span></label>
+      {{ form.specialite }}
+    </div>
+
+    <div class="col-md-12 d-flex justify-content-end gap-2 mt-3">
+      <a class="btn btn-success" href="{% url 'ListeDesClasse'%}">Retour</a>
+      <button type="submit" class="btn btn-dark">
+        Enregistre
+      </button>
+    </div>
+
+  </div>
+</form>
+
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleSpecialite = document.getElementById('id_a_specialite');
+    const specialiteField = document.getElementById('specialite-field');
+
+    function updateSpecialite() {
+        if (toggleSpecialite.checked) {
+            specialiteField.style.display = 'block';
+        } else {
+            specialiteField.style.display = 'none';
+            document.getElementById('id_specialite').value = '';
+        }
+    }
+
+    updateSpecialite();
+    toggleSpecialite.addEventListener('change', updateSpecialite);
+});
+</script>
+
+{% endblock %}
+
+

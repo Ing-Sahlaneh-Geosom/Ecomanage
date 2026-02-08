@@ -1,0 +1,69 @@
+{% extends 'base.html'%}
+{% block title %} Detaille de Proffesseur {% endblock %}
+{% block main %}
+
+<div class="container py-3 py-md-4 ">
+
+    <!-- Header (responsive) -->
+    <div class="bg-opacity-10 border rounded-3 p-3 p-md-4 shadow-sm">
+      <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center justify-content-between">
+        <small class="text-secondary">Envoyer une notification</small>
+
+        <button class="btn btn-brand text-white fw-semibold align-self-start align-self-sm-auto px-3">
+          <span class="me-1">+</span> Envoyer
+        </button>
+      </div>
+
+      <hr class="my-3">
+
+      <!-- Card notification -->
+      <div class="row g-3">
+        <!-- Sur mobile: 12 (plein écran), tablette: 6, desktop: 4 -->
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 shadow-sm">
+            <!-- Header vert clair -->
+            <div class="card-header bg-success bg-opacity-10 border-0">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="fw-bold text-uppercase small text-dark">
+                  Un Deux
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <p class="text-secondary text-small text-center mb-0">
+                Vous étiez absent le 24/12/2024 de 14h30-16h30
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exemple si tu veux une 2ème carte (optionnel)
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success bg-opacity-10 border-0">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="fw-bold text-uppercase small text-dark">
+                  NOM PRENOM
+                </div>
+                <span class="badge rounded-pill text-success bg-white border border-success border-opacity-25 px-3 py-2">
+                  12
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-secondary small text-center mb-0">
+                Votre message ici...
+              </p>
+            </div>
+          </div>
+        </div>
+        -->
+
+      </div>
+    </div>
+  </div>
+
+
+
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %} confirm delete emploi {% endblock %}
+{% block main %}
+<div class="container mt-5" style="max-width:720px;">
+  <div class="card card-body">
+    <h5 class="mb-3 text-danger">Confirmer la suppression</h5>
+    <p>
+      Supprimer ce créneau : <b>{{ obj.classe }}</b> - <b>{{ obj.jour }}</b>
+      ({{ obj.heure_debut|time:"H:i" }} - {{ obj.heure_fin|time:"H:i" }}) ?
+    </p>
+
+    <form method="post" class="d-flex gap-2 justify-content-end">
+      {% csrf_token %}
+      <a class="btn btn-outline-secondary" href="{% url 'emploi_list' %}">Annuler</a>
+      <button class="btn btn-danger" type="submit">Supprimer</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Paiement des frais{% endblock %}
+
+{% block main %}
+<div class="container-fluid px-4 py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold m-0">PAIEMENT DES FRAIS DE SCOLARITÉ</h6>
+    <div class="text-muted small">Finance/Gestionnaire &nbsp;›&nbsp; Paiement des frais de scolarité</div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">Paiement des frais de scolarité</div>
+    <div class="card-body">
+
+      <!-- FILTRE -->
+      <form method="GET" class="row g-3 align-items-end mb-3">
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Année scolaire <span class="text-danger">*</span></label>
+          <select class="form-select" name="annee" required>
+            <option value="">Sélectionner...</option>
+            {% for a in annees %}
+              <option value="{{ a.id }}" {% if annee_id|stringformat:"s" == a.id|stringformat:"s" %}selected{% endif %}>
+                {{ a }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Niveau <span class="text-danger">*</span></label>
+          <select class="form-select" name="niveau" required>
+            <option value="">Sélectionner...</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}" {% if niveau_id|stringformat:"s" == n.id|stringformat:"s" %}selected{% endif %}>
+                {{ n.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Type frais <span class="text-danger">*</span></label>
+          <select class="form-select" name="type" required>
+            <option value="">Sélectionner...</option>
+            {% for t in types %}
+              <option value="{{ t.id }}" {% if type_id|stringformat:"s" == t.id|stringformat:"s" %}selected{% endif %}>
+                {{ t.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+          <button class="btn btn-success fw-bold">⏷ Filtre</button>
+        </div>
+      </form>
+
+      <!-- BOUTONS (NE DOIVENT PAS S'IMPRIMER) -->
+<div class="d-flex justify-content-end gap-2 mb-2 no-print">
+  <a class="btn btn-success"
+     href="{% url 'paiement_frais_export' %}?annee={{ annee_id }}&niveau={{ niveau_id }}&type={{ type_id }}"
+     {% if not annee_id or not niveau_id or not type_id %}style="pointer-events:none;opacity:.5"{% endif %}>
+    ⬇ Excel
+  </a>
+  <button class="btn btn-primary" type="button" onclick="window.print()">🖨 Imprimer</button>
+</div>
+
+<div class="d-flex justify-content-end mb-2 no-print">
+  <input class="form-control" style="max-width:220px;" id="searchInput" placeholder="Rechercher ici">
+</div>
+
+<!-- ✅ SEULE CETTE ZONE SERA IMPRIMÉE -->
+<div id="printArea">
+  <div class="mb-3 text-center">
+    <h5 class="fw-bold m-0">FICHE DE PAIEMENT</h5>
+
+    <div class="mt-1">
+      <span class="fw-semibold">Année scolaire :</span>
+      {{ annee_obj }}
+
+      &nbsp;|&nbsp;
+
+      <span class="fw-semibold">Niveau :</span>
+      {{ niveau_obj }}
+
+      &nbsp;|&nbsp;
+
+      <span class="fw-semibold">Type de frais :</span>
+      {{ type_obj }}
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table align-middle" id="payTable">
+      <thead class="table-light">
+        <tr>
+          <th>Élève</th>
+          <th>Niveau</th>
+          <th>Type frais</th>
+          <th>Mode de paiement</th>
+          <th>Frais facturés</th>
+          <th>Frais payés</th>
+          <th>Frais restants</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td class="fw-semibold">{{ r.eleve }}</td>
+            <td>{{ r.niveau }}</td>
+            <td>{{ r.type }}</td>
+            <td>{{ r.mode }}</td>
+            <td>{{ r.facture }} {{ r.devise }}</td>
+            <td>{{ r.paye }} {{ r.devise }}</td>
+            <td class="{% if r.restant|floatformat:2 == '0.00' %}text-success fw-bold{% else %}text-danger fw-bold{% endif %}">
+              {{ r.restant }} {{ r.devise }}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+              Aucun enregistrement à afficher
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .no-print { display: block; }
+
+  @media print {
+    /* cacher tout */
+    body * {
+      visibility: hidden !important;
+    }
+
+    /* afficher seulement printArea */
+    #printArea, #printArea * {
+      visibility: visible !important;
+    }
+
+    /* placer en haut à gauche */
+    #printArea {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+
+    /* cacher les éléments no-print */
+    .no-print {
+      display: none !important;
+    }
+
+    /* améliorer table à l’impression */
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    thead { display: table-header-group; }
+  }
+</style>
+
+
+<script>
+  const input = document.getElementById("searchInput");
+  const table = document.getElementById("payTable");
+  input.addEventListener("keyup", function(){
+    const q = input.value.toLowerCase();
+    [...table.tBodies[0].rows].forEach(row => {
+      row.style.display = row.innerText.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+</script>
+{% endblock %}

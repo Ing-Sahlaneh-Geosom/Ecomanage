@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block main %}
+<div class="container py-3">
+  <h5 class="mb-3">CONFIGURATION DES APPRÉCIATIONS</h5>
+  {% include "_tabs.html" %}
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Configuration de moyen</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Ajouter</button>
+      </div>
+
+      <div class="d-flex justify-content-end mb-3">
+        <form method="get" class="d-flex" style="max-width:320px;">
+          <input class="form-control" name="q" value="{{ q }}" placeholder="Rechercher ici">
+        </form>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Niveau</th>
+              <th>Moyen de</th>
+              <th>Moyen à</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in items %}
+              <tr>
+                <td>{{ it.niveau.nom }}</td>
+                <td>{{ it.moyenne_de }}</td>
+                <td>{{ it.moyenne_a }}</td>
+                <td>{{ it.get_status_display }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ it.id }}">✏️</button>
+                  <form method="post" action="{% url 'moyenne_delete' it.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ?')">🗑️</button>
+                  </form>
+                </td>
+              </tr>
+
+              <div class="modal fade" id="editModal{{ it.id }}" tabindex="-1">
+                <div style="z-index: 1000;" class="modal-dialog modal-lg modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Modifier une configuration de moyen</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="post" action="{% url 'moyenne_update' it.id %}">
+                      {% csrf_token %}
+                      <div class="modal-body">
+                        <div class="mb-3">
+                          <label class="form-label">Niveau*</label>
+                          <select name="niveau" class="form-select" required>
+                            {% for n in form.fields.niveau.queryset %}
+                              <option value="{{ n.id }}" {% if n.id == it.niveau.id %}selected{% endif %}>{{ n.nom }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        <div class="row g-3">
+                          <div class="col-md-4">
+                            <label class="form-label">Moyen de*</label>
+                            <input class="form-control" type="number" step="0.01" name="moyenne_de" value="{{ it.moyenne_de }}">
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Moyen à*</label>
+                            <input class="form-control" type="number" step="0.01" name="moyenne_a" value="{{ it.moyenne_a }}">
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Status*</label>
+                            <select name="status" class="form-select" required>
+                              {% for val, lab in it.STATUS_CHOICES %}
+                                <option value="{{ val }}" {% if val == it.status %}selected{% endif %}>{{ lab }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                        <div class="form-check mt-3">
+                          <input class="form-check-input" type="checkbox" name="actif" {% if it.actif %}checked{% endif %}>
+                          <label class="form-check-label">Actif</label>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button class="btn btn-light" type="button" data-bs-dismiss="modal">Fermer</button>
+                        <button class="btn btn-dark" type="submit">Sauvegarder</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+            {% empty %}
+              <tr><td colspan="5" class="text-muted">Aucun élément.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ajouter une configuration de moyen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'moyenne_create' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Niveau*</label>{{ form.niveau }}</div>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Moyen de*</label>{{ form.moyenne_de }}</div>
+            <div class="col-md-4"><label class="form-label">Moyen à*</label>{{ form.moyenne_a }}</div>
+            <div class="col-md-4"><label class="form-label">Status*</label>{{ form.status }}</div>
+          </div>
+          <div class="form-check mt-3">{{ form.actif }} <label class="form-check-label">Actif</label></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-light" type="button" data-bs-dismiss="modal">Fermer</button>
+          <button class="btn btn-dark" type="submit">Sauvegarder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

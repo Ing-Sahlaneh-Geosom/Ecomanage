@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Ajouter un eleve {% endblock %}
+{% block main %}
+
+
+<div class="container mt-4">
+  <h4>✉️ Nouveau message</h4>
+  <form method="post" class="form">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label>Destinataire</label>
+      {{ form.receiver }}
+    </div>
+    <div class="mb-3">
+      <label>Sujet</label>
+      {{ form.sujet }}
+    </div>
+    <div class="mb-3">
+      <label>Contenu</label>
+      {{ form.contenu }}
+    </div>
+    <button class="btn btn-success">Envoyer</button>
+  </form>
+</div>
+
+<!-- <div class="containaire">
+    <h2>{{Title}} </h2>
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+         <div>
+              <label for="titre">Titre :</label>
+             {{ form.titre }}
+          </div>
+         <div>
+            <label for="contenu">Contenu :</label>
+             {{ form.contenu }}
+          </div>
+          <div>
+            <label for="destinateur">Destinataire :</label>
+              {{ form.destinateur }}
+          </div>
+
+          <div>
+            <label for="lu">Lu :</label>
+            {{ form.lu }}
+          </div>
+
+        <div class="full-width">
+            <button type="submit" class="submit-btn">{{submit_text}}</button>
+        </div>
+
+    </form>
+    </div> -->
+{% endblock %}

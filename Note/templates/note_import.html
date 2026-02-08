@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+{% if result %}
+  <div class="alert alert-info">
+    <b>Résultat import :</b>
+    {{ result.ok }} OK / {{ result.ko }} erreurs — lignes lues: {{ result.rows }}
+    {% if result.errors and result.errors|length > 0 %}
+      <hr>
+      <b>Exemples erreurs :</b>
+      <ul class="mb-0">
+        {% for e in result.errors %}
+          <li>{{ e }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+{% endif %}
+
+
+<h4 class="mb-3">Importation des notes (CSV)</h4>
+<div class="alert alert-info">
+  <b>Règles importantes :</b>
+  <ul class="mb-0">
+    <li>Ne modifie pas les noms des colonnes</li>
+    <li>Une ligne = une note pour un élève</li>
+    <li>L’identifiant doit exister dans le système</li>
+    <li>La note peut être 15 ou 15.5</li>
+  </ul>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <p class="text-muted mb-2">Format CSV: <code>identifiant,note,coefficient</code></p>
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'note_import_template_csv' %}">Télécharger modèle CSV</a>
+
+        <form class="mt-3" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <label class="form-label">Devoir</label>
+          <select class="form-select" name="devoir_id" required>
+            <option value="">-- choisir --</option>
+            {% for d in devoirs %}
+              <option value="{{ d.id }}">{{ d.nom }} — {{ d.matiere.nom }} — {{ d.periode.nom }}</option>
+            {% endfor %}
+          </select>
+
+          <label class="form-label mt-3">Fichier CSV</label>
+          <input
+            type="file"
+            name="fichier"
+            class="form-control"
+            accept=".csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+          />
+
+          <button class="btn btn-primary mt-3 w-100">Importer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

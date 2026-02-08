@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">Devoirs</h4>
+  <a class="btn btn-primary" href="{% url 'devoir_create' %}">+ Créer</a>
+</div>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-6">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Rechercher...">
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-outline-secondary w-100">Filtrer</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-body">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Période</th>
+          <th>Matière</th>
+          <th>Prof</th>
+          <th>Coef</th>
+          <th class="text-end"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in devoirs %}
+        <tr>
+          <td>{{ d.nom }}</td>
+          <td>{{ d.periode.nom }}</td>
+          <td>{{ d.matiere.nom }}</td>
+          <td>{{ d.professeur.nom_conplet }}</td>
+          <td>{{ d.coefficient }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'devoir_detail' d.id %}">Détails</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted">Aucun devoir</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

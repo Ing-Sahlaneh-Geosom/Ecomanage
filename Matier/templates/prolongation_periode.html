@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+<h4 class="mb-3">Prolongation des périodes</h4>
+
+<form method="get" class="row g-3 align-items-end mb-3">
+  <div class="col-md-4">
+    <label class="form-label">Année scolaire *</label>
+    <select class="form-select" name="annee" required>
+      {% for a in annees %}
+        <option value="{{ a.id }}" {% if a.id == annee.id %}selected{% endif %}>{{ a.nom }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <button class="btn btn-success w-100">Filtrer</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr>
+            <th>Période</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Fin effective</th>
+            <th>Active</th>
+            <th>Prolonger (jours)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td>{{ r.p.nom }}</td>
+            <td>{{ r.p.debut|date:"d/m/Y" }}</td>
+            <td>{{ r.p.fin|date:"d/m/Y" }}</td>
+            <td>{{ r.p.fin_effective|date:"d/m/Y" }}</td>
+
+            <td>
+              {% if r.closed %}
+                <span class="badge bg-danger">Clôturée</span>
+              {% elif r.expired %}
+                <span class="badge bg-secondary">Terminée</span>
+              {% elif r.p.est_active %}
+                <span class="badge bg-success">Oui</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">Non</span>
+              {% endif %}
+            </td>
+
+            <td style="width:180px;">
+              <form method="post" action="{% url 'prolongation_periode_update' r.p.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="annee_id" value="{{ annee.id }}">
+                <input class="form-control" type="number" min="0" name="prolongation_jours"
+                       value="{{ r.p.prolongation_jours }}"
+                       {% if r.closed %}disabled{% endif %}>
+            </td>
+
+            <td class="text-end">
+                <button class="btn btn-dark btn-sm" {% if r.closed %}disabled{% endif %}>Sauvegarder</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+            <tr><td colspan="7" class="text-center text-muted">Aucune période</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <small class="text-muted">
+      Règles: période clôturée ou fin dépassée (fin effective) => désactivée automatiquement et inutilisable pour devoir/saisie.
+      Les périodes restent visibles dans les filtres bulletin.
+    </small>
+  </div>
+</div>
+
+{% endblock %}

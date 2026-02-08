@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+{% block title %} Ajoute emploi {% endblock %}
+{% block main %}
+
+
+<style>
+  .slot-btn { border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; background:#fff; cursor:pointer; }
+  .slot-btn:hover{ background:#f1f5f9; }
+  .slot-btn.active{ border-color:#2563eb; background:#dbeafe; }
+  .box { border:1px solid rgba(0,0,0,.08); border-radius:14px; }
+  .muted{ color:#64748b; font-size:.9rem; }
+</style>
+
+<div class="container mt-4" style="max-width:1100px;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="mb-1">
+        {% if mode == "create" %}Ajouter un créneau (AUTO){% else %}Modifier un créneau (AUTO){% endif %}
+      </h4>
+      <div class="muted">Année: {{ annee_active.nom }}</div>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'emploi_list' %}">Retour</a>
+  </div>
+
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      <b>Erreur :</b> {{ form.non_field_errors }}
+      <div class="small">{{ form.errors }}</div>
+    </div>
+  {% endif %}
+
+  <form method="post" id="autoForm" class="card card-body shadow-sm">
+    {% csrf_token %}
+
+    <!-- hidden times -->
+    <input type="hidden" name="heure_debut" id="heureDebut" value="{% if obj %}{{ obj.heure_debut|time:'H:i' }}{% endif %}">
+    <input type="hidden" name="heure_fin" id="heureFin" value="{% if obj %}{{ obj.heure_fin|time:'H:i' }}{% endif %}">
+
+    <div class="row g-3">
+
+      <div class="col-md-4">
+        <label class="form-label">Niveau</label>
+        <select class="form-select" id="niveauSelect">
+          <option value="">-- Choisir --</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Classe <span class="text-danger">*</span></label>
+        <select class="form-select" name="classe" id="classeSelect" required disabled>
+          <option value="">-- Choisir --</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Jour <span class="text-danger">*</span></label>
+        <select class="form-select" name="jour" id="jourSelect" required>
+          <option value="">-- Choisir --</option>
+          <option>Samedi</option>
+          <option>Dimanche</option>
+          <option>Lundi</option>
+          <option>Mardi</option>
+          <option>Mercredi</option>
+          <option>Jeudi</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Période</label>
+        <select class="form-select" id="periodSelect">
+          <option value="morning" selected>Matin ({{ morning_start }} - {{ morning_end }})</option>
+          <option value="afternoon">Après-midi ({{ after_start }} - {{ after_end }})</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Durée</label>
+        <select class="form-select" id="durationSelect">
+          <option value="60">1h</option>
+          <option value="120">2h</option>
+          <option value="180">3h</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Créneau choisi</label>
+        <div class="form-control" id="chosenSlot" style="background:#0b1220; color:#fff;">Aucun</div>
+      </div>
+
+      <div class="col-12">
+        <div class="box p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold">Créneaux disponibles</div>
+              <div class="muted" id="periodLabel">Choisis classe + jour…</div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" type="button" id="btnReloadSlots">Rafraîchir</button>
+          </div>
+
+          <div id="slotsWrap" class="mt-3 d-flex flex-wrap gap-2">
+            <span class="muted">Choisis niveau + classe + jour…</span>
+          </div>
+
+          <div class="mt-3">
+            <div class="muted">Heures occupées (classe) :</div>
+            <div id="busyWrap" class="muted"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Salle libre <span class="text-danger">*</span></label>
+        <select class="form-select" name="salle" id="salleSelect" required disabled>
+          <option value="">-- Choisir un créneau d’abord --</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Prof libre (de cette classe) <span class="text-danger">*</span></label>
+        <select class="form-select" name="professeur" id="profSelect" required disabled>
+          <option value="">-- Choisir un créneau d’abord --</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Matière (du prof) <span class="text-danger">*</span></label>
+        <select class="form-select" name="matiere" id="matiereSelect" required disabled>
+          <option value="">-- Choisir un prof d’abord --</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <a class="btn btn-outline-secondary" href="{% url 'emploi_list' %}">Annuler</a>
+      <button class="btn btn-primary" type="submit" id="btnSave" disabled>Enregistrer</button>
+    </div>
+  </form>
+</div>
+
+<script>
+const URL_NIVEAUX = "{% url 'api_niveaux' %}";
+const URL_CLASSES = "{% url 'api_classes' %}";
+const URL_SLOTS   = "{% url 'api_slots' %}";
+const URL_RES     = "{% url 'api_resources_free' %}";
+const URL_MATS    = "{% url 'api_matieres_by_prof' %}";
+
+const els = {
+  niveau: document.getElementById("niveauSelect"),
+  classe: document.getElementById("classeSelect"),
+  jour: document.getElementById("jourSelect"),
+  period: document.getElementById("periodSelect"),
+  duration: document.getElementById("durationSelect"),
+  slotsWrap: document.getElementById("slotsWrap"),
+  busyWrap: document.getElementById("busyWrap"),
+  periodLabel: document.getElementById("periodLabel"),
+  chosen: document.getElementById("chosenSlot"),
+  hd: document.getElementById("heureDebut"),
+  hf: document.getElementById("heureFin"),
+  salle: document.getElementById("salleSelect"),
+  prof: document.getElementById("profSelect"),
+  mat: document.getElementById("matiereSelect"),
+  btnReload: document.getElementById("btnReloadSlots"),
+  btnSave: document.getElementById("btnSave"),
+};
+
+function opt(value, label){ const o=document.createElement("option"); o.value=value; o.textContent=label; return o; }
+function resetSelect(sel, placeholder){ sel.innerHTML=""; sel.appendChild(opt("", placeholder)); }
+function setDisabled(sel, yes){ sel.disabled = !!yes; }
+
+function clearResources(){
+  resetSelect(els.salle, "-- Choisir un créneau d’abord --");
+  resetSelect(els.prof, "-- Choisir un créneau d’abord --");
+  resetSelect(els.mat, "-- Choisir un prof d’abord --");
+  setDisabled(els.salle, true);
+  setDisabled(els.prof, true);
+  setDisabled(els.mat, true);
+  els.btnSave.disabled = true;
+}
+
+function validateReady(){
+  const ok = !!(
+    els.classe.value &&
+    els.jour.value &&
+    els.hd.value && els.hf.value &&
+    els.salle.value &&
+    els.prof.value &&
+    els.mat.value
+  );
+  els.btnSave.disabled = !ok;
+}
+
+async function loadNiveaux(){
+  const res = await fetch(URL_NIVEAUX, {headers:{Accept:"application/json"}});
+  const data = await res.json();
+  data.items.forEach(n => els.niveau.appendChild(opt(n.id, n.nom)));
+}
+
+async function loadClasses(niveauId){
+  setDisabled(els.classe, true);
+  resetSelect(els.classe, "-- Choisir --");
+  if(!niveauId) return;
+
+  const res = await fetch(`${URL_CLASSES}?niveau_id=${encodeURIComponent(niveauId)}`, {headers:{Accept:"application/json"}});
+  const data = await res.json();
+  data.items.forEach(c => els.classe.appendChild(opt(c.id, c.nom)));
+  setDisabled(els.classe, false);
+
+  {% if obj %}
+  els.classe.value = "{{ obj.classe_id }}";
+  {% endif %}
+}
+
+function setChosenSlot(start, end){
+  els.hd.value = start;
+  els.hf.value = end;
+  els.chosen.textContent = `${start} - ${end}`;
+}
+
+async function loadSlots(){
+  clearResources();
+  els.slotsWrap.innerHTML = `<span class="text-muted">Chargement...</span>`;
+  els.busyWrap.textContent = "";
+  els.periodLabel.textContent = "";
+
+  const classeId = els.classe.value;
+  const jour = els.jour.value;
+  const duration = els.duration.value;
+  const period = els.period.value;
+
+  if(!classeId || !jour){
+    els.slotsWrap.innerHTML = `<span class="text-muted">Choisis classe + jour.</span>`;
+    return;
+  }
+
+  const url = `${URL_SLOTS}?classe_id=${encodeURIComponent(classeId)}`
+    + `&jour=${encodeURIComponent(jour)}`
+    + `&duration=${encodeURIComponent(duration)}`
+    + `&period=${encodeURIComponent(period)}`;
+
+  const res = await fetch(url, {headers:{Accept:"application/json"}});
+  const data = await res.json();
+
+  if(!data.ok){
+    els.slotsWrap.innerHTML = `<span class="text-danger">${data.error || "Erreur"}</span>`;
+    return;
+  }
+
+  els.periodLabel.textContent = data.period_label || "";
+
+  els.busyWrap.textContent = data.busy.length
+    ? data.busy.map(x => `${x.start}-${x.end}`).join(" • ")
+    : "Aucun";
+
+  if(!data.items.length){
+    els.slotsWrap.innerHTML = `<span class="text-danger">Aucun créneau disponible.</span>`;
+    return;
+  }
+
+  els.slotsWrap.innerHTML = "";
+  data.items.forEach((s) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "slot-btn";
+    b.dataset.start = s.start;
+    b.dataset.end = s.end;
+    b.textContent = s.label;
+    els.slotsWrap.appendChild(b);
+  });
+}
+
+async function loadResourcesForSlot(jour, start, end){
+  clearResources();
+
+  const classeId = els.classe.value;
+  const url = `${URL_RES}?jour=${encodeURIComponent(jour)}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&classe_id=${encodeURIComponent(classeId)}`;
+
+  const res = await fetch(url, {headers:{Accept:"application/json"}});
+  const data = await res.json();
+
+  if(!data.ok){
+    alert(data.error || "Erreur ressources");
+    return;
+  }
+
+  // salles libres
+  resetSelect(els.salle, "-- Choisir --");
+  data.salles.forEach(s => els.salle.appendChild(opt(s.id, s.label)));
+  setDisabled(els.salle, false);
+  if(data.salles.length === 1) els.salle.value = String(data.salles[0].id);
+
+  // profs libres (déjà filtrés par classe)
+  resetSelect(els.prof, "-- Choisir --");
+  data.profs.forEach(p => els.prof.appendChild(opt(p.id, p.label)));
+  setDisabled(els.prof, false);
+  if(data.profs.length === 1) els.prof.value = String(data.profs[0].id);
+
+  // matières (du prof)
+  await loadMatieresForProf();
+
+  validateReady();
+}
+
+async function loadMatieresForProf(){
+  resetSelect(els.mat, "-- Choisir --");
+  setDisabled(els.mat, true);
+
+  const profId = els.prof.value;
+  const classeId = els.classe.value;
+  if(!profId || !classeId){
+    resetSelect(els.mat, "-- Choisir un prof d’abord --");
+    setDisabled(els.mat, true);
+    validateReady();
+    return;
+  }
+
+  const url = `${URL_MATS}?professeur_id=${encodeURIComponent(profId)}&classe_id=${encodeURIComponent(classeId)}`;
+  const res = await fetch(url, {headers:{Accept:"application/json"}});
+  const data = await res.json();
+
+  if(!data.ok || !data.items.length){
+    resetSelect(els.mat, "-- Aucune matière --");
+    setDisabled(els.mat, true);
+    validateReady();
+    return;
+  }
+
+  data.items.forEach(m => els.mat.appendChild(opt(m.id, m.nom)));
+  setDisabled(els.mat, false);
+
+  if(data.items.length === 1) els.mat.value = String(data.items[0].id);
+  validateReady();
+}
+
+els.niveau.addEventListener("change", () => {
+  els.hd.value=""; els.hf.value="";
+  els.chosen.textContent="Aucun";
+  clearResources();
+  loadClasses(els.niveau.value);
+});
+
+["change"].forEach(evt => {
+  els.classe.addEventListener(evt, () => {
+    els.hd.value=""; els.hf.value="";
+    els.chosen.textContent="Aucun";
+    loadSlots();
+  });
+  els.jour.addEventListener(evt, () => {
+    els.hd.value=""; els.hf.value="";
+    els.chosen.textContent="Aucun";
+    loadSlots();
+  });
+  els.period.addEventListener(evt, () => {
+    els.hd.value=""; els.hf.value="";
+    els.chosen.textContent="Aucun";
+    loadSlots();
+  });
+  els.duration.addEventListener(evt, () => {
+    els.hd.value=""; els.hf.value="";
+    els.chosen.textContent="Aucun";
+    loadSlots();
+  });
+});
+
+els.btnReload.addEventListener("click", loadSlots);
+
+els.slotsWrap.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button.slot-btn");
+  if(!btn) return;
+
+  [...els.slotsWrap.querySelectorAll(".slot-btn")].forEach(x => x.classList.remove("active"));
+  btn.classList.add("active");
+
+  const start = btn.dataset.start;
+  const end = btn.dataset.end;
+
+  setChosenSlot(start, end);
+  await loadResourcesForSlot(els.jour.value, start, end);
+});
+
+els.prof.addEventListener("change", loadMatieresForProf);
+els.salle.addEventListener("change", validateReady);
+els.mat.addEventListener("change", validateReady);
+
+// init
+(async function(){
+  await loadNiveaux();
+
+  {% if obj %}
+    els.jour.value = "{{ obj.jour }}";
+    els.hd.value = "{{ obj.heure_debut|time:'H:i' }}";
+    els.hf.value = "{{ obj.heure_fin|time:'H:i' }}";
+    els.chosen.textContent = `${els.hd.value} - ${els.hf.value}`;
+  {% endif %}
+})();
+</script>
+
+{% endblock %}

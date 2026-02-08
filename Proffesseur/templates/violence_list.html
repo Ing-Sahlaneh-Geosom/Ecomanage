@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Violences élèves" %}{% endblock %}
+{% block main %}
+
+<style>
+  .m-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999;}
+  .m-overlay.show{display:flex;}
+  .m-box{width:min(980px,100%);max-height:calc(100vh - 24px);background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,.25);display:flex;flex-direction:column;}
+  .m-head{padding:14px 18px;border-bottom:1px solid #e7e7e7;display:flex;align-items:center;justify-content:space-between;}
+  .m-head h5{margin:0;font-weight:600;font-size:18px;}
+  .m-close{width:34px;height:34px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:18px;line-height:1;}
+  .m-body{padding:14px 18px;overflow:auto;}
+  .m-section-title{text-align:center;font-weight:600;color:#555;margin:8px 0 10px;}
+  .m-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .m-col-2{grid-column:span 2;}
+  .m-col-3{grid-column:1 / -1;}
+  .m-field label{display:block;font-size:12px;color:#555;margin:0 0 6px;}
+  .req{color:#d11;font-weight:700;}
+  .m-input,.m-select,.m-text{width:100%;border:1px solid #d9d9d9;border-radius:4px;padding:10px 10px;outline:none;font-size:13px;background:#fff;}
+  .m-text{min-height:90px;resize:vertical;}
+  .m-foot{padding:12px 18px;border-top:1px solid #e7e7e7;display:flex;justify-content:flex-end;gap:10px;background:#fafafa;}
+  .m-btn{border:1px solid #d0d0d0;background:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;}
+  .m-btn.primary{background:#3f2bbf;border-color:#3f2bbf;color:#fff;}
+  .m-msg{display:none;margin:0 0 12px;padding:10px 12px;border-radius:6px;border:1px solid #ddd;background:#f6f6f6;font-size:13px;}
+  .m-msg.show{display:block;}
+  .m-msg.err{border-color:#f0b4b4;background:#fff1f1;}
+  .m-msg.ok{border-color:#bfe8c9;background:#f0fff4;}
+
+  /* RTL (si ta langue active est ar) */
+  html[dir="rtl"] .rtl-auto{direction:rtl;text-align:right;}
+  html[dir="rtl"] .rtl-auto .m-grid{direction:rtl;}
+  html[dir="rtl"] .rtl-auto .d-flex.gap-2, html[dir="rtl"] .rtl-auto .m-foot{flex-direction:row-reverse;}
+  html[dir="rtl"] .rtl-auto table{direction:rtl;}
+
+  @media (max-width:900px){.m-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:600px){.m-grid{grid-template-columns:1fr;}.m-col-2,.m-col-3{grid-column:auto;}.m-box{border-radius:8px;}}
+</style>
+
+<div class="container-fluid rtl-auto">
+  <div class="card">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">{% trans "Violence pour les élèves" %}</h5>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary" id="btnOpenModal">{% trans "Ajouter" %}</button>
+          <a class="btn btn-success" href="{% url 'violence_export_excel' %}?q={{ q|urlencode }}">{% trans "Excel" %}</a>
+          <a class="btn btn-danger" href="{% url 'violence_export_pdf' %}?q={{ q|urlencode }}" target="_blank">{% trans "PDF" %}</a>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="d-flex justify-content-end mb-2">
+        <form method="get" class="d-flex gap-2">
+          <input type="text" name="q" value="{{ q }}" class="form-control" style="max-width:220px"
+                 placeholder="{% trans 'Rechercher ici' %}">
+          <button class="btn btn-outline-secondary" type="submit">{% trans "OK" %}</button>
+        </form>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>{% trans "L'agresseur (euse)" %}</th>
+              <th>{% trans "Forme d’agression" %}</th>
+              <th>{% trans "Cause de la violence" %}</th>
+              <th>{% trans "Dommage corporel" %}</th>
+              <th>{% trans "Moyens de résolution" %}</th>
+              <th>{% trans "Date" %}</th>
+              <th style="width:90px">{% trans "Actions" %}</th>
+            </tr>
+          </thead>
+
+          <tbody id="tbodyViolence">
+            {% for v in violences %}
+            <tr data-id="{{ v.id }}">
+              <td>{{ v.agresseur.nom }}</td>
+              <td>{{ v.forme_agression|truncatechars:18 }}</td>
+              <td>{{ v.cause_violence|truncatechars:18 }}</td>
+              <td>{{ v.dommage_corporel|truncatechars:18 }}</td>
+              <td>{{ v.moyens_resolution|truncatechars:18 }}</td>
+              <td>{{ v.date|date:"d-m-Y" }}</td>
+              <td>
+                <button class="btn btn-sm btn-link text-primary btnEdit" type="button" title="{% trans 'Modifier' %}">✎</button>
+                <button class="btn btn-sm btn-link text-danger btnDelete" type="button" title="{% trans 'Supprimer' %}">🗑</button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-muted">{% trans "Aucun enregistrement" %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ✅ MODAL (sans bootstrap modal) -->
+<div class="m-overlay" id="modalOverlay" aria-hidden="true">
+  <div class="m-box" role="dialog" aria-modal="true">
+    <div class="m-head">
+      <div style="width:34px"></div>
+      <h5 class="text-center w-100" style="margin-left:-34px">{% trans "Enregistrement de violence" %}</h5>
+      <button class="m-close" id="btnCloseModal" type="button">×</button>
+    </div>
+
+    <div class="m-body">
+      <div class="m-msg" id="modalMsg"></div>
+      <input type="hidden" id="v_id" value="">
+
+      <div class="m-grid">
+        <div class="m-field">
+          <label>{% trans "Niveaux" %}<span class="req">*</span></label>
+          <select class="m-select" id="ag_niveau">
+            <option value="">{% trans "Select..." %}</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}">{{ n.nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="m-field">
+          <label>{% trans "La liste des classes" %}<span class="req">*</span></label>
+          <select class="m-select" id="ag_classe">
+            <option value="">{% trans "Select..." %}</option>
+          </select>
+        </div>
+
+        <div class="m-field">
+          <label>{% trans "L'agresseur (euse)" %}<span class="req">*</span></label>
+          <select class="m-select" id="ag_eleve">
+            <option value="">{% trans "Select..." %}</option>
+          </select>
+        </div>
+
+        <div class="m-field m-col-3">
+          <label>{% trans "Forme d'agression" %}<span class="req">*</span></label>
+          <textarea class="m-text" id="forme_agression" placeholder="{% trans "Forme d'agression" %}"></textarea>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="m-section-title">{% trans "Victime" %}</div>
+
+      <div class="m-grid">
+        <div class="m-field">
+          <label>{% trans "Niveaux" %}<span class="req">*</span></label>
+          <select class="m-select" id="vi_niveau">
+            <option value="">{% trans "Select..." %}</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}">{{ n.nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="m-field">
+          <label>{% trans "La liste des classes" %}<span class="req">*</span></label>
+          <select class="m-select" id="vi_classe">
+            <option value="">{% trans "Select..." %}</option>
+          </select>
+        </div>
+
+        <div class="m-field">
+          <label>{% trans "Victime" %}<span class="req">*</span></label>
+          <select class="m-select" id="vi_eleve">
+            <option value="">{% trans "Select..." %}</option>
+          </select>
+        </div>
+
+        <div class="m-field m-col-3">
+          <label>{% trans "Cause de la violence" %}<span class="req">*</span></label>
+          <textarea class="m-text" id="cause_violence" placeholder="{% trans "Cause de la violence" %}"></textarea>
+        </div>
+
+        <div class="m-field m-col-2">
+          <label>{% trans "Dommage corporel" %}<span class="req">*</span></label>
+          <textarea class="m-text" id="dommage_corporel" placeholder="{% trans "Dommage corporel" %}"></textarea>
+        </div>
+
+        <div class="m-field">
+          <label>{% trans "Moyens de résolution" %}<span class="req">*</span></label>
+          <textarea class="m-text" id="moyens_resolution" placeholder="{% trans "Moyens de résolution" %}"></textarea>
+        </div>
+
+        <div class="m-field">
+          <label>{% trans "Date" %}<span class="req">*</span></label>
+          <input class="m-input" type="date" id="v_date">
+        </div>
+      </div>
+
+    </div>
+
+    <div class="m-foot">
+      <button class="m-btn" type="button" id="btnCancel">{% trans "Fermer" %}</button>
+      <button class="m-btn primary" type="button" id="btnSave">{% trans "Sauvegarder" %}</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ Strings i18n pour JS (pour que confirm/erreurs soient traduits)
+  const I18N = {
+    select: "{% trans 'Select...' %}",
+    confirm_delete: "{% trans 'Supprimer cet enregistrement ?' %}",
+    err_load: "{% trans 'Erreur chargement.' %}",
+    err_delete: "{% trans 'Erreur suppression.' %}",
+    err_save: "{% trans 'Erreur sauvegarde.' %}",
+    ok_saved: "{% trans 'Enregistré.' %}",
+    err_network: "{% trans 'Erreur réseau.' %}",
+  };
+
+  // CSRF
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const CSRFTOKEN = getCookie('csrftoken');
+
+  // Modal
+  const overlay = document.getElementById("modalOverlay");
+  const msgBox = document.getElementById("modalMsg");
+
+  function showMsg(text, type){
+    msgBox.className = "m-msg show " + (type === "ok" ? "ok" : "err");
+    msgBox.textContent = text || "";
+  }
+  function clearMsg(){
+    msgBox.className = "m-msg";
+    msgBox.textContent = "";
+  }
+  function openModal(){
+    clearMsg();
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+  }
+  function closeModal(){
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden","true");
+  }
+
+  document.getElementById("btnOpenModal").addEventListener("click", () => {
+    resetForm();
+    openModal();
+  });
+  document.getElementById("btnCloseModal").addEventListener("click", closeModal);
+  document.getElementById("btnCancel").addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+  // AJAX loaders
+  async function loadClasses(niveauId, targetSelect){
+    targetSelect.innerHTML = `<option value="">${I18N.select}</option>`;
+    if(!niveauId) return;
+
+    const res = await fetch("{% url 'ajax_classes_by_niveau_violence' %}?niveau_id=" + encodeURIComponent(niveauId));
+    const data = await res.json();
+    if(!data.ok) return;
+
+    for(const it of data.items){
+      const opt = document.createElement("option");
+      opt.value = it.id;
+      opt.textContent = it.text;
+      targetSelect.appendChild(opt);
+    }
+  }
+
+  async function loadEleves(classeId, targetSelect){
+    targetSelect.innerHTML = `<option value="">${I18N.select}</option>`;
+    if(!classeId) return;
+
+    const res = await fetch("{% url 'ajax_eleves_by_classe_violence' %}?classe_id=" + encodeURIComponent(classeId));
+    const data = await res.json();
+    if(!data.ok) return;
+
+    for(const it of data.items){
+      const opt = document.createElement("option");
+      opt.value = it.id;
+      opt.textContent = it.text;
+      targetSelect.appendChild(opt);
+    }
+  }
+
+  // agresseur chain
+  const agNiveau = document.getElementById("ag_niveau");
+  const agClasse = document.getElementById("ag_classe");
+  const agEleve  = document.getElementById("ag_eleve");
+
+  agNiveau.addEventListener("change", async () => {
+    await loadClasses(agNiveau.value, agClasse);
+    await loadEleves("", agEleve);
+  });
+  agClasse.addEventListener("change", async () => {
+    await loadEleves(agClasse.value, agEleve);
+  });
+
+  // victime chain
+  const viNiveau = document.getElementById("vi_niveau");
+  const viClasse = document.getElementById("vi_classe");
+  const viEleve  = document.getElementById("vi_eleve");
+
+  viNiveau.addEventListener("change", async () => {
+    await loadClasses(viNiveau.value, viClasse);
+    await loadEleves("", viEleve);
+  });
+  viClasse.addEventListener("change", async () => {
+    await loadEleves(viClasse.value, viEleve);
+  });
+
+  function resetForm(){
+    document.getElementById("v_id").value = "";
+    agNiveau.value = "";
+    agClasse.innerHTML = `<option value="">${I18N.select}</option>`;
+    agEleve.innerHTML  = `<option value="">${I18N.select}</option>`;
+    viNiveau.value = "";
+    viClasse.innerHTML = `<option value="">${I18N.select}</option>`;
+    viEleve.innerHTML  = `<option value="">${I18N.select}</option>`;
+    document.getElementById("forme_agression").value = "";
+    document.getElementById("cause_violence").value = "";
+    document.getElementById("dommage_corporel").value = "";
+    document.getElementById("moyens_resolution").value = "";
+    document.getElementById("v_date").value = "";
+    clearMsg();
+  }
+
+  // Edit
+  document.querySelectorAll(".btnEdit").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const tr = e.target.closest("tr");
+      const id = tr.getAttribute("data-id");
+      resetForm();
+      openModal();
+
+      const res = await fetch("{% url 'violence_json' 1 %}".replace("/1/", "/" + id + "/"));
+      const data = await res.json();
+      if(!data.ok){
+        showMsg(I18N.err_load, "err");
+        return;
+      }
+
+      document.getElementById("v_id").value = data.id;
+
+      agNiveau.value = data.agresseur.niveau_id || "";
+      await loadClasses(agNiveau.value, agClasse);
+      agClasse.value = data.agresseur.classe_id || "";
+      await loadEleves(agClasse.value, agEleve);
+      agEleve.value = data.agresseur.eleve_id || "";
+
+      viNiveau.value = data.victime.niveau_id || "";
+      await loadClasses(viNiveau.value, viClasse);
+      viClasse.value = data.victime.classe_id || "";
+      await loadEleves(viClasse.value, viEleve);
+      viEleve.value = data.victime.eleve_id || "";
+
+      document.getElementById("forme_agression").value = data.forme_agression || "";
+      document.getElementById("cause_violence").value = data.cause_violence || "";
+      document.getElementById("dommage_corporel").value = data.dommage_corporel || "";
+      document.getElementById("moyens_resolution").value = data.moyens_resolution || "";
+      document.getElementById("v_date").value = data.date || "";
+    });
+  });
+
+  // Delete
+  document.querySelectorAll(".btnDelete").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const tr = e.target.closest("tr");
+      const id = tr.getAttribute("data-id");
+      if(!confirm(I18N.confirm_delete)) return;
+
+      const url = "{% url 'violence_delete' 1 %}".replace("/1/", "/" + id + "/");
+      const res = await fetch(url, { method: "POST", headers: { "X-CSRFToken": CSRFTOKEN } });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.ok){
+        alert((data && data.message) ? data.message : I18N.err_delete);
+        return;
+      }
+      tr.remove();
+    });
+  });
+
+  // Save
+  document.getElementById("btnSave").addEventListener("click", async () => {
+    clearMsg();
+
+    const payload = {
+      id: document.getElementById("v_id").value || null,
+      ag_eleve_id: agEleve.value,
+      vi_eleve_id: viEleve.value,
+      forme_agression: document.getElementById("forme_agression").value,
+      cause_violence: document.getElementById("cause_violence").value,
+      dommage_corporel: document.getElementById("dommage_corporel").value,
+      moyens_resolution: document.getElementById("moyens_resolution").value,
+      date: document.getElementById("v_date").value
+    };
+
+    try{
+      const res = await fetch("{% url 'violence_save' %}", {
+        method: "POST",
+        headers: { "Content-Type":"application/json", "X-CSRFToken": CSRFTOKEN },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.ok){
+        showMsg((data && data.message) ? data.message : I18N.err_save, "err");
+        return;
+      }
+      showMsg(data.message || I18N.ok_saved, "ok");
+      setTimeout(() => window.location.reload(), 600);
+
+    }catch(err){
+      showMsg(I18N.err_network, "err");
+    }
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block title%} Utilisateurs form {% endblock %}
+{% block main %}
+<div class="background"></div>
+
+<div style="margin-top: 12rem;" id="register">
+<h5>{{ erreur }}</h5>
+ <div style="display: flex; justify-content: space-evenly;" class="logos">
+         <img class="logo" src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" alt="Ecomanage">
+         <h2 style="margin-top: 0px;">Modifier les Utilisateurs</h2>
+    </div>
+
+<form action="" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Modifier</button>
+</form>
+
+</div>
+<br>
+<br>
+{% endblock %}

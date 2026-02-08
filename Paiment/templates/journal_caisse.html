@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Historique Caisse{% endblock %}
+{% block main %}
+<style>
+  .modal { z-index: 2000 !important; }
+  .modal-backdrop { z-index: 1990 !important; }
+</style>
+
+<div class="container-fluid px-4 py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold m-0">HISTORIQUE CAISSE</h6>
+    <div class="text-muted small">Finance › Caisse › Historique</div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold">Filtres</div>
+    <div class="card-body">
+      <form method="GET" class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Date début</label>
+          <input type="date" class="form-control" name="d1" value="{{ d1 }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Date fin</label>
+          <input type="date" class="form-control" name="d2" value="{{ d2 }}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Mode</label>
+          <select class="form-select" name="mode">
+            <option value="">Tous</option>
+            <option value="especes" {% if mode == "especes" %}selected{% endif %}>Espèces</option>
+            <option value="mobile" {% if mode == "mobile" %}selected{% endif %}>Mobile</option>
+            <option value="virement" {% if mode == "virement" %}selected{% endif %}>Virement</option>
+            <option value="cheque" {% if mode == "cheque" %}selected{% endif %}>Chèque</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Recherche</label>
+          <input class="form-control" name="q" value="{{ q }}" placeholder="N° reçu / élève / classe">
+        </div>
+        <div class="col-md-1 d-grid">
+          <button class="btn btn-success fw-bold">Filtrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold d-flex justify-content-between">
+      <span>Totaux (reçus validés)</span>
+      <span class="fw-bold">Total: {{ grand_total }}</span>
+    </div>
+    <div class="card-body">
+      <div class="row g-2">
+        {% for t in totals %}
+          <div class="col-md-3">
+            <div class="border rounded p-2">
+              <div class="text-muted small">{{ t.mode }}</div>
+              <div class="fw-bold">{{ t.total }}</div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">Aucun paiement.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+      <span>Journal</span>
+      <a class="btn btn-sm btn-outline-dark" href="{% url 'cloture_caisse' %}">Clôture</a>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>N°</th>
+              <th>Date</th>
+              <th>Élève</th>
+              <th>Classe</th>
+              <th>Total</th>
+              <th>Mode</th>
+              <th>Statut</th>
+              <th style="width:220px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+            <tr>
+              <td class="fw-semibold">{{ r.numero }}</td>
+              <td>{{ r.date_operation|date:"d/m/Y H:i" }}</td>
+              <td>{{ r.eleve.nom }}</td>
+              <td>{{ r.eleve.classe.niveau }} - {{ r.eleve.classe.nom }}</td>
+              <td class="fw-bold">{{ r.total }} {{ r.devise }}</td>
+              <td>{{ r.mode }}</td>
+              <td>
+                {% if r.statut == "annule" %}
+                  <span class="badge bg-danger">Annulé</span>
+                {% else %}
+                  <span class="badge bg-success">Validé</span>
+                {% endif %}
+              </td>
+              <td class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'recu_print' r.pk %}">Imprimer</a>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'historique_eleve' r.eleve.id %}">Élève</a>
+
+                {% if r.statut == "valide" %}
+                <button class="btn btn-sm btn-outline-danger"
+                        type="button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#annuleModal{{ r.pk }}">
+                  Annuler
+                </button>
+                {% endif %}
+
+              </td>
+            </tr>
+
+            
+            {% empty %}
+              <tr><td colspan="8" class="text-center text-muted py-4">Aucun enregistrement.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<!-- ✅ MODALS EN DEHORS DE LA TABLE (IMPORTANT) -->
+{% for r in rows %}
+  {% if r.statut == "valide" %}
+  <div class="modal fade" id="annuleModal{{ r.pk }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h6 class="modal-title">Annuler le reçu {{ r.numero }}</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form method="POST" action="{% url 'annuler_recu' r.pk %}">
+          {% csrf_token %}
+          <div class="modal-body">
+            <label class="form-label fw-bold">Motif</label>
+            <input class="form-control" name="motif" placeholder="Erreur / doublon / ..." required>
+
+            <div class="alert alert-warning mt-3 mb-0">
+              Le reçu sera marqué <b>Annulé</b> (il ne sera plus compté dans les totaux).
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fermer</button>
+            <button type="submit" class="btn btn-danger">Confirmer annulation</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% endfor %}
+
+{% endblock %}

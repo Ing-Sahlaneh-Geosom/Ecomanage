@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+
+<h4 class="mb-3">Gestion des notes</h4>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-2">{{ form.classe }}</div>
+  <div class="col-md-2">{{ form.matiere }}</div>
+  <div class="col-md-3">{{ form.devoir }}</div>
+  <div class="col-md-3">{{ form.periode }}</div>
+  <div class="col-md-2"><input class="form-control" name="q" value="{{ request.GET.q }}" placeholder="Élève..."></div>
+  <div class="col-12 d-flex gap-2">
+    <button class="btn btn-outline-primary">Filtrer</button>
+    <a class="btn btn-outline-secondary" href="{% url 'notes_gestion' %}">Réinitialiser</a>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Élève</th>
+            <th>Classe</th>
+            <th>Matière</th>
+            <th>Devoir</th>
+            <th>Période</th>
+            <th>Note</th>
+            <th>Coef</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in notes %}
+          <tr>
+            <td>{{ n.eleve.nom }}</td>
+            <td>{{ n.eleve.classe.nom }}</td>
+            <td>{{ n.matiere.nom }}</td>
+            <td>{{ n.devoir.nom }}</td>
+            <td>{{ n.devoir.periode.nom }}</td>
+            <td><span class="badge bg-primary">{{ n.note }}</span></td>
+            <td>{{ n.coefficient }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center text-muted">Aucune note</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

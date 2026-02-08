@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+
+<h4 class="mb-3">Saisie des notes</h4>
+
+<div class="card">
+  <div class="card-body">
+    <form method="get">
+      <div class="row g-3">
+        <div class="col-md-6">{{ form.devoir.label_tag }}{{ form.devoir }}</div>
+        <div class="col-md-6">{{ form.classe.label_tag }}{{ form.classe }}</div>
+      </div>
+      <button class="btn btn-primary mt-3">Continuer</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

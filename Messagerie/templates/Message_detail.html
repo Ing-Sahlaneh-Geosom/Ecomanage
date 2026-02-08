@@ -1,0 +1,16 @@
+{% extends 'base.html'%}
+{% block title %} Message detail {% endblock %}
+{% block main %}
+
+<div class="container">
+    <a href="{% url 'inbox'%}" class="btn btn-sm btn-outline-primary">Retour</a>
+    <h5 class="text-center">Le Message de {{message.sender}} </h5>
+    <div class="text-center mt-4">
+        <h6> {{ message.sujet }} </h6>
+         <p>{{ message.contenu }}</p>
+    </div>
+
+</div>
+
+
+{% endblock %}

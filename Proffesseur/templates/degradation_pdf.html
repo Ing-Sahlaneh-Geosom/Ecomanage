@@ -1,0 +1,58 @@
+{% load i18n %}
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+<head>
+  <meta charset="utf-8">
+  <title>{% trans "Dégradations" %}</title>
+  <style>
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11px; color: #111; }
+    h2 { margin: 0 0 8px; }
+    .meta { margin: 0 0 12px; color: #444; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 6px; vertical-align: top; }
+    th { background: #f2f2f2; }
+
+    /* petit confort RTL */
+    {% if LANGUAGE_CODE == 'ar' %}
+    th, td { text-align: right; }
+    {% endif %}
+  </style>
+</head>
+<body>
+
+  <h2>{% trans "Rapport — Dégradations commises" %}</h2>
+
+  <p class="meta">
+    {% trans "Recherche:" %}
+    <b>{{ q|default:"-" }}</b>
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>{% trans "Élève" %}</th>
+        <th>{% trans "Classe" %}</th>
+        <th>{% trans "Dégradation" %}</th>
+        <th>{% trans "Décision" %}</th>
+        <th>{% trans "Date" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in degradations %}
+      <tr>
+        <td>{{ d.eleve.nom }}</td>
+        <td>{% if d.eleve.classe %}{{ d.eleve.classe.nom }}{% endif %}</td>
+        <td>{{ d.degradation_commise }}</td>
+        <td>{{ d.decision_affichee }}</td>
+        <td>{{ d.date|date:"d-m-Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">{% trans "Aucun enregistrement" %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</body>
+</html>

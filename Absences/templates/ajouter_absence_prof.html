@@ -1,0 +1,46 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block title %} Ajouter Une Absence {% endblock %}
+{% block main %}
+
+<div class="containaire">
+    <h2>{{ Title }} </h2>
+    {% if form.errors %}
+        <div class="error-messages bg-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+        <div>
+            <label for="eleve">Proffesseur :</label>
+            {{ form.prof }}
+        </div>
+        <div>
+            <label for="date">Date :</label>
+            <input type="date" name="date" id="date">
+        </div>
+         <div>
+            <label for="annee_scolaire">Motif :</label>
+            {{ form.motif }}
+        </div>
+         <div>
+            <label for="annee_scolaire">Justifie :</label>
+            {{ form.justifiee }}
+        </div>
+
+        <div class="full-width">
+            <button type="submit" class="submit-btn">{{ submit_text }}</button>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %} Suivis des apsences employés {% endblock %}
+{% block main %}
+<div class="container-fluid py-3">
+
+  <h5 class="fw-bold text-uppercase mb-3">Suivi mensuel des absences des employés</h5>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Employé</label>
+          <select name="emp" class="form-select">
+            <option value="">Tous les employés</option>
+            {% for e in emps %}
+              <option value="{{ e.id }}" {% if emp_id == e.id|stringformat:"s" %}selected{% endif %}>
+                {{ e.nom_complet }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">Mois</label>
+          <select name="mois" class="form-select">
+            {% for i in "123456789101112"|make_list %}
+              <option value="{{ forloop.counter }}" {% if mois == forloop.counter %}selected{% endif %}>
+                {{ forloop.counter|stringformat:"02d" }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Année scolaire</label>
+          <select name="annee_id" class="form-select">
+            {% for a in annees_db %}
+              <option value="{{ a.id }}" {% if annee_id == a.id|stringformat:"s" %}selected{% endif %}>
+                {{ a.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <button class="btn btn-success w-100 fw-semibold" type="submit">Filtrer</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Date</th>
+              <th>Employé</th>
+              <th>Heures</th>
+              <th>Statut</th>
+              <th>Motif</th>
+              <th>Justifiée</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for r in rows %}
+            <tr>
+              <td>{{ r.date|date:"d/m/Y" }}</td>
+              <td>{{ r.employe.nom_complet }}</td>
+              <td>
+                {% if r.h_debut %}{{ r.h_debut }} → {{ r.h_fin|default:"--" }}{% else %}—{% endif %}
+              </td>
+              <td>
+                {% if r.statut == "absence" %}
+                  <span class="badge bg-danger">Absence</span>
+                {% elif r.statut == "retard" %}
+                  <span class="badge bg-warning text-dark">Retard</span>
+                {% else %}
+                  <span class="badge bg-success">Présent</span>
+                {% endif %}
+              </td>
+              <td>{{ r.motif|default:"—" }}</td>
+              <td>
+                {% if r.justifiee %}
+                  <span class="badge bg-success">Oui</span>
+                {% else %}
+                  <span class="badge bg-secondary">Non</span>
+                {% endif %}
+              </td>
+              <td>
+                <form method="post" onsubmit="return confirm('Supprimer cette absence ?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="delete_id" value="{{ r.id }}">
+                  <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">Aucune absence pour ce mois</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Configuration Paiement{% endblock %}
+
+{% block main %}
+<div class="container-fluid px-4 py-3">
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">Finance/Gestionnaire</div>
+
+    <div class="card-body">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} py-2 mb-3">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- =======================
+           FILTRE (OBLIGATOIRE)
+      ======================== -->
+      <form method="GET" id="filterForm" class="row g-3 align-items-end mb-4">
+
+        <div class="col-md-5">
+          <label class="form-label fw-bold">Niveaux <span class="text-danger">*</span></label>
+          <select class="form-select" name="niveau" id="niveauSelect" required>
+            <option value="">Sélectionner...</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}" {% if niveau_id|stringformat:"s" == n.id|stringformat:"s" %}selected{% endif %}>
+                {{ n.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-5">
+          <label class="form-label fw-bold">Type frais <span class="text-danger">*</span></label>
+          <select class="form-select" name="type" id="typeSelect" required>
+            <option value="">Sélectionner...</option>
+            {% for t in types %}
+              <option value="{{ t.id }}" {% if type_id|stringformat:"s" == t.id|stringformat:"s" %}selected{% endif %}>
+                {{ t.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-success fw-bold" id="btnFilter">Y Filtrer</button>
+        </div>
+
+      </form>
+
+      <!-- =======================
+           CONFIG (CACHÉ AU DÉPART)
+      ======================== -->
+      <div id="configBox" class="config-box">
+        <form method="POST" id="saveForm" class="row g-3">
+          {% csrf_token %}
+
+          <!-- ces hidden seront remplis par JS après filtre -->
+          <input type="hidden" name="niveau" id="hiddenNiveau" value="{{ niveau_id }}">
+          <input type="hidden" name="type" id="hiddenType" value="{{ type_id }}">
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Frais <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" name="montant" class="form-control"
+                   value="{% if tarif %}{{ tarif.montant }}{% endif %}" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Devise <span class="text-danger">*</span></label>
+            <select class="form-select" name="devise" required>
+              {% with d=tarif.devise|default:"DJF" %}
+                <option value="DJF" {% if d == "DJF" %}selected{% endif %}>DJF</option>
+                <option value="USD" {% if d == "USD" %}selected{% endif %}>USD</option>
+                <option value="EUR" {% if d == "EUR" %}selected{% endif %}>EUR</option>
+              {% endwith %}
+            </select>
+          </div>
+
+          <div class="col-12 d-flex justify-content-end align-items-center gap-2 mt-2">
+            <div class="text-danger small d-none" id="saveError">
+              Veuillez d’abord filtrer (choisir Niveau + Type frais).
+            </div>
+            <button type="submit" class="btn btn-dark px-4" id="btnSave" disabled>Sauvegarder</button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<style>
+  /* Bloc config caché */
+  .config-box {
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.25s ease;
+  }
+  .config-box.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  const configBox = document.getElementById("configBox");
+  const btnSave = document.getElementById("btnSave");
+  const saveError = document.getElementById("saveError");
+
+  const niveauSelect = document.getElementById("niveauSelect");
+  const typeSelect = document.getElementById("typeSelect");
+  const hiddenNiveau = document.getElementById("hiddenNiveau");
+  const hiddenType = document.getElementById("hiddenType");
+
+  const hasNiveau = "{{ niveau_id|default:'' }}" !== "";
+  const hasType = "{{ type_id|default:'' }}" !== "";
+
+  // ✅ Si la page est déjà filtrée (GET niveau+type), on affiche et on autorise sauver
+  if (hasNiveau && hasType) {
+    configBox.classList.add("show");
+    btnSave.disabled = false;
+    saveError.classList.add("d-none");
+  }
+
+  // ✅ Quand l’utilisateur change le filtre, on bloque la sauvegarde jusqu’au prochain Filtrer
+  function lockSave() {
+    btnSave.disabled = true;
+    saveError.classList.remove("d-none");
+    // on cache aussi le bloc pour forcer à cliquer Filtrer
+    configBox.classList.remove("show");
+  }
+
+  niveauSelect.addEventListener("change", lockSave);
+  typeSelect.addEventListener("change", lockSave);
+
+  // ✅ Sécurité côté front : empêcher submit si pas filtré
+  document.getElementById("saveForm").addEventListener("submit", function(e){
+    const n = niveauSelect.value;
+    const t = typeSelect.value;
+
+    if(!n || !t){
+      e.preventDefault();
+      btnSave.disabled = true;
+      saveError.classList.remove("d-none");
+      configBox.classList.remove("show");
+      return;
+    }
+
+    // remplir hidden pour POST
+    hiddenNiveau.value = n;
+    hiddenType.value = t;
+  });
+
+  // ✅ Bonus: si l’utilisateur clique sur Filtrer (GET), on affiche immédiatement (animation)
+  // (la page va se recharger, mais l’effet est visible)
+  document.getElementById("btnFilter").addEventListener("click", function(){
+    if(niveauSelect.value && typeSelect.value){
+      configBox.classList.add("show");
+    }
+  });
+</script>
+{% endblock %}

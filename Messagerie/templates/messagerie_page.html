@@ -1,0 +1,538 @@
+{% extends "base.html" %}
+{% block title %}Messagerie{% endblock %}
+{% block main %}
+<style>
+  .msg-row { cursor: pointer; }
+  .msg-row:hover { background: rgba(13,110,253,.06); }
+  .open-btn, .del-btn { pointer-events: auto; }
+  .notice-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.45);
+    display:none; align-items:center; justify-content:center; z-index:9999;
+  }
+  .notice-card{
+    width:min(520px,92vw); background:#fff; border-radius:16px;
+    padding:22px; box-shadow:0 20px 60px rgba(0,0,0,.25); position:relative;
+    text-align:center;
+  }
+  .notice-close{
+    position:absolute; right:12px; top:10px; border:none; background:transparent;
+    font-size:20px; cursor:pointer;
+  }
+  .notice-icon{ font-size:52px; }
+</style>
+
+<div class="container-fluid px-4 py-4">
+
+  <!-- ✅ POPUP NON-LU (comme ton image) -->
+  <div class="notice-overlay" id="noticeOverlay">
+    <div class="notice-card">
+      <button class="notice-close" onclick="closeNotice()">✕</button>
+      <div class="notice-icon">🌙✨</div>
+      <h3 class="mt-2" style="color:#ff5a3c;">Notice!</h3>
+      <div class="text-muted small mb-3" id="noticeText">
+        Vous avez un nouveau message.
+      </div>
+      <div class="d-flex gap-2 justify-content-center">
+        <button class="btn btn-primary" id="noticeReadBtn">Lire le message</button>
+        <a class="btn btn-outline-secondary" href="{% url 'messagerie_home' %}">Aller à la messagerie</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ SEND FORM TOP -->
+  {% if request.user.role != "parent" %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <div class="fw-bold">✉️ Envoyer un message</div>
+      <div class="small text-muted">
+        {% if request.user.role == "admin" or request.user.role == "secretaire" %}Administration{% else %}Professeur{% endif %}
+      </div>
+    </div>
+
+    <div class="card-body">
+      {% if messages %}
+        {% for m in messages %}
+          <div class="alert alert-{{ m.tags }} py-2">{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" id="sendForm">
+        {% csrf_token %}
+
+        <div class="row g-3">
+
+          {% if request.user.role == "admin" or request.user.role == "secretaire" %}
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Destinataires</label>
+            <select class="form-select" name="receiver_group" id="receiverGroup" required>
+              <option value="">-- Choisir --</option>
+              <option value="parents">Parents</option>
+              <option value="profs">Professeurs</option>
+            </select>
+          </div>
+          {% else %}
+            <input type="hidden" name="receiver_group" value="parents">
+          {% endif %}
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Filtre</label>
+            <select class="form-select" name="target" id="targetSelect" required>
+              <option value="">-- Choisir --</option>
+            </select>
+          </div>
+
+          <!-- CLASSE -->
+          <div class="col-md-4 d-none" id="classeBox">
+            <label class="form-label fw-semibold">Classe</label>
+
+            {% if request.user.role == "proffesseur" %}
+              <select class="form-select" name="classe_id" id="classeSelect">
+                <option value="">-- Choisir --</option>
+                {% for c in prof_classes %}
+                  <option value="{{ c.id }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <select class="form-select" name="classe_id" id="classeSelect">
+                <option value="">Chargement...</option>
+              </select>
+            {% endif %}
+          </div>
+
+          <!-- NIVEAU -->
+          <div class="col-md-4 d-none" id="niveauBox">
+            <label class="form-label fw-semibold">Niveau</label>
+            <select class="form-select" name="niveau_id" id="niveauSelect">
+              <option value="">-- Choisir --</option>
+              {% for n in niveaux %}
+                <option value="{{ n.id }}">{{ n.nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- ELEVE (prof) -->
+          <div class="col-md-6 d-none" id="eleveBox">
+            <label class="form-label fw-semibold">Élève (pour cibler son parent)</label>
+            <select class="form-select" name="eleve_id" id="eleveSelect">
+              <option value="">Choisir d'abord une classe...</option>
+            </select>
+          </div>
+
+          <!-- PARENT -->
+          <div class="col-md-6 d-none" id="parentBox">
+            <label class="form-label fw-semibold">Parent</label>
+            <select class="form-select" name="parent_id" id="parentSelect">
+              <option value="">Chargement...</option>
+            </select>
+          </div>
+
+          <!-- PROF -->
+          <div class="col-md-6 d-none" id="profBox">
+            <label class="form-label fw-semibold">Professeur</label>
+            <select class="form-select" name="prof_id" id="profSelect">
+              <option value="">Chargement...</option>
+            </select>
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label fw-semibold">Sujet</label>
+            <input class="form-control" name="sujet" required>
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label fw-semibold">Message</label>
+            <textarea class="form-control" name="contenu" rows="4" required></textarea>
+          </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+          <button class="btn btn-primary" type="submit">Envoyer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ✅ INBOX -->
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="fw-bold m-0">📩 Messages reçus</h5>
+    <span class="badge bg-primary" id="unreadBadge">Non lus : {{ unread_count|default:0 }}</span>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>De</th><th>Sujet</th><th>Date</th><th>Lu</th><th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inboxBody">
+            {% for m in messages_recus %}
+            <tr class="msg-row {% if not m.lu %}table-warning{% endif %}" data-id="{{ m.id }}">
+              <td>{{ m.sender.nom_complet|default:m.sender.username }}</td>
+              <td class="fw-semibold">{{ m.sujet }}</td>
+              <td>{{ m.date_envoi|date:"d/m/Y H:i" }}</td>
+              <td>
+                {% if m.lu %}
+                  <span class="badge bg-success">Lu</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Non lu</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary open-btn" type="button" data-id="{{ m.id }}">Ouvrir</button>
+                <button class="btn btn-sm btn-outline-danger del-btn" type="button" data-id="{{ m.id }}">Supprimer</button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">Aucun message</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ MODAL -->
+  <div class="modal fade" id="msgModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="z-index: 10000;">
+        <div class="modal-header">
+          <h6 class="modal-title" id="msgTitle">Messageggffgff</h6>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="small text-muted" id="msgMeta"></div>
+          <div class="mt-2" id="msgBody" style="white-space: pre-wrap;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const role = "{{ request.user.role }}";
+  const isAdmin = role === "admin" || role === "secretaire";
+  const isProf  = role === "proffesseur";
+
+  const receiverGroup = document.getElementById("receiverGroup");
+  const targetSelect  = document.getElementById("targetSelect");
+
+  const classeBox = document.getElementById("classeBox");
+  const niveauBox = document.getElementById("niveauBox");
+  const eleveBox  = document.getElementById("eleveBox");
+  const parentBox = document.getElementById("parentBox");
+  const profBox   = document.getElementById("profBox");
+
+  const classeSelect = document.getElementById("classeSelect");
+  const niveauSelect = document.getElementById("niveauSelect");
+  const eleveSelect  = document.getElementById("eleveSelect");
+  const parentSelect = document.getElementById("parentSelect");
+  const profSelect   = document.getElementById("profSelect");
+
+  const urlMsg    = "{% url 'message_ajax_detail' 0 %}".replace("0/", "");
+  const urlClasses = "{% url 'ajax_classes' %}";
+  const urlEleves  = "{% url 'ajax_eleves_by_classe' %}";
+  const urlParents = "{% url 'ajax_parents_by_scope' %}";
+  const urlProfs   = "{% url 'ajax_profs_by_scope' %}";
+  const urlDelete  = "{% url 'delete_message' 0 %}".replace("0/", "");
+  const urlNotif   = "{% url 'ajax_notifications' %}";
+  const urlUnread  = "{% url 'ajax_unread_count' %}";
+
+  function hideAll(){
+    classeBox && classeBox.classList.add("d-none");
+    niveauBox && niveauBox.classList.add("d-none");
+    eleveBox  && eleveBox.classList.add("d-none");
+    parentBox && parentBox.classList.add("d-none");
+    profBox   && profBox.classList.add("d-none");
+  }
+
+  function setTargetOptions(opts){
+    targetSelect.innerHTML = `<option value="">-- Choisir --</option>`;
+    opts.forEach(o=>{
+      const op=document.createElement("option");
+      op.value=o.value; op.textContent=o.label;
+      targetSelect.appendChild(op);
+    });
+  }
+
+  async function loadClassesForAdmin(){
+    if(!isAdmin) return;
+    const res = await fetch(urlClasses, {cache:"no-store"});
+    const data = await res.json();
+    classeSelect.innerHTML = `<option value="">-- Choisir --</option>`;
+    (data.items||[]).forEach(it=>{
+      const op=document.createElement("option");
+      op.value=it.id; op.textContent=it.text;
+      classeSelect.appendChild(op);
+    });
+  }
+
+  async function loadElevesForProf(){
+    const classe_id = classeSelect.value;
+    eleveSelect.innerHTML = `<option value="">Chargement...</option>`;
+    const res = await fetch(urlEleves + `?classe_id=${classe_id}`, {cache:"no-store"});
+    const data = await res.json();
+    eleveSelect.innerHTML = `<option value="">-- Choisir --</option>`;
+    (data.items||[]).forEach(it=>{
+      const op=document.createElement("option");
+      op.value=it.id; op.textContent=it.text;
+      eleveSelect.appendChild(op);
+    });
+  }
+
+  async function loadParents(scope){
+    let qs = `?scope=${scope}`;
+    if(scope==="classe") qs += `&classe_id=${classeSelect.value}`;
+    if(scope==="niveau") qs += `&niveau_id=${niveauSelect.value}`;
+
+    parentSelect.innerHTML = `<option value="">Chargement...</option>`;
+    const res = await fetch(urlParents + qs, {cache:"no-store"});
+    const data = await res.json();
+    parentSelect.innerHTML = `<option value="">-- Choisir --</option>`;
+    (data.items||[]).forEach(it=>{
+      const op=document.createElement("option");
+      op.value=it.id; op.textContent=it.text;
+      parentSelect.appendChild(op);
+    });
+  }
+
+  async function loadProfs(scope){
+    let qs = `?scope=${scope}`;
+    if(scope==="classe") qs += `&classe_id=${classeSelect.value}`;
+
+    profSelect.innerHTML = `<option value="">Chargement...</option>`;
+    const res = await fetch(urlProfs + qs, {cache:"no-store"});
+    const data = await res.json();
+    profSelect.innerHTML = `<option value="">-- Choisir --</option>`;
+    (data.items||[]).forEach(it=>{
+      const op=document.createElement("option");
+      op.value=it.id; op.textContent=it.text;
+      profSelect.appendChild(op);
+    });
+  }
+
+  // init targets
+  if(isAdmin) loadClassesForAdmin();
+
+  if(isProf){
+    setTargetOptions([
+      {value:"eleve", label:"Parent d'un élève"},
+      {value:"classe", label:"Parents d'une classe"},
+      {value:"toutes", label:"Parents de toutes mes classes"},
+    ]);
+  }
+  if(isAdmin && receiverGroup){
+    setTargetOptions([]);
+  }
+
+  if(isAdmin && receiverGroup){
+    receiverGroup.addEventListener("change", ()=>{
+      hideAll();
+      const g = receiverGroup.value;
+
+      if(g==="parents"){
+        setTargetOptions([
+          {value:"one", label:"Un parent"},
+          {value:"classe", label:"Parents d'une classe"},
+          {value:"niveau", label:"Parents d'un niveau"},
+          {value:"tous", label:"Tous les parents"},
+        ]);
+      } else if(g==="profs"){
+        setTargetOptions([
+          {value:"one", label:"Un professeur"},
+          {value:"classe", label:"Profs d'une classe"},
+          {value:"tous", label:"Tous les professeurs"},
+        ]);
+      } else {
+        setTargetOptions([]);
+      }
+    });
+  }
+
+  if(targetSelect){
+    targetSelect.addEventListener("change", async ()=>{
+      hideAll();
+      const t = targetSelect.value;
+      const g = isAdmin ? (receiverGroup ? receiverGroup.value : "") : "parents";
+
+      // PROF
+      if(isProf){
+        if(t==="classe"){
+          classeBox.classList.remove("d-none");
+        }
+        if(t==="eleve"){
+          classeBox.classList.remove("d-none");
+          eleveBox.classList.remove("d-none");
+        }
+        return;
+      }
+
+      // ADMIN
+      if(isAdmin){
+        if(g==="parents"){
+          if(t==="one"){
+            parentBox.classList.remove("d-none");
+            await loadParents("tous");
+          }
+          if(t==="classe"){
+            classeBox.classList.remove("d-none");
+            parentBox.classList.remove("d-none");
+            await loadParents("classe");
+          }
+          if(t==="niveau"){
+            niveauBox.classList.remove("d-none");
+            parentBox.classList.remove("d-none");
+            await loadParents("niveau");
+          }
+        }
+
+        if(g==="profs"){
+          if(t==="one"){
+            profBox.classList.remove("d-none");
+            await loadProfs("tous");
+          }
+          if(t==="classe"){
+            classeBox.classList.remove("d-none");
+            profBox.classList.remove("d-none");
+            await loadProfs("classe");
+          }
+        }
+      }
+    });
+  }
+
+  if(isProf && classeSelect){
+    classeSelect.addEventListener("change", async ()=>{
+      if(!eleveBox.classList.contains("d-none")){
+        await loadElevesForProf();
+      }
+    });
+  }
+
+  if(isAdmin && classeSelect){
+    classeSelect.addEventListener("change", async ()=>{
+      const g = receiverGroup.value;
+      const t = targetSelect.value;
+      if(g==="parents" && t==="classe") await loadParents("classe");
+      if(g==="profs" && t==="classe") await loadProfs("classe");
+    });
+  }
+
+  if(isAdmin && niveauSelect){
+    niveauSelect.addEventListener("change", async ()=>{
+      const g = receiverGroup.value;
+      const t = targetSelect.value;
+      if(g==="parents" && t==="niveau") await loadParents("niveau");
+    });
+  }
+
+  async function openMsg(id){
+    const res = await fetch(urlMsg + id + "/", {cache:"no-store"});
+    const data = await res.json();
+    if(!data.ok) return;
+
+    document.getElementById("msgTitle").textContent = data.sujet;
+    document.getElementById("msgMeta").textContent = `De: ${data.from} | ${data.date}`;
+    document.getElementById("msgBody").textContent = data.contenu;
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("msgModal")).show();
+
+    // refresh unread badge + header notification
+    refreshUnread();
+  }
+
+  // clic row + button
+  function bindInboxClicks(){
+    document.querySelectorAll(".msg-row").forEach(row=>{
+      row.addEventListener("click", (e)=>{
+        if(e.target.classList.contains("open-btn") || e.target.classList.contains("del-btn")) return;
+        openMsg(row.getAttribute("data-id"));
+      });
+    });
+    document.querySelectorAll(".open-btn").forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        openMsg(btn.getAttribute("data-id"));
+      });
+    });
+    document.querySelectorAll(".del-btn").forEach(btn=>{
+      btn.addEventListener("click", async (e)=>{
+        e.stopPropagation();
+        const id = btn.getAttribute("data-id");
+        if(!confirm("Supprimer ce message ?")) return;
+        const res = await fetch(urlDelete + id + "/", {
+          method:"POST",
+          headers: {"X-CSRFToken":"{{ csrf_token }}"}
+        });
+        const data = await res.json();
+        if(data.ok){
+          // remove row
+          const tr = document.querySelector(`tr[data-id="${id}"]`);
+          if(tr) tr.remove();
+          refreshUnread();
+        }
+      });
+    });
+  }
+  bindInboxClicks();
+
+  // =========================
+  // ✅ POPUP + NOTIFICATIONS
+  // =========================
+  function closeNotice(){
+    document.getElementById("noticeOverlay").style.display = "none";
+  }
+
+  async function refreshUnread(){
+    const r = await fetch(urlUnread, {cache:"no-store"});
+    const d = await r.json();
+    if(d.ok){
+      document.getElementById("unreadBadge").textContent = "Non lus : " + d.count;
+      // badge du header (si tu as span badge dans header)
+      const headerBadge = document.querySelector(".dropdown .badge.bg-primary");
+      if(headerBadge) headerBadge.textContent = d.count;
+    }
+  }
+
+  // affiche popup si au moins 1 non-lu
+  async function checkPopup(){
+    const r = await fetch(urlNotif, {cache:"no-store"});
+    const d = await r.json();
+    if(!d.ok) return;
+
+    // update header dropdown list si tu veux (optionnel ici)
+    const count = d.count || 0;
+
+    // popup seulement si count > 0
+    if(count > 0){
+      const first = d.items[0];
+      document.getElementById("noticeText").textContent =
+        `Nouveau message: "${first.titre}"`;
+      document.getElementById("noticeReadBtn").onclick = ()=>{
+        closeNotice();
+        openMsg(first.id);
+      };
+      document.getElementById("noticeOverlay").style.display = "flex";
+    }
+  }
+
+  // au chargement
+  refreshUnread();
+
+  // si URL ?open=ID
+  const params = new URLSearchParams(window.location.search);
+  const openId = params.get("open");
+  if(openId) openMsg(openId);
+
+  // refresh auto notifications toutes les 20s
+  setInterval(refreshUnread, 20000);
+
+  // popup une seule fois après 1.5s
+  setTimeout(checkPopup, 1500);
+</script>
+{% endblock %}

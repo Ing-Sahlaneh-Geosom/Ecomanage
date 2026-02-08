@@ -1,0 +1,84 @@
+{% load tz %}
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Reçu {{ object.numero }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 24px; }
+    .box { max-width: 820px; margin: 0 auto; border: 1px solid #ddd; padding: 18px; border-radius: 10px; }
+    .muted { color: #666; font-size: 13px; }
+    table { width:100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #f5f5f5; }
+    .right { text-align: right; }
+    .btns { margin: 12px auto; max-width: 820px; display: flex; gap: 10px; justify-content: end; }
+    @media print { .btns { display:none; } body{ padding:0; } .box{ border:none; } }
+  </style>
+</head>
+<body>
+
+<div class="btns">
+  <button onclick="window.print()">Imprimer</button>
+  <button onclick="window.location.href='{% url "caisse" %}'">Retour</button>
+</div>
+
+<div class="box">
+  <h2 style="margin:0;">REÇU DE CAISSE</h2>
+  <div class="muted">N° {{ object.numero }} — {{ object.date_operation|localtime|date:"d/m/Y H:i" }}</div>
+
+  <hr>
+
+  <div style="display:flex; justify-content:space-between; gap:16px;">
+    <div>
+      <div><b>Élève :</b> {{ object.eleve.nom }}</div>
+      <div class="muted">{{ object.eleve.classe.niveau }} - {{ object.eleve.classe.nom }}</div>
+      <div class="muted"><b>Année :</b> {{ object.annee_scolaire }}</div>
+    </div>
+    <div class="right">
+      <div><b>Mode :</b> {{ object.mode }}</div>
+      <div class="muted"><b>Réf :</b> {{ object.numero|default:"—" }}</div>
+      <div class="muted"><b>Caissier :</b> {{ object.caissier }}</div>
+    </div>
+  </div>
+
+  <table>
+  <thead>
+    <tr>
+      <th>Type frais</th>
+      <th class="right">Facturé</th>
+      <th class="right">Payé</th>
+      <th class="right">Restant</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.type }}</td>
+      <td class="right">{{ r.facture }} {{ r.devise }}</td>
+      <td class="right">{{ r.paye }} {{ r.devise }}</td>
+      <td class="right"><b>{{ r.reste }} {{ r.devise }}</b></td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td class="right" colspan="3"><b>Total payé (ce reçu)</b></td>
+      <td class="right"><b>{{ object.total }} {{ object.devise }}</b></td>
+    </tr>
+  </tbody>
+</table>
+
+
+  {% if object.note %}
+    <p class="muted"><b>Note :</b> {{ object.note }}</p>
+  {% endif %}
+
+  <div style="margin-top:22px; display:flex; justify-content:space-between;">
+    <div class="muted">Signature Caissier</div>
+    <div class="muted">Signature Parent / Élève</div>
+  </div>
+</div>
+
+</body>
+</html>

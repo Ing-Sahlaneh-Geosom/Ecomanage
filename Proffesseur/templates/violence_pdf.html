@@ -1,0 +1,72 @@
+{% load i18n static %}
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<head>
+  <meta charset="utf-8">
+  <title>{% trans "Violences" %}</title>
+
+  <style>
+    /* ✅ Charger une police locale (ton fichier existe déjà) */
+    @font-face{
+      font-family: "DejaVuSans";
+      src: url("file:///{{ font_path|cut:'\\'|add:'/' }}") format("truetype");
+    }
+
+    body, table, th, td, h2, p, b, div, span {
+      font-family: "DejaVuSans", Arial, sans-serif;
+      font-size: 11px;
+      color:#111;
+    }
+
+    h2 { margin: 0 0 8px; }
+    .meta { margin: 0 0 12px; color:#444; }
+
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid #ccc; padding:6px; vertical-align:top; }
+    th { background:#f2f2f2; }
+
+    /* RTL */
+    .rtl { direction: rtl; text-align: right; }
+  </style>
+</head>
+
+<body class="{% if LANGUAGE_BIDI %}rtl{% endif %}">
+  <h2>{% trans "Violences scolaires — Rapport" %}</h2>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>{% trans "Agresseur" %}</th>
+        <th>{% trans "Classe" %}</th>
+        <th>{% trans "Victime" %}</th>
+        <th>{% trans "Classe" %}</th>
+        <th>{% trans "Forme" %}</th>
+        <th>{% trans "Cause" %}</th>
+        <th>{% trans "Dommage" %}</th>
+        <th>{% trans "Résolution" %}</th>
+        <th>{% trans "Date" %}</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for v in violences %}
+      <tr>
+        <td>{{ v.agresseur.nom }}</td>
+        <td>{% if v.agresseur.classe %}{{ v.agresseur.classe.nom }}{% endif %}</td>
+
+        <td>{{ v.victime.nom }}</td>
+        <td>{% if v.victime.classe %}{{ v.victime.classe.nom }}{% endif %}</td>
+
+        <td>{{ v.forme_agression }}</td>
+        <td>{{ v.cause_violence }}</td>
+        <td>{{ v.dommage_corporel }}</td>
+        <td>{{ v.moyens_resolution }}</td>
+        <td>{{ v.date|date:"d-m-Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9">{% trans "Aucun enregistrement" %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h4 class="mb-0">{{ d.nom }}</h4>
+  <a class="btn btn-outline-secondary" href="{% url 'devoir_list' %}">Retour</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card"><div class="card-body">
+      <p><strong>Période:</strong> {{ d.periode.nom }}</p>
+      <p><strong>Matière:</strong> {{ d.matiere.nom }}</p>
+      <p><strong>Prof:</strong> {{ d.professeur.nom_conplet }}</p>
+      <p><strong>Points:</strong> {{ d.points }}</p>
+      <p><strong>Coefficient:</strong> {{ d.coefficient }}</p>
+    </div></div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card"><div class="card-body">
+      <h6>Classes concernées</h6>
+      <ul class="mb-0">
+        {% for c in d.classes.all %}
+          <li>{{ c.nom }} ({{ c.niveau.nom }})</li>
+        {% endfor %}
+      </ul>
+    </div></div>
+  </div>
+</div>
+
+{% endblock %}

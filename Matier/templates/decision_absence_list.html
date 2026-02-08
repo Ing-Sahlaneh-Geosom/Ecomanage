@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block main %}
+<div class="container py-3">
+  <h5 class="mb-3">CONFIGURATION DES APPRÉCIATIONS</h5>
+  {% include "_tabs.html" %}
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Absence decision</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Ajouter</button>
+      </div>
+
+      <div class="d-flex justify-content-end mb-3">
+        <form method="get" class="d-flex" style="max-width:320px;">
+          <input class="form-control" name="q" value="{{ q }}" placeholder="Rechercher ici">
+        </form>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Décision d'absence</th>
+              <th>Statut</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in items %}
+              <tr>
+                <td>{{ it.max_abs }}</td>
+                <td>{{ it.get_statut_display }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ it.id }}">✏️</button>
+                  <form method="post" action="{% url 'decision_absence_delete' it.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ?')">🗑️</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="text-muted">Aucun enregistrement à afficher</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Absence Decision</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'decision_absence_create' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Max Abs *</label>
+              {{ form.max_abs }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Statut</label>
+              {{ form.statut }}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-light" type="button" data-bs-dismiss="modal">Fermer</button>
+          <button class="btn btn-dark" type="submit">Sauvegarder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% for it in items %}
+<div class="modal fade" id="editModal{{ it.id }}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modifier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'decision_absence_update' it.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Max Abs *</label>
+              <input class="form-control" type="number" min="0" name="max_abs" value="{{ it.max_abs }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Statut</label>
+              <select name="statut" class="form-select">
+                {% for v,l in it.STATUT_CHOICES %}
+                  <option value="{{ v }}" {% if v == it.statut %}selected{% endif %}>{{ l }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" name="actif" {% if it.actif %}checked{% endif %}>
+            <label class="form-check-label">Actif</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-light" type="button" data-bs-dismiss="modal">Fermer</button>
+          <button class="btn btn-dark" type="submit">Sauvegarder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

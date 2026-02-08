@@ -1,0 +1,21 @@
+{% extends 'parametre.html'%}
+{% block title %} <title>Changer l'annee </title> {% endblock %}
+{% block main %}
+<div class="container m-5">
+    <h1>Changer L'annee en cour</h1>
+    <form action="{% url 'changer_annee'%}" method="POST">
+                    {% csrf_token %}
+
+                     <select name="annee_scolaire_id" onchange="this.form.submit()" class="form-select w-auto d-inline">
+                       
+                        {% for annee in annees %}
+                          <option value="{{ annee.id }}" {% if annee.id == annee_active.id %} selected {% endif %}>
+                            {{ annee.nom }}
+                          </option>
+                        {% endfor %}
+                     </select>
+                     </form>
+                </li>
+</div>
+
+{% endblock %}

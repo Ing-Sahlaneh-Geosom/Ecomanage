@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}{% trans "Détails de la classe" %} - {{ classe.nom }}{% endblock %}
+
+{% block main %}
+<div class="container py-4" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <h2 class="m-0 text-dark">
+      {% trans "Classe" %} : {{ classe.nom }}
+    </h2>
+
+    <a href="{% url 'ListeDesClasse'%}" class="btn btn-outline-dark">
+      {% trans "Retour à la liste" %}
+    </a>
+  </div>
+
+  {% if eleves %}
+    <div class="mb-3 text-dark">
+      <strong>{% trans "Nombre d’élèves" %} :</strong> {{ eleves|length }}
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle bg-light">
+        <thead class="table-primary">
+          <tr>
+            <th>N°</th>
+            <th>{% trans "Nom" %}</th>
+            <th>{% trans "Photo" %}</th>
+            <th>{% trans "Date de naissance" %}</th>
+            <th>{% trans "Sexe" %}</th>
+            <th>{% trans "Adresse" %}</th>
+            <th>{% trans "Téléphone" %}</th>
+            <th>Email</th>
+            <th>{% trans "Classe" %}</th>
+            <th>{% trans "Détails" %}</th>
+            <th>{% trans "Modifier" %}</th>
+            <th>{% trans "Supprimer" %}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for eleve in eleves %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ eleve.nom }}</td>
+              <td>
+                {% if eleve.photo %}
+                  <img src="{{ eleve.photo.url }}" alt="{% trans 'Photo de l’élève' %}" height="50" width="50" style="object-fit:cover;border-radius:8px;">
+                {% else %}
+                  <span class="text-muted">{% trans "Aucune photo" %}</span>
+                {% endif %}
+              </td>
+              <td>{{ eleve.date_naissancce }}</td>
+              <td>{{ eleve.Sexe }}</td>
+              <td>{{ eleve.adrress }}</td>
+              <td>{{ eleve.telephone }}</td>
+              <td>{{ eleve.email }}</td>
+              <td>{{ eleve.classe }}</td>
+
+              <td>
+                <a href="{% url 'detaille' id=eleve.id %}" class="btn btn-sm btn-outline-primary">
+                  {% trans "Voir" %}
+                </a>
+              </td>
+              <td>
+                <a href="{% url 'EditView' eleve.pk %}" class="btn btn-sm btn-outline-success">
+                  {% trans "Modifier" %}
+                </a>
+              </td>
+              <td>
+                <a href="{% url 'Supprimer' eleve.pk %}" class="btn btn-sm btn-outline-danger">
+                  {% trans "Supprimer" %}
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  {% else %}
+    <div class="alert alert-danger">
+      {% trans "Aucun élève n’est inscrit dans cette classe." %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

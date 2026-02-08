@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block main %}
+{% include "_taps.html" %}
+
+<h4 class="mb-3">Dispenses</h4>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card"><div class="card-body">
+      <h6>Ajouter une dispense</h6>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-2">{{ form.eleve.label_tag }}{{ form.eleve }}</div>
+        <div class="mb-2">{{ form.matiere.label_tag }}{{ form.matiere }}</div>
+        <div class="mb-2">{{ form.periode.label_tag }}{{ form.periode }}</div>
+        <div class="mb-2">{{ form.valeur.label_tag }}{{ form.valeur }}</div>
+        <div class="mb-2">{{ form.motif.label_tag }}{{ form.motif }}</div>
+        <button class="btn btn-warning w-100">Enregistrer</button>
+      </form>
+    </div></div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card"><div class="card-body">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Élève</th>
+            <th>Matière</th>
+            <th>Période</th>
+            <th>Valeur</th>
+            <th>Motif</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x in items %}
+          <tr>
+            <td>{{ x.eleve.nom }}</td>
+            <td>{{ x.matiere.nom }}</td>
+            <td>{{ x.periode.nom }}</td>
+            <td><span class="badge bg-warning text-dark">{{ x.valeur }}</span></td>
+            <td>{{ x.motif|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">Aucune dispense</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+</div>
+
+{% endblock %}

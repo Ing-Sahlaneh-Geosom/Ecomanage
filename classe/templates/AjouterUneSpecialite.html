@@ -1,0 +1,55 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block title %} Ajouter Un Specialite {% endblock %}
+{% block main %}
+
+<div class="containaire">
+    <h2>{{ Title }} </h2>
+    {% if form.errors %}
+        <div class="error-messages bg-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+<form method="post" id="classeForm">
+  {% csrf_token %}
+
+  <div class="row g-3">
+
+    <div class="col-md-6">
+      <label class="form-label">Nom <span class="text-danger">*</span></label>
+      {{ form.nom }}
+    </div>
+
+    
+    
+    <div class="col-md-6">
+      <label class="form-label"> Niveau <span class="text-danger">*</span></label>
+      {{ form.niveau }}
+    </div>
+    <!-- Spécialité (cachée par défaut) -->
+    
+   
+    
+
+    <div class="col-md-12 d-flex justify-content-end gap-2 mt-3">
+      <a class="btn btn-success" href="{% url 'ListeDesClasse'%}">Retour</a>
+      <button type="submit" class="btn btn-dark">
+        Enregistre
+      </button>
+    </div>
+
+  </div>
+</form>
+
+
+</div>
+
+
+
+{% endblock %}

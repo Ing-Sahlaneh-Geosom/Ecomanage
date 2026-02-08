@@ -1,0 +1,456 @@
+{% extends 'base.html'%}
+{% load static %}
+{% load i18n %}
+{% block title %} {% trans "Certificat scolaire" %} {% endblock  %}
+{% block main %}
+  <style>
+    body{ background:#f4f6f9; }
+    .wrap{ max-width:1100px; margin:0 auto; padding:18px; }
+    .cardx{ background:#fff; border:1px solid #e9edf2; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+    .headerx{ padding:16px 18px; border-bottom:1px solid #e9edf2; }
+    .headerx h4{ margin:0; font-weight:800; }
+    .required:after{ content:" *"; color:#d00; }
+
+    @media print {
+      .no-print,
+      header, nav, aside,
+      .navbar, .topbar, .sidebar,
+      .content-header, .app-header, .app-sidebar,
+      .main-header, .main-sidebar {
+        display: none !important;
+      }
+      body, html { background: #fff !important; }
+      .wrap, .cardx, .print-area, #certBox {
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .wrap {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+      }
+    }
+
+    .print-area{ padding:18px; }
+    .cert{
+      background:#fff;
+      border:1px solid #d9d9d9;
+      border-radius:10px;
+      padding:26px;
+      max-width: 210mm;
+      margin: 0 auto;
+      position: relative;
+      min-height: 260mm;
+    }
+
+    .grid-top{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      gap:12px;
+      align-items:start;
+    }
+
+    .leftblock{ font-size:13px; color:#111; }
+    .leftblock strong{ font-weight:800; }
+
+    .arabic{ direction:rtl; text-align:right; font-size:13px; margin-right: 2rem; color:#111; font-weight:600; }
+
+    .logo-mid{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding-top:2px;
+    }
+    .logo-mid img{
+      max-height:70px;
+      max-width:90px;
+      object-fit:contain;
+    }
+
+    .hr{ height:1px; background:#d9d9d9; margin:14px 0; }
+
+    .school{ font-size:13px; color:#111; }
+    .school strong{ font-weight:800; }
+
+    .titleWrap{ margin:16px 0 18px; text-align:center; }
+    .titleBadge{
+      display:inline-block;
+      padding:10px 18px;
+      border-radius:6px;
+      border:1px solid #cfcfcf;
+      background: #f1f1f1;
+      font-weight:900;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      color:#111;
+      min-width: 70%;
+    }
+
+    .line{ margin:8px 0; font-size:14px; color:#111; }
+    .label{ font-weight:800; }
+
+    .cert-footer{
+      position:absolute;
+      left:26px;
+      right:26px;
+      bottom:18px;
+      border-top:1px solid #d9d9d9;
+      padding-top:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      font-size:12px;
+      color:#111;
+    }
+    .cert-footer .left{ text-align:left; font-weight:700; }
+    .cert-footer .right{ text-align:right; font-weight:600; }
+    .cert-footer .muted{ font-weight:500; color:#444; }
+
+    @page { size:A4; margin: 12mm; }
+    @media print{
+      body{ background:#fff !important; }
+      .no-print{ display:none !important; }
+      .wrap{ padding:0 !important; max-width:none !important; }
+      .cardx{ border:none !important; box-shadow:none !important; }
+      .cert{ border:none !important; padding:0 !important; min-height:auto !important; }
+      .cert-footer{ position:relative !important; left:auto !important; right:auto !important; bottom:auto !important; margin-top:12px; }
+    }
+  </style>
+
+  <div class="wrap">
+    <div class="cardx">
+
+      <div class="headerx no-print">
+        <h4>{% trans "Certificat de scolarité" %}</h4>
+      </div>
+
+      <!-- FILTRES -->
+      <div class="p-3 no-print">
+        <div class="row g-3 align-items-end">
+
+          <div class="col-md-4">
+            <label class="form-label required">{% trans "Honorifique" %}</label>
+            <select id="honorifique" class="form-select">
+              <option value="Dr">{% trans "Dr" %}</option>
+              <option value="Monsieur" selected>{% trans "Monsieur" %}</option>
+              <option value="Madame">{% trans "Madame" %}</option>
+              <option value="Mademoiselle">{% trans "Mademoiselle" %}</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label required">{% trans "Chef d'établissement" %}</label>
+            <select id="chef_user" class="form-select">
+              <option value="">{% trans "Sélectionner..." %}</option>
+              {% for u in chefs %}
+                <option value="{{ u.id }}" data-role="{{ u.get_role_display }}">
+                  {% if u.nom_complet %}{{ u.nom_complet }}{% else %}{{ u.username }}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label required">{% trans "Titre" %}</label>
+            <input id="titre" class="form-control" value="" readonly>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label required">{% trans "Niveaux" %}</label>
+            <select id="niveau" class="form-select">
+              <option value="">{% trans "Sélectionner..." %}</option>
+              {% for n in niveaux %}
+                <option value="{{ n.id }}">{{ n.nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label required">{% trans "La liste des classes" %}</label>
+            <select id="classe" class="form-select" disabled>
+              <option value="">{% trans "Sélectionner..." %}</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label required">{% trans "Élève" %}</label>
+            <select id="eleve" class="form-select" disabled>
+              <option value="">{% trans "Sélectionner..." %}</option>
+            </select>
+          </div>
+
+          <div class="col-12 d-flex justify-content-end">
+            <button id="btnPrint" class="btn btn-primary px-4" type="button" disabled>
+              🖨️ {% trans "Imprimer" %}
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CERTIFICAT -->
+      <div class="print-area">
+        <div class="cert" id="certBox">
+
+          <!-- ✅ Haut: FR/EN (gauche) | LOGO | AR (droite) -->
+          <div class="grid-top">
+            <div class="leftblock">
+              <strong>REPUBLIQUE DE DJIBOUTI</strong><br>
+              Unité - Égalité - Paix<br><br>
+              
+            </div>
+
+            <div class="logo-mid">
+              {% if ecole and ecole.logo %}
+                <img src="{{ ecole.logo.url }}" alt="{% trans 'Logo École' %}">
+              {% else %}
+                <img src="{% static 'img/logo-ecole.png' %}" alt="{% trans 'Logo École' %}">
+              {% endif %}
+            </div>
+
+            <div class="arabic">
+              جمهورية جيبوتي وحدة – مساواة – سالم<br>
+              وزارة التربية الوطنية والتكوين المهني
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="grid" style="grid-template-columns:1fr 1fr;">
+            <div class="school">
+              <div><strong id="vTypeEtab">{% if ecole %}{{ ecole.type_etablissement|default:"" }}{% endif %}</strong></div>
+              <div><strong id="vEcole">{% if ecole %}{{ ecole.nom }}{% else %}{% trans "CEM ARTA" %}{% endif %}</strong></div>
+              <div>{% trans "Téléphone" %}: <span id="vTel">{% if ecole and ecole.telephone %}{{ ecole.telephone }}{% else %}21{% endif %}</span></div>
+              <div>{% trans "E-mail" %}: <span id="vEmail">{% if ecole and ecole.email %}{{ ecole.email }}{% else %}CEMARTA@gmail.com{% endif %}</span></div>
+            </div>
+
+            <div class="school" style="text-align:right;">
+              <div>{% trans "Année scolaire" %}: <strong id="vAnnee">{% if annee %}{{ annee.nom }}{% endif %}</strong></div>
+              <div>{% trans "Fait à Djibouti, le" %} <strong id="vDate">{{ today|date:"d-m-Y" }}</strong></div>
+            </div>
+          </div>
+
+          <div class="titleWrap">
+            <div class="titleBadge">{% trans "CERTIFICAT DE SCOLARITE" %}</div>
+          </div>
+
+          <div class="line">
+            {% trans "Je soussigné," %}
+            <span class="label" id="vHonorifique">{% trans "Monsieur" %}</span>
+            <span class="label" id="vChef">{% trans "Utilisateur inconnu" %}</span>,
+            <span id="vTitre">—</span>
+            <span id="vEcoleInline">{% if ecole %}{{ ecole.nom }}{% else %}{% trans "CEM ARTA" %}{% endif %}</span>
+            {% trans "certifie que l’élève :" %}
+          </div>
+
+          <div class="line">
+            <span class="label">{% trans "Matricule" %}:</span> <span id="vMatricule">—</span>
+          </div>
+
+          <div class="line">
+            <span class="label" id="vNom">—</span>
+          </div>
+
+          <div class="line">
+            {% trans "Né(e) :" %} <span id="vNaissance">—</span> &nbsp;
+            {% trans "À :" %} <span id="vLieu">—</span>
+          </div>
+
+          <div class="line">{% trans "Poursuit ses études dans notre établissement." %}</div>
+
+          <div class="line">
+            {% trans "En classe de :" %} <span class="label" id="vClasse">—</span>.
+          </div>
+
+          <div class="line">
+            {% trans "Année scolaire :" %} <span class="label" id="vAnnee2">{% if annee %}{{ annee.nom }}{% endif %}</span>
+          </div>
+
+          <div class="line">
+            {% trans "Le présent certificat est délivré à la demande de l'intéressé(e) pour servir et valoir ce que de droit." %}
+          </div>
+
+          <div class="cert-footer">
+            <div class="left">
+              {% trans "Chef d'établissement" %}<br>
+              <span id="vChef2">—</span>
+
+              {% if ecole and ecole.signature %}
+                <img src="{{ ecole.signature.url }}" alt="{% trans 'Signature' %}" style="max-height:90px; max-width:240px;">
+              {% else %}
+                <div style="height:90px;">____</div>
+              {% endif %}
+            </div>
+
+            <div class="right">
+              <span class="muted">{% if ecole %}{{ ecole.nom }}{% endif %}</span><br>
+              <span class="muted">{% trans "Année" %}: {% if annee %}{{ annee.nom }}{% endif %}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  const URL_CLASSES = "{% url 'ajax_classes_by_niveau_scolarite' %}";
+  const URL_ELEVES  = "{% url 'ajax_eleves_by_classe_scolarite' %}";
+  const URL_INFO    = "{% url 'ajax_eleve_info_scolarite' %}";
+
+  // ✅ Textes traduisibles pour JS
+  const TXT_SELECT = "{% trans 'Sélectionner...' %}";
+  const TXT_DASH   = "—";
+
+  const honorifique = document.getElementById("honorifique");
+  const chefUser    = document.getElementById("chef_user");
+  const titre       = document.getElementById("titre");
+  const setNiveau   = document.getElementById("niveau");
+  const setClasse   = document.getElementById("classe");
+  const setEleve    = document.getElementById("eleve");
+  const btnPrint    = document.getElementById("btnPrint");
+
+  function setQS(key, val){
+    const u = new URL(window.location.href);
+    if(val) u.searchParams.set(key, val);
+    else u.searchParams.delete(key);
+    history.replaceState({}, "", u.toString());
+  }
+
+  function setOptions(sel, items){
+    sel.innerHTML = `<option value="">${TXT_SELECT}</option>`;
+    (items || []).forEach(it=>{
+      const o = document.createElement("option");
+      o.value = it.id;
+      o.textContent = it.label;
+      sel.appendChild(o);
+    });
+  }
+
+  async function fetchJSON(url){
+    const r = await fetch(url, {headers: {"X-Requested-With":"XMLHttpRequest"}, cache:"no-store"});
+    const ct = (r.headers.get("content-type") || "").toLowerCase();
+    if(!ct.includes("application/json")) return {ok:false};
+    return await r.json();
+  }
+
+  function safeSetText(id, value){
+    const el = document.getElementById(id);
+    if(el) el.textContent = value;
+  }
+
+  function syncHonor(){
+    safeSetText("vHonorifique", honorifique.value || TXT_DASH);
+    setQS("honorifique", honorifique.value || "");
+  }
+
+  function syncChef(){
+    const opt = chefUser.options[chefUser.selectedIndex] || null;
+
+    const chefName = (opt && opt.value) ? opt.textContent.trim() : TXT_DASH;
+    const roleLabel = (opt && opt.value) ? (opt.getAttribute("data-role") || "") : "";
+
+    titre.value = roleLabel || "";
+
+    safeSetText("vChef", chefName);
+    safeSetText("vChef2", chefName);
+    safeSetText("vTitre", titre.value || TXT_DASH);
+
+    setQS("chef_user", chefUser.value || "");
+  }
+
+  honorifique.addEventListener("change", syncHonor);
+  chefUser.addEventListener("change", syncChef);
+
+  setNiveau.addEventListener("change", async ()=>{
+    setQS("niveau_id", setNiveau.value || "");
+    setQS("classe_id", "");
+    setQS("eleve_id", "");
+
+    btnPrint.disabled = true;
+
+    setOptions(setClasse, []);
+    setOptions(setEleve, []);
+    setClasse.disabled = true;
+    setEleve.disabled = true;
+
+    safeSetText("vMatricule", TXT_DASH);
+    safeSetText("vNom", TXT_DASH);
+    safeSetText("vNaissance", TXT_DASH);
+    safeSetText("vLieu", TXT_DASH);
+    safeSetText("vClasse", TXT_DASH);
+
+    if(!setNiveau.value) return;
+
+    const data = await fetchJSON(`${URL_CLASSES}?niveau_id=${encodeURIComponent(setNiveau.value)}`);
+    if(data.ok){
+      setOptions(setClasse, data.classes || []);
+      setClasse.disabled = false;
+    }
+  });
+
+  setClasse.addEventListener("change", async ()=>{
+    setQS("classe_id", setClasse.value || "");
+    setQS("eleve_id", "");
+
+    btnPrint.disabled = true;
+
+    setOptions(setEleve, []);
+    setEleve.disabled = true;
+
+    safeSetText("vMatricule", TXT_DASH);
+    safeSetText("vNom", TXT_DASH);
+    safeSetText("vNaissance", TXT_DASH);
+    safeSetText("vLieu", TXT_DASH);
+    safeSetText("vClasse", TXT_DASH);
+
+    if(!setClasse.value) return;
+
+    const data = await fetchJSON(`${URL_ELEVES}?classe_id=${encodeURIComponent(setClasse.value)}`);
+    if(data.ok){
+      setOptions(setEleve, data.eleves || []);
+      setEleve.disabled = false;
+    }
+  });
+
+  setEleve.addEventListener("change", async ()=>{
+    setQS("eleve_id", setEleve.value || "");
+
+    btnPrint.disabled = !setEleve.value;
+    if(!setEleve.value) return;
+
+    const data = await fetchJSON(`${URL_INFO}?eleve_id=${encodeURIComponent(setEleve.value)}`);
+    if(!data.ok) return;
+
+    const e = data.eleve || {};
+
+    safeSetText("vMatricule", e.matricule || TXT_DASH);
+    safeSetText("vNom", (e.nom ? e.nom.toUpperCase() : TXT_DASH));
+    safeSetText("vNaissance", e.date_naissance || TXT_DASH);
+    safeSetText("vLieu", e.lieu_naissance || TXT_DASH);
+
+    const classeTxt = (e.niveau && e.classe) ? `${e.niveau} - ${e.classe}` : (e.classe || TXT_DASH);
+    safeSetText("vClasse", classeTxt);
+
+    if(e.annee){
+      safeSetText("vAnnee", e.annee);
+      safeSetText("vAnnee2", e.annee);
+    }
+    if(e.ecole) safeSetText("vEcole", e.ecole);
+    if(e.tel) safeSetText("vTel", e.tel);
+    if(e.email) safeSetText("vEmail", e.email);
+
+    const inlineEl = document.getElementById("vEcoleInline");
+    if(inlineEl) inlineEl.textContent = e.ecole || inlineEl.textContent;
+  });
+
+  btnPrint.addEventListener("click", ()=> window.print());
+
+  // init
+  syncHonor();
+  syncChef();
+</script>
+
+{% endblock %}

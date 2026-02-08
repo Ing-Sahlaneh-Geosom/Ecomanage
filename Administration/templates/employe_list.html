@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+{% block title %} Employés {% endblock %}
+{% block main %}
+
+<style>
+  /* ===== Page style (simple, compatible main-content dark) ===== */
+  /* =========================
+   FIX VISIBILITÉ LIGNES TABLE (DARK MODE)
+   ========================= */
+
+/* Forcer fond sombre pour TOUTES les lignes */
+.emp-card table tbody tr {
+  background: transparent !important;
+}
+
+/* Zebra dark (optionnel mais recommandé) */
+.emp-card table tbody tr:nth-child(odd) {
+  background: rgba(255,255,255,0.04) !important;
+}
+
+.emp-card table tbody tr:nth-child(even) {
+  background: rgba(255,255,255,0.08) !important;
+}
+
+/* Texte toujours visible */
+.emp-card table tbody td {
+  color: #e5e7eb !important;
+}
+
+/* Hover propre */
+.emp-card table tbody tr:hover {
+  background: rgba(15,107,77,0.25) !important;
+}
+
+  .emp-wrap{ max-width:1200px; margin:0 auto; }
+  .emp-top{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .emp-top h5{ margin:0; color:#e5e7eb; font-weight:700; }
+
+  .emp-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .emp-search{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.14);
+    padding:10px 14px;
+    border-radius:999px;
+    min-width:320px;
+  }
+  .emp-search input{
+    border:0; outline:0; background:transparent; width:100%;
+    color:#e5e7eb;
+  }
+  .emp-search input::placeholder{ color:rgba(229,231,235,.7); }
+
+  .emp-btn{
+    border:0; cursor:pointer;
+    padding:10px 14px; border-radius:10px;
+    font-weight:700;
+    background:#0f6b4d; color:#fff;
+  }
+  .emp-btn:hover{ filter:brightness(.95); }
+
+  .emp-card{
+    margin-top:14px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  table{ width:100%; border-collapse:collapse; }
+  th,td{ padding:14px 12px; border-bottom:1px solid rgba(255,255,255,.10); text-align:left; }
+  th{ color:rgba(229,231,235,.8); font-weight:700; background:rgba(255,255,255,.05); }
+  td{ color:#e5e7eb; }
+  .t-muted{ color:rgba(229,231,235,.7); font-size:12px; }
+  .badge{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);
+    font-weight:700;
+    font-size:12px;
+  }
+  .badge.ok{ background:rgba(16,185,129,.14); border-color:rgba(16,185,129,.25); }
+  .badge.no{ background:rgba(244,63,94,.14); border-color:rgba(244,63,94,.25); }
+
+  .act-btn{
+    border:0; background:transparent; cursor:pointer;
+    font-weight:700;
+    padding:6px 8px;
+  }
+  .act-btn.edit{ color:#60a5fa; }
+  .act-btn.del{ color:#fb7185; }
+
+  @media (max-width: 720px){
+    th:nth-child(2), td:nth-child(2){ display:none; } /* hide matricule */
+    .emp-search{ min-width:100%; }
+  }
+
+  /* =========================
+     ✅ Modal CSS EXACT
+     ========================= */
+  .m-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.45);
+    display:none; align-items:center; justify-content:center;
+    padding:16px; z-index:9999;
+  }
+  .m-overlay.show{ display:flex; }
+
+  .m-box{
+    width:min(980px, 100%);
+    max-height: calc(100vh - 24px);
+    background:#fff;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 25px 80px rgba(0,0,0,.25);
+    display:flex;
+    flex-direction:column;
+  }
+  .m-head{
+    padding:14px 18px;
+    border-bottom:1px solid #e7e7e7;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .m-head h5{ margin:0; font-weight:600; font-size:18px; }
+  .m-close{
+    width:34px; height:34px; border-radius:8px;
+    border:1px solid #ddd; background:#fff;
+    cursor:pointer; font-size:18px; line-height:1;
+  }
+  .m-body{ padding:14px 18px; overflow:auto; }
+
+  .m-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:12px;
+  }
+  .m-col-2{ grid-column: span 2; }
+  .m-col-3{ grid-column: 1 / -1; }
+
+  .m-field label{
+    display:block; font-size:12px; color:#555; margin:0 0 6px;
+  }
+  .req{ color:#d11; font-weight:700; }
+
+  .m-input, .m-select{
+    width:100%;
+    border:1px solid #d9d9d9;
+    border-radius:4px;
+    padding:10px 10px;
+    outline:none;
+    font-size:13px;
+    background:#fff;
+  }
+
+  .m-foot{
+    padding:12px 18px;
+    border-top:1px solid #e7e7e7;
+    display:flex; justify-content:flex-end; gap:10px;
+    background:#fafafa;
+  }
+  .m-btn{
+    border:1px solid #d0d0d0;
+    background:#fff;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .m-btn.primary{
+    background:#0f6b4d;
+    border-color:#0f6b4d;
+    color:#fff;
+  }
+
+  .m-msg{
+    display:none;
+    margin:0 0 12px;
+    padding:10px 12px;
+    border-radius:6px;
+    border:1px solid #ddd;
+    background:#f6f6f6;
+    font-size:13px;
+    white-space:pre-line; /* ✅ pour afficher \n */
+  }
+  .m-msg.show{ display:block; }
+  .m-msg.err{ border-color:#f0b4b4; background:#fff1f1; }
+  .m-msg.ok{ border-color:#bfe8c9; background:#f0fff4; }
+
+  @media (max-width: 900px){
+    .m-grid{ grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px){
+    .m-grid{ grid-template-columns: 1fr; }
+    .m-col-2, .m-col-3{ grid-column:auto; }
+    .m-box{ border-radius:8px; }
+  }
+</style>
+
+<div class="emp-wrap">
+  <div class="emp-top">
+    <h5>Inscription des employés</h5>
+
+    <div class="emp-actions">
+      <form class="emp-search" method="get">
+        <span style="color:#e5e7eb">🔎</span>
+        <input name="q" value="{{ q|default:'' }}" placeholder="Rechercher ici (nom, matricule)">
+      </form>
+      <button class="emp-btn" id="btnOpenModal" type="button">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="emp-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Matricule</th>
+          <th>Fonction</th>
+          <th>Statut</th>
+          <th style="width:110px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+          <tr data-id="{{ it.id }}">
+            <td>
+              <div style="font-weight:700">{{ it.nom_complet }}</div>
+              <div class="t-muted">
+                {{ it.telephone|default:"" }}{% if it.email %} • {{ it.email }}{% endif %}
+              </div>
+            </td>
+            <td style="font-weight:700">{{ it.matricule }}</td>
+            <td>
+              <span class="badge">
+                {% if it.fonction == "autre" and it.autre_fonction %}
+                  {{ it.autre_fonction }}
+                {% else %}
+                  {{ it.get_fonction_display }}
+                {% endif %}
+              </span>
+            </td>
+            <td>
+              {% if it.statut == "active" %}
+                <span class="badge ok">● Active</span>
+              {% else %}
+                <span class="badge no">● Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <button class="act-btn edit btnEdit" type="button" title="Modifier">✎</button>
+              <button class="act-btn del btnDelete" type="button" title="Supprimer">🗑</button>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="t-muted" style="padding:16px">Aucun employé.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ✅ MODAL -->
+<div class="m-overlay" id="modalOverlay" aria-hidden="true">
+  <div class="m-box" role="dialog" aria-modal="true">
+    <div class="m-head">
+      <div style="width:34px"></div>
+      <h5 class="text-center w-100" style="margin-left:-34px" id="modalTitle">Ajouter un employé</h5>
+      <button class="m-close" id="btnCloseModal" type="button">×</button>
+    </div>
+
+    <div class="m-body">
+      <div class="m-msg" id="modalMsg"></div>
+
+      <input type="hidden" id="e_id" value="">
+
+      <div class="m-grid">
+        <div class="m-field">
+          <label>Nom de l'employé<span class="req">*</span></label>
+          <input class="m-input" id="nom_complet" placeholder="Nom complet">
+        </div>
+
+       
+
+        <div class="m-field">
+          <label>Sexe<span class="req">*</span></label>
+          <select class="m-select" id="sexe">
+            <option value="M">M</option>
+            <option value="F">F</option>
+          </select>
+        </div>
+
+        <div class="m-field">
+          <label>Téléphone</label>
+          <input class="m-input" id="telephone" placeholder="Téléphone">
+        </div>
+
+        <div class="m-field">
+          <label>E-mail</label>
+          <input class="m-input" id="email" placeholder="Email">
+        </div>
+
+        <div class="m-field">
+          <label>Fonction<span class="req">*</span></label>
+          <select class="m-select" id="fonction">
+            <option value="">Select...</option>
+            {% for v, t in form.fields.fonction.choices %}
+              {% if v %}<option value="{{ v }}">{{ t }}</option>{% endif %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="m-field m-col-2" id="otherWrap" style="display:none;">
+          <label>Préciser (Autre)<span class="req">*</span></label>
+          <input class="m-input" id="autre_fonction" placeholder="Ex: Agent de sécurité nuit">
+        </div>
+
+        <div class="m-field">
+          <label>Statut<span class="req">*</span></label>
+          <select class="m-select" id="statut">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div class="m-field">
+          <label>Bureau</label>
+          <input class="m-input" id="bureau" placeholder="Bureau (optionnel)">
+        </div>
+
+        <div class="m-field">
+          <label>Date d'embauche</label>
+          <input class="m-input" type="date" id="date_embauche">
+        </div>
+
+        <div class="m-field">
+          <label>Working Hours<span class="req">*</span></label>
+          <input class="m-input" type="number" min="1" max="24" id="working_hours" value="8">
+        </div>
+      </div>
+    </div>
+
+    <div class="m-foot">
+      <button class="m-btn" type="button" id="btnCancel">Fermer</button>
+      <button class="m-btn primary" type="button" id="btnSave">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ✅ URLs Django (no hardcode) */
+  const URL_CREATE = "{% url 'employe_create' %}";
+  const URL_GET    = (id) => "{% url 'employe_get' 0 %}".replace("/0/", `/${id}/`);
+  const URL_UPDATE = (id) => "{% url 'employe_update' 0 %}".replace("/0/", `/${id}/`);
+  const URL_DELETE = (id) => "{% url 'employe_delete' 0 %}".replace("/0/", `/${id}/`);
+
+  // CSRF cookie
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const CSRFTOKEN = getCookie('csrftoken');
+
+  // Modal UI
+  const overlay = document.getElementById("modalOverlay");
+  const msgBox = document.getElementById("modalMsg");
+
+  function showMsg(text, type){
+    msgBox.className = "m-msg show " + (type === "ok" ? "ok" : "err");
+    msgBox.textContent = text || "";
+  }
+  function clearMsg(){
+    msgBox.className = "m-msg";
+    msgBox.textContent = "";
+  }
+
+  function openModal(){
+    clearMsg();
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+  }
+  function closeModal(){
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden","true");
+  }
+
+  document.getElementById("btnOpenModal").addEventListener("click", () => {
+    resetForm();
+    document.getElementById("modalTitle").textContent = "Ajouter un employé";
+    openModal();
+  });
+  document.getElementById("btnCloseModal").addEventListener("click", closeModal);
+  document.getElementById("btnCancel").addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+  // Autre fonction toggle
+  const fonctionEl = document.getElementById("fonction");
+  const otherWrap  = document.getElementById("otherWrap");
+  fonctionEl.addEventListener("change", () => {
+    otherWrap.style.display = (fonctionEl.value === "autre") ? "block" : "none";
+    if (fonctionEl.value !== "autre") document.getElementById("autre_fonction").value = "";
+  });
+
+  function resetForm(){
+    document.getElementById("e_id").value = "";
+    document.getElementById("nom_complet").value = "";
+   
+    document.getElementById("sexe").value = "M";
+    document.getElementById("telephone").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("fonction").value = "";
+    document.getElementById("autre_fonction").value = "";
+    document.getElementById("statut").value = "active";
+    document.getElementById("bureau").value = "";
+    document.getElementById("date_embauche").value = "";
+    document.getElementById("working_hours").value = "8";
+    otherWrap.style.display = "none";
+    clearMsg();
+  }
+
+  // EDIT (✅ uses URL_GET)
+  document.querySelectorAll(".btnEdit").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const tr = e.target.closest("tr");
+      const id = tr.getAttribute("data-id");
+      resetForm();
+      document.getElementById("modalTitle").textContent = "Mettre à jour l'employé";
+      openModal();
+
+      const res = await fetch(URL_GET(id), { headers: { "X-Requested-With":"XMLHttpRequest" } });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.ok){
+        showMsg(data.message || "Erreur chargement.", "err");
+        return;
+      }
+      const d = data.data;
+
+      document.getElementById("e_id").value = d.id;
+      document.getElementById("nom_complet").value = d.nom_complet || "";
+      
+      document.getElementById("sexe").value = d.sexe || "M";
+      document.getElementById("telephone").value = d.telephone || "";
+      document.getElementById("email").value = d.email || "";
+      document.getElementById("fonction").value = d.fonction || "";
+      document.getElementById("autre_fonction").value = d.autre_fonction || "";
+      document.getElementById("statut").value = d.statut || "active";
+      document.getElementById("bureau").value = d.bureau || "";
+      document.getElementById("date_embauche").value = d.date_embauche || "";
+      document.getElementById("working_hours").value = d.working_hours || "8";
+
+      otherWrap.style.display = (document.getElementById("fonction").value === "autre") ? "block" : "none";
+    });
+  });
+
+  // DELETE (✅ uses URL_DELETE)
+  document.querySelectorAll(".btnDelete").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const tr = e.target.closest("tr");
+      const id = tr.getAttribute("data-id");
+      if(!confirm("Supprimer cet employé ?")) return;
+
+      const res = await fetch(URL_DELETE(id), {
+        method: "POST",
+        headers: { "X-CSRFToken": CSRFTOKEN, "X-Requested-With":"XMLHttpRequest" }
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      if(!contentType.includes("application/json")){
+        const text = await res.text();
+        console.log("Réponse serveur:", text);
+        alert("Erreur serveur (non-JSON). Regarde console.");
+        return;
+      }
+
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.ok){
+        alert(data.message || "Erreur suppression");
+        return;
+      }
+      tr.remove();
+    });
+  });
+
+  // SAVE create/update (✅ uses URL_CREATE / URL_UPDATE)
+  document.getElementById("btnSave").addEventListener("click", async () => {
+    clearMsg();
+
+    const id = document.getElementById("e_id").value || "";
+    const payload = new FormData();
+
+    const fonction = document.getElementById("fonction").value;
+    const autre = (document.getElementById("autre_fonction").value || "").trim();
+
+    if(!document.getElementById("nom_complet").value.trim()){
+      showMsg("Nom obligatoire.", "err"); return;
+    }
+    
+    if(!fonction){
+      showMsg("Fonction obligatoire.", "err"); return;
+    }
+    if(fonction === "autre" && !autre){
+      showMsg("Précise la fonction si tu choisis 'Autre'.", "err"); return;
+    }
+
+    payload.append("nom_complet", document.getElementById("nom_complet").value);
+    
+    payload.append("sexe", document.getElementById("sexe").value);
+    payload.append("telephone", document.getElementById("telephone").value);
+    payload.append("email", document.getElementById("email").value);
+    payload.append("fonction", fonction);
+    payload.append("autre_fonction", autre);
+    payload.append("statut", document.getElementById("statut").value);
+    payload.append("bureau", document.getElementById("bureau").value);
+    payload.append("date_embauche", document.getElementById("date_embauche").value);
+    payload.append("working_hours", document.getElementById("working_hours").value);
+
+    const url = id ? URL_UPDATE(id) : URL_CREATE;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "X-CSRFToken": CSRFTOKEN, "X-Requested-With":"XMLHttpRequest" },
+      body: payload
+    });
+
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      const text = await res.text();
+      showMsg("Erreur serveur (non-JSON). Regarde console.", "err");
+      console.log("Réponse serveur:", text);
+      return;
+    }
+
+    const data = await res.json().catch(()=>({}));
+
+    if(!res.ok || !data.ok){
+      if(data.errors){
+        let txt = "";
+        for(const k in data.errors){
+          txt += `• ${k}: ${data.errors[k].join(" ")}\n`;
+        }
+        showMsg(txt || "Erreur sauvegarde.", "err");
+      } else {
+        showMsg(data.message || "Erreur sauvegarde.", "err");
+      }
+      return;
+    }
+
+    showMsg(data.message || "Employé enregistré.", "ok");
+    setTimeout(() => window.location.reload(), 600);
+  });
+</script>
+
+{% endblock %}

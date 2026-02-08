@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block main %}
+
+<style>
+  .page-title{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:12px;
+    color:#fff;
+  }
+
+  .filters-card{
+    background:#fff;
+    border:1px solid rgba(0,0,0,.06);
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 10px 24px rgba(0,0,0,.08);
+    margin-bottom:16px;
+  }
+  .filters-card .form-label{ font-weight:800; font-size:13px; color:#111; }
+  .filters-actions{
+    display:flex; justify-content:flex-end; gap:10px; align-items:center;
+    margin-top:14px;
+  }
+
+  .report-card{
+    background:#fff;
+    border:1px solid rgba(0,0,0,.06);
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.06);
+    color:#111 !important;
+  }
+
+  .report-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom:10px;
+  }
+  .report-head h5{ margin:0; font-weight:900; color:#111; }
+  .report-head .meta{ color:#374151; font-weight:700; }
+
+  .table-wrap{
+    overflow:auto;
+    max-height:520px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+  }
+
+  table.report{
+    border-collapse:collapse;
+    width:100%;
+    font-size:12px;
+    color:#111 !important;
+  }
+
+  .report th, .report td{
+    border:1px solid #e5e7eb;
+    padding:8px 10px;
+    white-space:nowrap;
+    color:#111 !important;
+    background:#fff;
+  }
+
+  .report thead th{
+    position:sticky; top:0;
+    background:#2f76ff;
+    color:#fff !important;
+    font-weight:900;
+    z-index:5;
+  }
+
+  .report tbody tr:nth-child(even) td{ background:#f9fafb; }
+
+  .badge-active{
+    background:#d1fae5; color:#065f46;
+    padding:4px 10px; border-radius:999px;
+    font-weight:900;
+    display:inline-block;
+  }
+
+  .classes-footer{
+    display:flex; flex-wrap:wrap; gap:10px;
+    margin-top:14px;
+  }
+  .class-chip{
+    display:inline-flex; align-items:center;
+    border:1px solid #e5e7eb;
+    padding:8px 12px;
+    border-radius:999px;
+    background:#fff;
+    text-decoration:none;
+    color:#111;
+    font-weight:800;
+  }
+  .class-chip.active{
+    background:#eef2ff;
+    border-color:#c7d2fe;
+  }
+
+ @media print{
+  /* cacher UI */
+  .filters-card, .classes-footer, .btn, .nav, .navbar{ display:none !important; }
+
+  /* enlever le scroll */
+  .table-wrap{
+    max-height:none !important;
+    overflow:visible !important;
+    border:none !important;
+  }
+
+  /* IMPORTANT : table doit prendre toute la page */
+  table.report{
+    width:100% !important;
+  }
+
+  /* page en paysage pour ne pas couper les colonnes (Rang, etc.) */
+  @page{
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  /* réduire un peu si beaucoup de matières */
+  .report-card{
+    border:none !important;
+    box-shadow:none !important;
+    zoom: 0.85;  /* tu peux mettre 0.8 si beaucoup de matières */
+  }
+}
+
+</style>
+
+<div class="page-title">
+  <h4 class="mb-0">RAPPORT GÉNÉRAL D'EXAMEN DE CLASSE</h4>
+  <div class="text-muted">Report &nbsp;›&nbsp; Rapport général d'examen de classe</div>
+</div>
+
+<div class="filters-card">
+  <form method="get" id="filterForm">
+    <div class="row g-3 align-items-end">
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Année scolaire*</label>
+        <select class="form-select" name="annee" onchange="document.getElementById('filterForm').submit()">
+          {% for a in annees %}
+            <option value="{{ a.id }}" {% if annee_id == a.id|stringformat:"s" %}selected{% endif %}>{{ a.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Niveaux*</label>
+        <select class="form-select" name="niveau" onchange="document.getElementById('filterForm').submit()">
+          <option value="all" {% if niveau_id == "all" %}selected{% endif %}>All</option>
+          {% for n in niveaux %}
+            <option value="{{ n.id }}" {% if niveau_id == n.id|stringformat:"s" %}selected{% endif %}>{{ n.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">La liste des classes*</label>
+        <select class="form-select" name="classe">
+          <option value="">-- choisir --</option>
+          {% for c in classes %}
+            <option value="{{ c.id }}" {% if classe_id == c.id|stringformat:"s" %}selected{% endif %}>
+              {{ c.nom }} - {{ c.niveau.nom }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Période*</label>
+        <select class="form-select" name="periode">
+          <option value="">-- choisir --</option>
+          {% for p in periodes %}
+            <option value="{{ p.id }}" {% if periode_id == p.id|stringformat:"s" %}selected{% endif %}>{{ p.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+    </div>
+
+    <div class="filters-actions">
+      <button class="btn btn-success px-4" type="submit">Filtrer</button>
+
+      <a class="btn btn-outline-success px-4"
+         href="?annee={{ annee_id }}&niveau={{ niveau_id }}&classe={{ classe_id }}&periode={{ periode_id }}&export=excel">
+         Excel
+      </a>
+
+      <button class="btn btn-primary px-4" type="button" onclick="window.print()">Imprimer</button>
+    </div>
+  </form>
+
+  {% if niveau_id == "all" %}
+    <div class="text-muted mt-3" style="font-weight:700;">
+      Niveau = <strong>All</strong> → sélectionne une classe ci-dessous.
+    </div>
+    <div class="classes-footer">
+      {% for c in classes_footer %}
+        <a class="class-chip {% if classe_id == c.id|stringformat:'s' %}active{% endif %}"
+           href="?annee={{ annee_id }}&niveau={{ niveau_id }}&classe={{ c.id }}&periode={{ periode_id|default:'' }}">
+          {{ c.nom }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<div class="report-card">
+  {% if rapport and selected_classe and selected_periode %}
+
+    <div class="report-head">
+      <div>
+        <h5>Classe : {{ selected_classe.nom }} ({{ selected_classe.niveau.nom }})</h5>
+        <div class="meta">Période : {{ selected_periode.nom }} — Année : {{ annee.nom }}</div>
+      </div>
+      <div class="meta">Le : {{ today }}</div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="report">
+        <thead>
+          <tr>
+            <th>N°</th>
+            <th>Nom</th>
+            <th>Classe</th>
+            <th>Date naissance</th>
+            <th>Sexe</th>
+            <th>Statut</th>
+
+            {# ✅ matières dynamiques de la classe #}
+            {% for m in rapport.subjects %}
+              <th>{{ m.nom|upper }}</th>
+            {% endfor %}
+
+            <th>Total</th>
+            <th>Nb matières</th>
+            <th>Moyenne</th>
+            <th>Absences (h)</th>
+            <th>Appréciation</th>
+            <th>Rang</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for r in rapport.rows %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td style="font-weight:900;">{{ r.eleve.nom }}</td>
+            <td>{{ r.eleve.classe.nom }}</td>
+
+            <td>{{ r.eleve.date_naissancce }}</td>
+            
+            <td>{{ r.sexe }}</td>
+            <td><span class="badge-active">{{ r.status }}</span></td>
+
+
+            {# notes par matière (liste alignée sur subjects) #}
+            {% for v in r.notes_list %}
+              <td style="text-align:center; font-weight:800;">
+                {% if v %}{{ v }}{% else %}-{% endif %}
+              </td>
+            {% endfor %}
+
+            <td style="text-align:center; font-weight:900;">{{ r.total }}</td>
+            <td style="text-align:center;">{{ r.nb }}</td>
+            <td style="text-align:center; font-weight:900;">{{ r.moyenne }}</td>
+            <td style="text-align:center;">{{ r.absences }}</td>
+            <td style="font-weight:800;">{{ r.appreciation }}</td>
+            <td style="text-align:center; font-weight:900;">{{ r.rang }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% else %}
+    <div class="alert alert-info mb-0">
+      Choisis une <strong>classe</strong> et une <strong>période</strong>, puis clique <strong>Filtrer</strong>.
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

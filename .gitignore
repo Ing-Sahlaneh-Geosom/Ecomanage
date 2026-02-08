@@ -1,0 +1,57 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+db.sqlite3
+media/
+staticfiles/
+*.log
+.vscode/
+.idea/
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenv
+venv/
+.venv/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# Node / frontend
+node_modules/
+
+# OS / IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Archives
+*.zip
+*.rar
+*.7z
+*.exe
+*.msi
+
+
+# gros fichiers / installateurs
+*.msi
+*.exe
+*.zip
+*.rar
+*.7z
+
+# Node & Django runtime
+node_modules/
+media/
+staticfiles/

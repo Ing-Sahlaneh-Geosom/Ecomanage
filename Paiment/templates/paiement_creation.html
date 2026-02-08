@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Ajouter une paiment {% endblock %}
+{% block main %}
+
+
+<div class="containaire">
+    <h2>{{Title}} </h2>
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+          <div>
+            <label for="eleve">Eleve :</label>
+              {{ form.eleve }}
+        </div>
+         <div>
+            <label for="montant">Type de frais :</label>
+            <select name="" id="">
+                <option value="">__ Sélectionner __</option>
+                <option value="">Frais Inscription</option>
+                <option value="">Frais scolarité</option>
+                <option value="">Frais examen</option>
+                
+            </select>
+        </div>
+        <div>
+            <label for="montant">Mantant :</label>
+            {{ form.montant }}
+        </div>
+        <div>
+            <label for="date_paiement">Date de paiement :</label>
+            <input type="date" name="date_paiement" id="date_paiement">
+        </div>
+        <div>
+            <label for="periode">Periode :</label>
+            {{ form.periode }}
+        </div>
+        <div>
+            <label for="moyen">Moyen :</label>
+            {{ form.moyen }}
+        </div>
+
+        <div class="full-width">
+            <button type="submit" class="submit-btn">{{Submit_text}}</button>
+        </div>
+
+    </form>
+    </div>
+{% endblock %}

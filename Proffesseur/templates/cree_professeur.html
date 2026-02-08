@@ -1,0 +1,72 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block title %} Ajouter Un Professeur {% endblock %}
+{% block main %}
+
+<div class="containaire">
+    <h2>{{ Title }} </h2>
+    {% if form.errors %}
+        <div class="error-messages bg-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+        <div>
+            <label for="nom_conplet">Nom Complete :</label>
+            {{ form.nom_conplet }}
+        </div>
+        <div>
+            <label for="sexe">Sexe :</label>
+            {{ form.sexe }}
+        </div>
+        <div>
+            <label for="telephone">Telephone :</label>
+            {{ form.telephone }}
+        </div>
+        <div>
+            <label for="email">Email :</label>
+            {{ form.email }}
+        </div>
+         <div>
+            <label for="adresse">Adrress</label>
+            {{ form.adresse }}
+        </div>
+        <div>
+            <label for="matieres">Matier :</label>
+            {{ form.matieres }}
+        </div>
+        <div>
+            <label for="diplome">Diplome :</label>
+            {{ form.diplome }}
+        </div>
+        <div>
+            <label for="date_empauche">Date d'empauche :</label>
+            {{ form.date_empauche }}
+        </div>
+        <div>
+            <label for="status">Status</label>
+            {{ form.status }}
+        </div>
+        <div>
+            <label for="actif"> Actif </label>
+            {{ form.actif }}
+        </div>
+          <div>
+            <label for="classes">Classes :</label>
+            {{ form.classes }}
+        </div>
+        <div class="full-width">
+            <button type="submit" class="submit-btn">{{ Submit_text }}</button>
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}

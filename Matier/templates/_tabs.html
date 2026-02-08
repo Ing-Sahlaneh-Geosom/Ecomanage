@@ -1,0 +1,35 @@
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'periode' %}active text-success{% endif %}"
+       href="{% url 'periode_liste' %}">Appréciations des périodes</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'annuelle' %}active text-success{% endif %}"
+       href="{% url 'annuelle_list' %}">Appréciations annuelles</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'absence' %}active text-success{% endif %}"
+       href="{% url 'absence_list' %}">Appréciations absences</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'prolonger' %}active text-success{% endif %}"
+       href="{% url 'prolongation_periode' %}">Prolonger les periode</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'moyenne' %}active text-success{% endif %}"
+       href="{% url 'moyenne_list' %}">Configuration de moyen</a>
+  </li>
+  <li class="nav-item">
+  <a class="nav-link {% if tab == 'promotion' %}active text-success{% endif %}"
+     href="{% url 'promotion_list' %}">Décisions de promotion</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link {% if tab == 'decision_absence' %}active text-success{% endif %}"
+     href="{% url 'decision_absence_list' %}">Décision d'absence</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link {% if tab == 'cloture' %}active text-success{% endif %}"
+     href="{% url 'cloture_list' %}">Clôture des périodes</a>
+</li>
+
+</ul>

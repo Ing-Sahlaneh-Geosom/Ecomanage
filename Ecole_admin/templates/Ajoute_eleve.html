@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block title %} {% trans "Ajouter un eleve" %} {% endblock %}
+{% block main %}
+
+<div class="containaire bg-light">
+    <h2>{{ Title }} </h2>
+
+    {% if form.errors %}
+        <div class="error-messages bg-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+
+        <div>
+            <label for="nom">{% trans "Nom Complete" %} :</label>
+            {{ form.nom }}
+        </div>
+
+        <div>
+            <label for="sexe">{% trans "Sexe" %} :</label>
+            {{ form.Sexe }}
+        </div>
+
+        <div>
+            <label for="date_naissancce">{% trans "Date de naissance" %} :</label>
+            {# ✅ Si tu veux un placeholder jj/mm/aaaa sans toucher au form, tu peux faire ça: #}
+            {# {{ form.date_naissancce|add_class:"" }}  (si tu as un filtre) #}
+            {{ form.date_naissancce }}
+            <small style="display:block;">
+                {% trans "Format" %}: {% trans "jj/mm/aaaa" %}
+            </small>
+        </div>
+
+        <div>
+            <label for="adrress">{% trans "Adrress" %}</label>
+            {{ form.adrress }}
+        </div>
+
+        <div>
+            <label for="telephone">{% trans "Telephone" %} :</label>
+            {{ form.telephone }}
+        </div>
+
+        <div>
+            <label for="email">{% trans "Email" %} :</label>
+            {{ form.email }}
+        </div>
+
+        <div>
+            <label for="photo">{% trans "Image" %} :</label>
+            {{ form.photo }}
+            <div id="fileHint" style="margin-top:6px;color: black;">
+                {% trans "Aucun fichier choisi" %}
+            </div>
+        </div>
+
+        <div>
+            <label for="classe">{% trans "Classe" %} :</label>
+           <select name="classe" id="classe">
+                <option value="">{% trans "Select" %}</option>
+                {% for classe in classes %}
+                <option value="{{ classe.id }}">{{ classe.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="parent">{% trans "Nom du mere" %} :</label>
+            {{ form.parent }}
+        </div>
+
+        <div>
+            <label for="telephone_parent">{% trans "Telephone Parent" %}</label>
+            {{ form.telephone_parent }}
+        </div>
+
+        <div>
+            <label for="email_parent">{% trans "Email parent" %}</label>
+            {{ form.email_parent }}
+        </div>
+
+         <div>
+            <label for="email_parent">{% trans "Status" %}</label>
+            {{ form.status }}
+        </div>
+
+        <div class="full-width">
+            <button type="submit" class="submit-btn">{{ Submit_text }}</button>
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+  // ✅ Affiche le nom du fichier (au lieu du texte navigateur)
+  (function () {
+    const input = document.querySelector('input[type="file"][name="photo"], input[type="file"]');
+    const hint = document.getElementById("fileHint");
+    if (!input || !hint) return;
+
+    const emptyText = hint.textContent;
+
+    input.addEventListener("change", function () {
+      if (this.files && this.files.length > 0) {
+        hint.textContent = this.files[0].name;
+      } else {
+        hint.textContent = emptyText;
+      }
+    });
+  })();
+</script>
+
+{% endblock %}

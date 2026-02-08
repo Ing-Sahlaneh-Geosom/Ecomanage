@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %} Supprimer '{{ eleve.nom }}' {% endblock %}
+
+{% block main %}
+
+<a class="btn btn-outline-primary btn-sm" href="{% url 'ListeDesClasse'%}">Retour</a>
+<div style="height: 100%; margin-top: 5rem; background: linear-gradient(#dbeafe,#70a6ec); width: 50%; border: 1px solid blue;" class="container text-center">
+<form method="POST">
+    {% csrf_token %}
+    <p>Voulez vous vraiment supprimer l'eleve {{ classe.nom }} ?</p>
+    <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+</form>
+
+</div>
+
+{% endblock %}

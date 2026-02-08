@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %} Supprimer '{{ eleve.nom }}' {% endblock %}
+
+{% block main %}
+
+<a class="btn btn-outline-primary btn-sm" href="{% url 'ListeDesAbsences'%}">Retour</a>
+<div style="height: 100%; margin-top: 5rem; width: 50%; border: 1px solid blue;" class="container text-center">
+<form method="POST">
+    {% csrf_token %}
+    <p>Voulez vous vraiment supprimer L'Absence de {{ absence.eleve }} ?</p>
+    <input class="btn btn-outline-danger" type="submit" value="Supprimer">
+</form>
+
+</div>
+
+{% endblock %}

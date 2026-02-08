@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Les bulletins {% endblock %}
+    {% block main %}
+<div class="container">
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-body">
+            <h4 class="card-title">Génération des bulletins</h4>
+            
+            <form method="POST" action="{% url 'choisir_bulletin' %}">
+                {% csrf_token %}
+
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="classe_id">Sélectionner une classe :</label>
+                        <select name="classe_id" id="classe_id" class="form-control">
+                            <option value="">-- Choisir une classe --</option>
+                            {% for classe in classes %}
+                                <option value="{{ classe.id }}" 
+                                    {% if classe.id == selected_classe_id %}selected{% endif %}>
+                                    {{ classe.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="eleve_id">Ou sélectionner un élève :</label>
+                        <select name="eleve_id" id="eleve_id" class="form-control">
+                            <option value="">-- Choisir un élève --</option>
+                            {% for eleve in eleves %}
+                                <option value="{{ eleve.id }}"
+                                    {% if eleve.id == selected_eleve_id %}selected{% endif %}>
+                                    {{ eleve.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="trimestre">Trimestre :</label>
+                        <select name="trimestre" id="trimestre" class="form-control" required>
+                            <option value="">-- Choisir un trimestre --</option>
+                            {% for num, nom in trimestres %}
+                                <option value="{{ num }}"
+                                    {% if num == selected_trimestre %}selected{% endif %}>
+                                    {{ nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                    Afficher les bulletins
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if bulletin_data_list %}
+        <h2>Résultats des bulletins</h2>
+
+        {% for bulletin_context in bulletin_data_list %}
+            
+        <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5>{{ bulletin_context.eleve.nom }} — {{ bulletin_context.classe.nom }}</h5>
+        <small>{{ bulletin_context.trimestre_nom }} | Année scolaire : {{ bulletin_context.annee_scolaire.nom }}</small>
+    </div>
+
+    <div class="card-body">
+        {% if bulletin_context.error %}
+            <div class="alert alert-danger">{{ bulletin_context.error }}</div>
+        {% else %}
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Matière</th>
+                        <th>Notes</th>
+                        <th>Coef total</th>
+                        <th>Points totaux</th>
+                        <th>Moyenne matière</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in bulletin_context.lignes_bulletin %}
+                        <tr>
+                            <td>{{ ligne.matiere }}</td>
+                            <td>
+                                {% for note in ligne.notes %}
+                                    {{ note.note }} (coef {{ note.coefficient }})<br>
+                                {% empty %}
+                                    —
+                                {% endfor %}
+                            </td>
+                            <td>{{ ligne.total_coeff_matiere }}</td>
+                            <td>{{ ligne.total_points_matiere }}</td>
+                            <td>{{ ligne.moyenne_matiere }}</td>
+                        </tr>
+                        <a href="#" onclick="this.closest('form').action=''; this.closest('form').submit();" class="btn btn-success">Afficher</a>
+{% if bulletin_context.eleve %}
+    <form method="POST" action="{% url 'choisir_bulletin' %}">
+        {% csrf_token %}
+        <input type="hidden" name="classe_id" value="{{ selected_classe_id }}">
+        <input type="hidden" name="eleve_id" value="{{ bulletin_context.eleve.id }}">
+        <input type="hidden" name="trimestre" value="{{ selected_trimestre }}">
+        <button type="submit" name="pdf" class="btn btn-outline-danger" style="margin-top: 10px;">
+            Télécharger le bulletin PDF 
+        </button>
+    </form>
+{% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="mt-3">
+                <strong>Total des coefficients :</strong> {{ bulletin_context.total_coeff_general }}<br>
+                <strong>Total des points :</strong> {{ bulletin_context.total_points_general }}<br>
+                <strong>Moyenne générale :</strong> 
+                <span class="badge bg-success" style="font-size: 1.1rem;">{{ bulletin_context.moyenne_generale }}</span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+            
+
+        {% empty %}
+            <p>Aucun bulletin à afficher pour cette sélection.</p>
+        {% endfor %}
+    {% endif %}
+
+</div>
+{% endblock %}

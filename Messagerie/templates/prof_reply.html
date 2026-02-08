@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Répondre{% endblock %}
+{% block main %}
+
+<div class="container-fluid px-4 py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold m-0">↩️ Répondre</h5>
+        <a href="{% url 'read_message' %}" class="btn btn-light btn-sm">⬅ Retour</a>
+      </div>
+
+      {% if messages %}
+        {% for m in messages %}
+          <div class="alert alert-{{ m.tags }} py-2">{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <div class="small text-muted">Message reçu</div>
+          <div class="fw-semibold">{{ msg.sujet }}</div>
+          <div class="small text-muted">De: {{ msg.sender }} • {{ msg.date_envoi|date:"d/m/Y H:i" }}</div>
+          <hr>
+          <div style="white-space: pre-wrap;">{{ msg.contenu }}</div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <label class="form-label fw-semibold">Ta réponse</label>
+            <textarea name="contenu" class="form-control" rows="5" required></textarea>
+            <div class="d-flex justify-content-end mt-3">
+              <button class="btn btn-primary" type="submit">Envoyer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

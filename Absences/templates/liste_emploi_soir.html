@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Emplois du temps {% endblock %}
+    {% block main %}
+
+
+<div class="container mt-4">
+  <h4 class="text-center mb-4">📅 Emploi du Temps - {{ annee_active.nom }}</h4>
+
+  <div class="table-responsive">
+    <table class="table table-bordered text-center align-middle emploi-table">
+      <thead class="table-light">
+        <tr>
+          <th>Heure</th>
+          {% for jour in jours %}
+          <th>{{ jour }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in "07 08 09 10 11 12 13 14 15 16 17".split %}
+        <tr>
+          <td><strong>{{ h }}:00 - {{ h|add:"1" }}:00</strong></td>
+          {% for jour in jours %}
+            {% with cours=emplois|dictsort:"heure_debut"|first %}
+            <td>
+              {% for emploi in emplois %}
+                {% if emploi.jour == jour and emploi.heure_debut.hour == h|add:"0"|int %}
+                  <div class="emploi-case">
+                    <div class="matiere">{{ emploi.matiere.nom }}</div>
+                    <small class="prof text-muted">{{ emploi.professeur.nom }}</small><br>
+                    <small class="salle">{{ emploi.salle|default:"" }}</small>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </td>
+            {% endwith %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+

@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block main %}
+
+
+<style>
+  .required:after{content:" *"; color:#d00;}
+
+  .actions-row{ display:flex; justify-content:flex-end; gap:12px; }
+  .btn-wide{ min-width:140px; }
+
+  /* ----- DOCUMENT STYLE (comme certificat) ----- */
+  .print-only{ display:none !important; }
+  .grid-top{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:12px;
+    align-items:start;
+  }
+  .leftblock{ font-size:13px; color:#111; }
+  .leftblock strong{ font-weight:800; }
+  .arabic{ direction:rtl; text-align:right; font-size:13px; color:#111; font-weight:600; }
+  .logo-mid{ display:flex; align-items:center; justify-content:center; }
+  .logo-mid img{ max-height:70px; max-width:90px; object-fit:contain; }
+  .hr{ height:1px; background:#d9d9d9; margin:14px 0; }
+  .school{ font-size:13px; color:#111; }
+  .titleWrap{ margin:16px 0 18px; text-align:center; }
+  .titleBadge{
+    display:inline-block;
+    padding:10px 18px;
+    border-radius:6px;
+    border:1px solid #cfcfcf;
+    background:#f1f1f1;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#111;
+    min-width:70%;
+  }
+  .line{ margin:8px 0; font-size:14px; color:#111; }
+  .label{ font-weight:800; }
+  .sign{ margin-top:28px; display:flex; justify-content:space-between; gap:16px; }
+  .sign .box{ width:48%; }
+
+  /* ----- PRINT: imprime uniquement #printDoc ----- */
+  @media print{
+    body{ background:#fff !important; }
+    header, nav, aside, .sidebar, .navbar, .topbar, .no-print{ display:none !important; }
+    body *{ visibility:hidden !important; }
+    .print-only{ display:block !important; }
+    #printDoc, #printDoc *{ visibility:visible !important; }
+    #printDoc{ position:absolute; left:0; top:0; width:100%; margin:0; }
+  }
+</style>
+
+<div class="container-fluid">
+
+  <!-- FORM FILTRES (comme ta capture) -->
+  <div class="card shadow-sm no-print">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+
+        <div class="col-md-4">
+          <label class="form-label required">{% trans "Niveaux" %}</label>
+          <select id="niveau" class="form-select">
+            <option value="">{% trans "Sélectionner..." %}</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}">{{ n.nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label required">{% trans "La liste des classes" %}</label>
+          <select id="classe" class="form-select" disabled>
+            <option value="">{% trans "Sélectionner..." %}</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label required">{% trans "Élève" %}</label>
+          <select id="eleve" class="form-select" disabled>
+            <option value="">{% trans "Sélectionner..." %}</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label required">{% trans "Responsables" %}</label>
+          <select id="responsable_user" class="form-select">
+            <option value="">{% trans "Sélectionner..." %}</option>
+            {% for u in responsables %}
+              <option value="{{ u.id }}">
+                {% if u.nom_complet %}{{ u.nom_complet }}{% else %}{{ u.username }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Date" %}</label>
+          <input id="date_conv" type="date" class="form-control" value="{{ today|date:'Y-m-d' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">{% trans "temps" %}</label>
+          <input id="time_conv" type="time" class="form-control" value="08:14">
+        </div>
+
+        <div class="col-12">
+          <div class="actions-row">
+            <button id="btnPrint" class="btn btn-primary btn-wide" type="button" disabled>🖨️ {% trans "Imprimer" %}</button>
+            <button class="btn btn-primary btn-wide" type="button" data-bs-toggle="modal" data-bs-target="#modalRaison">
+              ＋ {% trans "Ajouter" %}
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <hr class="my-3">
+
+      <!-- TABLE RAISONS -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              <th style="width:70px;">{% trans "No" %}</th>
+              <th>{% trans "Raison" %}</th>
+              <th style="width:80px; text-align:center;"></th>
+            </tr>
+          </thead>
+          <tbody id="reasonsBody">
+            {% for r in raisons %}
+              <tr data-id="{{ r.id }}">
+                <td>{{ forloop.counter }}</td>
+                <td class="txt">{{ r.libelle }}</td>
+                <td style="text-align:center;">
+                  <input type="checkbox" class="form-check-input chkReason">
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3">{% trans "Aucune raison" %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ✅ ZONE IMPRIMABLE (même page, style certificat) -->
+  <div id="printDoc" class="doc print-only">
+
+    <div class="grid-top">
+      <div class="leftblock">
+        <strong>{% trans "REPUBLIQUE DE DJIBOUTI" %}</strong><br>
+        {% trans "Unité - Egalité - Paix" %}<br><br>
+
+      </div>
+
+      <div class="logo-mid">
+        {% if ecole and ecole.logo %}
+          <img src="{{ ecole.logo.url }}" alt="{% trans 'Logo' %}">
+        {% else %}
+          <img src="{% static 'img/logo-ecole.png' %}" alt="{% trans 'Logo' %}">
+        {% endif %}
+      </div>
+
+      <div class="arabic">
+        جمهورية جيبوتي وحدة – مساواة – سالم<br>
+        وزارة التربية الوطنية والتكوين المهني
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="school">
+        <div><strong>{% if ecole %}{{ ecole.nom }}{% endif %}</strong></div>
+        <div>{% trans "Téléphone:" %} {% if ecole and ecole.telephone %}{{ ecole.telephone }}{% else %}—{% endif %}</div>
+        <div>{% trans "E-mail:" %} {% if ecole and ecole.email %}{{ ecole.email }}{% else %}—{% endif %}</div>
+      </div>
+      <div class="school" style="text-align:right;">
+        <div>{% trans "Année scolaire:" %} <strong>{% if annee %}{{ annee.nom }}{% endif %}</strong></div>
+        <div>{% trans "Le" %} <strong id="pDateTop">—</strong></div>
+      </div>
+    </div>
+
+    <div class="titleWrap">
+      <div class="titleBadge">{% trans "CONVOCATION DES PARENTS" %}</div>
+    </div>
+
+    <div class="line">
+      <strong>{% trans "Chers parents," %}</strong><br>
+      {% trans "Vous êtes priés de vous présenter le:" %} <strong id="pDate">—</strong>
+      {% trans "à:" %} <strong id="pTime">—</strong> {% trans "au bureau du Chef d'établissement" %}<br>
+      {% trans "pour une affaire concernant l’élève" %} <strong id="pEleve">—</strong>
+      {% trans "de la classe de" %} <strong id="pClasse">—</strong>
+    </div>
+
+    <div class="line" style="margin-top:10px;">
+      <strong>{% trans "Motif :" %}</strong>
+    </div>
+
+    <table class="table table-bordered table-sm" style="margin-top:8px;">
+      <thead>
+        <tr>
+          <th style="width:70px;">{% trans "No" %}</th>
+          <th>{% trans "Raison" %}</th>
+        </tr>
+      </thead>
+      <tbody id="pReasons">
+        <tr><td>1</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="sign">
+      <div class="box">
+        <span class="label" style="color:#666;">{% trans "Responsable d’établissement" %}</span>
+        <div class="line" style="margin-top:12px;">
+          <span class="label" id="pResp">—</span>
+        </div>
+      </div>
+      <div class="box" style="text-align:right;">
+        <div style="height:90px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL Ajouter raison -->
+<div class="modal fade" id="modalRaison" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{% trans "Ajouter une raison" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <label class="form-label">{% trans "Libellé" %}</label>
+        <input id="raisonLibelle" class="form-control" placeholder="{% trans 'Ex: Absence répétitive' %}">
+        <div id="raisonErr" class="text-danger mt-2" style="display:none;"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-light" data-bs-dismiss="modal">{% trans "Annuler" %}</button>
+        <button id="btnSaveRaison" class="btn btn-primary" type="button">{% trans "Enregistrer" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  const URL_CLASSES = "{% url 'ajax_classes_by_niveau_conv' %}";
+  const URL_ELEVES  = "{% url 'ajax_eleves_by_classe_conv' %}";
+  const URL_R_CREATE= "{% url 'ajax_raisons_create' %}";
+
+  // ✅ Textes traduits pour JS (sans changer ton fonctionnement)
+  const T_SELECT = "{% trans 'Sélectionner...' %}";
+  const T_LIB_REQ = "{% trans 'Libellé obligatoire.' %}";
+  const T_ERR_ADD = "{% trans 'Erreur: impossible d’ajouter la raison.' %}";
+
+  const niveau = document.getElementById("niveau");
+  const classe = document.getElementById("classe");
+  const eleve  = document.getElementById("eleve");
+  const respSel= document.getElementById("responsable_user");
+  const dateConv = document.getElementById("date_conv");
+  const timeConv = document.getElementById("time_conv");
+  const btnPrint = document.getElementById("btnPrint");
+  const reasonsBody = document.getElementById("reasonsBody");
+
+  const raisonLibelle = document.getElementById("raisonLibelle");
+  const btnSaveRaison = document.getElementById("btnSaveRaison");
+  const raisonErr = document.getElementById("raisonErr");
+
+  function getCSRF(){
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : "";
+  }
+
+  function setOptions(sel, items){
+    sel.innerHTML = `<option value="">${T_SELECT}</option>`;
+    (items || []).forEach(it=>{
+      const o = document.createElement("option");
+      o.value = it.id;
+      o.textContent = it.label;
+      sel.appendChild(o);
+    });
+  }
+
+  async function fetchJSON(url){
+    const r = await fetch(url, {headers: {"X-Requested-With":"XMLHttpRequest"}, cache:"no-store"});
+    const ct = (r.headers.get("content-type") || "").toLowerCase();
+    if(!ct.includes("application/json")) return {ok:false};
+    return await r.json();
+  }
+
+  function selectedReasons(){
+    const list = [];
+    reasonsBody.querySelectorAll("tr").forEach(tr=>{
+      const chk = tr.querySelector(".chkReason");
+      if(chk && chk.checked){
+        list.push(tr.querySelector(".txt")?.textContent?.trim() || "");
+      }
+    });
+    return list.filter(Boolean);
+  }
+
+  function refreshBtn(){
+    btnPrint.disabled = !(niveau.value && classe.value && eleve.value && respSel.value && selectedReasons().length);
+  }
+
+  reasonsBody.addEventListener("change", refreshBtn);
+  respSel.addEventListener("change", refreshBtn);
+  dateConv.addEventListener("change", refreshBtn);
+  timeConv.addEventListener("change", refreshBtn);
+
+  niveau.addEventListener("change", async ()=>{
+    setOptions(classe, []);
+    setOptions(eleve, []);
+    classe.disabled = true;
+    eleve.disabled = true;
+    refreshBtn();
+
+    if(!niveau.value) return;
+    const data = await fetchJSON(`${URL_CLASSES}?niveau_id=${encodeURIComponent(niveau.value)}`);
+    if(data.ok){
+      setOptions(classe, data.classes || []);
+      classe.disabled = false;
+    }
+  });
+
+  classe.addEventListener("change", async ()=>{
+    setOptions(eleve, []);
+    eleve.disabled = true;
+    refreshBtn();
+
+    if(!classe.value) return;
+    const data = await fetchJSON(`${URL_ELEVES}?classe_id=${encodeURIComponent(classe.value)}`);
+    if(data.ok){
+      setOptions(eleve, data.eleves || []);
+      eleve.disabled = false;
+    }
+  });
+
+  eleve.addEventListener("change", refreshBtn);
+
+  // Ajouter raison (modal)
+  btnSaveRaison.addEventListener("click", async ()=>{
+    raisonErr.style.display = "none";
+    const lib = (raisonLibelle.value || "").trim();
+    if(!lib){
+      raisonErr.textContent = T_LIB_REQ;
+      raisonErr.style.display = "";
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append("libelle", lib);
+
+    const r = await fetch(URL_R_CREATE, {
+      method:"POST",
+      headers: {"X-Requested-With":"XMLHttpRequest", "X-CSRFToken": getCSRF()},
+      body: fd
+    });
+
+    const data = await r.json().catch(()=>({ok:false}));
+    if(!data.ok){
+      raisonErr.textContent = T_ERR_ADD;
+      raisonErr.style.display = "";
+      return;
+    }
+
+    const trCount = reasonsBody.querySelectorAll("tr").length + 1;
+    const tr = document.createElement("tr");
+    tr.setAttribute("data-id", data.raison.id);
+    tr.innerHTML = `
+      <td>${trCount}</td>
+      <td class="txt">${data.raison.libelle}</td>
+      <td style="text-align:center;">
+        <input type="checkbox" class="form-check-input chkReason" checked>
+      </td>
+    `;
+    reasonsBody.appendChild(tr);
+
+    raisonLibelle.value = "";
+    refreshBtn();
+
+    const modalEl = document.getElementById("modalRaison");
+    bootstrap.Modal.getInstance(modalEl).hide();
+  });
+
+  function fillPrintDoc(){
+    const niveauLabel = niveau.options[niveau.selectedIndex]?.textContent?.trim() || "";
+    const classeLabel = classe.options[classe.selectedIndex]?.textContent?.trim() || "";
+    const eleveLabel  = eleve.options[eleve.selectedIndex]?.textContent?.trim() || "";
+    const respLabel   = respSel.options[respSel.selectedIndex]?.textContent?.trim() || "";
+
+    const d = dateConv.value || "—";
+    const t = timeConv.value || "—";
+
+    document.getElementById("pDateTop").textContent = d;
+    document.getElementById("pDate").textContent = d;
+    document.getElementById("pTime").textContent = t;
+    document.getElementById("pEleve").textContent = eleveLabel || "—";
+    document.getElementById("pClasse").textContent = (niveauLabel && classeLabel) ? `${niveauLabel} - ${classeLabel}` : (classeLabel || "—");
+    document.getElementById("pResp").textContent = respLabel || "—";
+
+    const reasons = selectedReasons();
+    const tbody = document.getElementById("pReasons");
+    tbody.innerHTML = "";
+    if(!reasons.length){
+      tbody.innerHTML = `<tr><td>1</td><td>—</td></tr>`;
+      return;
+    }
+    reasons.forEach((txt, idx)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${idx+1}</td><td>${txt}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  btnPrint.addEventListener("click", ()=>{
+    fillPrintDoc();
+    window.print(); // ✅ direct, sans autre page
+  });
+
+  refreshBtn();
+</script>
+
+{% endblock %}

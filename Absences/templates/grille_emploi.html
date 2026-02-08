@@ -1,0 +1,79 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}  Emplois du temps {% endblock %}
+{% block main %}
+<div class="onntainer">
+    <a class="btn btn-sm btn-outline-primary" href="{% url 'Liste_des_emplois_soire_grille'%}">Voir le soire</a>
+</div>
+<div class="container mt-4">
+  <h4 class="text-center mb-4">📅 Emploi du Temps - {{ annee_active.nom }}</h4>
+
+  <div class="table-responsive">
+    <table class="table table-bordered text-center align-middle mt-4">
+  <thead class="table-light">
+    <tr>
+      <th>Heure</th>
+      {% for jour in jours %}
+        <th>{{ jour }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for h in hours %}
+      <tr>
+        <td><strong>{{ h|time:"H:i" }}</strong></td>
+
+        {% for jour in jours %}
+          <td>
+            {% for emploi in emplois %}
+              {% if emploi.jour == jour and emploi.heure_debut <= h and emploi.heure_fin > h %}
+                <div class="p-1 rounded bg-primary text-white shadow-sm">
+                  <div>{{ emploi.matiere.nom }}</div>
+                  <small>{{ emploi.professeur.user.username }}</small><br>
+                  <small>{{ emploi.heure_debut|time:"H:i" }} - {{ emploi.heure_fin|time:"H:i" }}</small>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+  </div>
+</div>
+
+<style>
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .table th, .table td {
+    min-width: 120px;
+  }
+}
+</style>
+
+{% endblock %}

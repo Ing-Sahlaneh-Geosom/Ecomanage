@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+{% block title %} Salles Liste {% endblock %}
+{% block main %}
+
+
+<style>
+  .page-wrap{ background:#f6f7fb; min-height: calc(100vh - 60px); }
+
+  /* ✅ Custom Modal */
+  .xmodal-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.55); display:none; z-index:9998; }
+  .xmodal{ position:fixed; inset:0; display:none; z-index:9999; padding:20px; }
+  .xmodal.is-open,.xmodal-backdrop.is-open{ display:block; }
+  .xmodal-panel{
+    max-width: 980px; margin:40px auto; background:#fff; border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden;
+    transform:translateY(10px); opacity:0; animation:xmodalIn .15s ease-out forwards;
+  }
+  @keyframes xmodalIn{ to{ transform:translateY(0); opacity:1; } }
+  .xmodal-header{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(0,0,0,.08); }
+  .xmodal-title{ font-size:1.05rem; font-weight:700; margin:0; }
+  .xmodal-close{ border:0; background:transparent; width:40px; height:40px; border-radius:10px; cursor:pointer; }
+  .xmodal-close:hover{ background:rgba(0,0,0,.06); }
+  .xmodal-body{ padding:16px; }
+  .xmodal-footer{ padding:14px 16px; border-top:1px solid rgba(0,0,0,.08); display:flex; gap:10px; justify-content:flex-end; }
+
+  .muted{ color:#64748b; font-size:.9rem; }
+</style>
+
+<div class="page-wrap py-3">
+  <div class="container">
+
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+      <div>
+        <h4 class="mb-1">Registre des Salles</h4>
+        <div class="muted">Salle = Bâtiment + Nom + Étage + Description </div>
+      </div>
+      <button class="btn btn-primary" id="btnOpenCreate" type="button">+ Ajouter</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-3 border-0" style="border-radius:16px;">
+      <div class="card-body">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-md-6">
+            <input type="text" class="form-control" id="searchInput" placeholder="Rechercher (salle, bâtiment...)">
+          </div>
+          <div class="col-12 col-md-3">
+            <select class="form-select" id="batimentFilter">
+              <option value="">-- Tous les bâtiments --</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-3 d-flex gap-2">
+            <button class="btn btn-outline-primary w-100" id="btnSearch" type="button">Filtrer</button>
+            <button class="btn btn-outline-secondary" id="btnReset" type="button">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div class="card shadow-sm border-0" style="border-radius:16px;">
+      <div class="card-body p-0">
+
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between px-3 py-3">
+          <div class="small text-muted">Total : <b id="totalCount">0</b></div>
+          <div class="d-flex gap-2 align-items-center">
+            <span class="small text-muted">Par page</span>
+            <select class="form-select form-select-sm" style="width:90px" id="pageSize">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover table-striped align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width:70px;">#</th>
+                <th>Salle</th>
+                <th style="width:200px;">Bâtiment</th>
+                <th style="width:120px;" class="text-center">Étage</th>
+                <th>Description</th>
+                <th style="width:190px;" class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr><td colspan="6" class="text-center py-4 text-muted">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="px-3 py-3">
+          <nav><ul class="pagination justify-content-center flex-wrap mb-0" id="pagination"></ul></nav>
+          <p style="font-size: xx-small;" class="text-center text-muted small mt-2 mb-0" id="pageInfo"></p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Custom modal -->
+<div class="xmodal-backdrop" id="xBackdrop"></div>
+<div class="xmodal" id="xModal">
+  <div class="xmodal-panel" role="dialog" aria-modal="true">
+    <div class="xmodal-header">
+      <h5 class="xmodal-title" id="xTitle">Ajouter une salle</h5>
+      <button class="xmodal-close" type="button" id="xClose">✕</button>
+    </div>
+
+    <form id="salleForm">
+      <div class="xmodal-body">
+        <input type="hidden" id="salleId" value="">
+
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Bâtiment <span class="text-danger">*</span></label>
+            <select class="form-select" id="batiment_id" required>
+              <option value="">-- Choisir --</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Nom salle <span class="text-danger">*</span></label>
+            <input class="form-control" id="nom" required placeholder="Ex: Salle 1 / Informatique">
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Étage <span class="text-danger">*</span></label>
+            <select class="form-select" id="etage" required>
+              <option value="">-- Choisir --</option>
+            </select>
+            <div class="muted mt-1">Les étages dépendent du bâtiment.</div>
+          </div>
+
+          <div class="col-12 col-md-8">
+            <label class="form-label">Description</label>
+            <input class="form-control" id="description" placeholder="Petite description (optionnel)">
+          </div>
+
+          <div class="col-12">
+            <div class="alert alert-danger d-none" id="formError"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="xmodal-footer">
+        <button type="button" class="btn btn-outline-secondary" id="btnCancel">Annuler</button>
+        <button type="submit" class="btn btn-primary" id="btnSave">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* URLs */
+const URL_BATS   = "{% url 'salles_api_batiments' %}";
+const URL_ETAGES = "{% url 'salles_api_etages' %}";
+const URL_LIST   = "{% url 'salles_api_list' %}";
+const URL_CREATE = "{% url 'salles_api_create' %}";
+const URL_DETAIL = (id) => "{% url 'salles_api_detail' 999999 %}".replace("999999", id);
+const URL_UPDATE = (id) => "{% url 'salles_api_update' 999999 %}".replace("999999", id);
+const URL_DELETE = (id) => "{% url 'salles_api_delete' 999999 %}".replace("999999", id);
+
+/* CSRF */
+function getCookie(name){
+  let v=null;
+  if(document.cookie && document.cookie!==""){
+    const c=document.cookie.split(";");
+    for(let i=0;i<c.length;i++){
+      const x=c[i].trim();
+      if(x.substring(0,name.length+1)===name+"="){ v=decodeURIComponent(x.substring(name.length+1)); break; }
+    }
+  }
+  return v;
+}
+const CSRF = getCookie("csrftoken");
+
+const state = { q:"", batiment:"", page:1, page_size:10 };
+
+const els = {
+  tableBody: document.getElementById("tableBody"),
+  pagination: document.getElementById("pagination"),
+  pageInfo: document.getElementById("pageInfo"),
+  totalCount: document.getElementById("totalCount"),
+  searchInput: document.getElementById("searchInput"),
+  batimentFilter: document.getElementById("batimentFilter"),
+  pageSize: document.getElementById("pageSize"),
+  btnSearch: document.getElementById("btnSearch"),
+  btnReset: document.getElementById("btnReset"),
+  btnOpenCreate: document.getElementById("btnOpenCreate"),
+
+  xModal: document.getElementById("xModal"),
+  xBackdrop: document.getElementById("xBackdrop"),
+  xClose: document.getElementById("xClose"),
+  btnCancel: document.getElementById("btnCancel"),
+  xTitle: document.getElementById("xTitle"),
+
+  form: document.getElementById("salleForm"),
+  formError: document.getElementById("formError"),
+  btnSave: document.getElementById("btnSave"),
+
+  id: document.getElementById("salleId"),
+  batiment_id: document.getElementById("batiment_id"),
+  nom: document.getElementById("nom"),
+  etage: document.getElementById("etage"),
+  description: document.getElementById("description"),
+};
+
+function h(str){
+  return String(str ?? "").replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[s]));
+}
+
+function setError(msg){
+  if(!msg){ els.formError.classList.add("d-none"); els.formError.textContent=""; return; }
+  els.formError.classList.remove("d-none");
+  els.formError.textContent = msg;
+}
+
+/* Custom modal open/close */
+function openModal(){ els.xModal.classList.add("is-open"); els.xBackdrop.classList.add("is-open"); document.body.style.overflow="hidden"; }
+function closeModal(){ els.xModal.classList.remove("is-open"); els.xBackdrop.classList.remove("is-open"); document.body.style.overflow=""; }
+els.xClose.addEventListener("click", closeModal);
+els.btnCancel.addEventListener("click", closeModal);
+els.xBackdrop.addEventListener("click", closeModal);
+document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && els.xModal.classList.contains("is-open")) closeModal(); });
+
+/* Load batiments (filter + modal) */
+async function loadBatiments(){
+  const res = await fetch(URL_BATS, { headers: {"Accept":"application/json"} });
+  if(!res.ok) return;
+  const data = await res.json();
+
+  // filter
+  const keepFilter = els.batimentFilter.value || "";
+  els.batimentFilter.innerHTML = `<option value="">-- Tous les bâtiments --</option>` +
+    data.items.map(b => `<option value="${b.id}">${h(b.nom)}</option>`).join("");
+  els.batimentFilter.value = keepFilter;
+
+  // modal
+  const keepModal = els.batiment_id.value || "";
+  els.batiment_id.innerHTML = `<option value="">-- Choisir --</option>` +
+    data.items.map(b => `<option value="${b.id}">${h(b.nom)}</option>`).join("");
+  els.batiment_id.value = keepModal;
+}
+
+/* Load etages based on batiment */
+async function loadEtagesForBatiment(batimentId, selectedValue=""){
+  els.etage.innerHTML = `<option value="">-- Choisir --</option>`;
+  if(!batimentId) return;
+
+  const url = `${URL_ETAGES}?batiment_id=${encodeURIComponent(batimentId)}`;
+  const res = await fetch(url, { headers: {"Accept":"application/json"} });
+  if(!res.ok) return;
+  const data = await res.json();
+
+  els.etage.innerHTML = `<option value="">-- Choisir --</option>` +
+    data.items.map(x => `<option value="${x.value}">${h(x.label)}</option>`).join("");
+
+  if(selectedValue !== "" && selectedValue !== null && selectedValue !== undefined){
+    els.etage.value = String(selectedValue);
+  }
+}
+els.batiment_id.addEventListener("change", () => {
+  loadEtagesForBatiment(els.batiment_id.value, "");
+});
+
+/* List */
+async function loadList(){
+  const params = new URLSearchParams({
+    q: state.q,
+    batiment: state.batiment,
+    page: String(state.page),
+    page_size: String(state.page_size),
+  });
+
+  els.tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Chargement...</td></tr>`;
+  const res = await fetch(`${URL_LIST}?${params.toString()}`, { headers: {"Accept":"application/json"} });
+
+  if(!res.ok){
+    els.tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Erreur chargement.</td></tr>`;
+    return;
+  }
+
+  const data = await res.json();
+  renderTable(data.items, data.page, data.pages, data.total);
+}
+
+function renderTable(items, page, pages, total){
+  els.totalCount.textContent = total;
+
+  if(!items.length){
+    els.tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Aucune salle.</td></tr>`;
+  }else{
+    const startIndex = (page - 1) * state.page_size;
+
+    // ✅ IMPORTANT: pas de onclick inline => data-action
+    els.tableBody.innerHTML = items.map((s,i)=>`
+      <tr>
+        <td>${startIndex + i + 1}</td>
+        <td class="fw-semibold">${h(s.nom)}</td>
+        <td class="text-muted">${h(s.batiment.nom)}</td>
+        <td class="text-center">${s.etage === 0 ? "Étage 0" : "Étage " + h(s.etage)}</td>
+        <td class="text-muted">${h(s.description || "-")}</td>
+        <td class="text-end">
+          <button type="button" class="btn btn-sm btn-outline-primary"
+                  data-action="edit" data-id="${s.id}">Modifier</button>
+          <button type="button" class="btn btn-sm btn-outline-danger"
+                  data-action="delete" data-id="${s.id}" data-name="${h(s.nom)}">Supprimer</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  renderPagination(page, pages);
+  els.pageInfo.textContent = `Page ${page} / ${pages}`;
+}
+
+function renderPagination(page, pages){
+  const win=2;
+  const link = (label,p,disabled=false,active=false)=>`
+    <li class="page-item ${disabled?"disabled":""} ${active?"active":""}">
+      <a class="page-link" href="#" data-page="${p}">${label}</a>
+    </li>`;
+
+  let html = "";
+  html += link("«",1,page===1);
+  html += link("Précédent",Math.max(1,page-1),page===1);
+
+  for(let p=1;p<=pages;p++){
+    if(p>=page-win && p<=page+win){
+      html += link(String(p),p,false,p===page);
+    }
+  }
+
+  html += link("Suivant",Math.min(pages,page+1),page===pages);
+  html += link("»",pages,page===pages);
+
+  els.pagination.innerHTML = html;
+}
+
+/* Pagination click (event delegation) */
+els.pagination.addEventListener("click", (e)=>{
+  const a = e.target.closest("a.page-link");
+  if(!a) return;
+  e.preventDefault();
+  const p = parseInt(a.getAttribute("data-page"), 10);
+  if(!p) return;
+  state.page = p;
+  loadList();
+});
+
+/* Filters */
+els.btnSearch.addEventListener("click", ()=>{
+  state.q = els.searchInput.value.trim();
+  state.batiment = els.batimentFilter.value;
+  state.page = 1;
+  loadList();
+});
+els.btnReset.addEventListener("click", ()=>{
+  els.searchInput.value="";
+  els.batimentFilter.value="";
+  state.q="";
+  state.batiment="";
+  state.page=1;
+  loadList();
+});
+els.pageSize.addEventListener("change", ()=>{
+  state.page_size = parseInt(els.pageSize.value,10) || 10;
+  state.page = 1;
+  loadList();
+});
+els.batimentFilter.addEventListener("change", ()=>{
+  state.batiment = els.batimentFilter.value;
+  state.page = 1;
+  loadList();
+});
+
+/* Open Create */
+els.btnOpenCreate.addEventListener("click", async ()=>{
+  els.xTitle.textContent="Ajouter une salle";
+  els.btnSave.textContent="Enregistrer";
+  els.id.value="";
+  els.nom.value="";
+  els.description.value="";
+  els.batiment_id.value="";
+  await loadEtagesForBatiment("", "");
+  setError("");
+  openModal();
+  setTimeout(()=>els.nom.focus(), 50);
+});
+
+/* Table actions (edit/delete) ✅ FIX refresh bug */
+els.tableBody.addEventListener("click", async (e)=>{
+  const btn = e.target.closest("button[data-action]");
+  if(!btn) return;
+
+  const action = btn.getAttribute("data-action");
+  const id = btn.getAttribute("data-id");
+
+  if(action === "edit"){
+    setError("");
+    const res = await fetch(URL_DETAIL(id), { headers: {"Accept":"application/json"} });
+    if(!res.ok){ alert("Erreur chargement salle."); return; }
+    const s = await res.json();
+
+    els.xTitle.textContent="Modifier la salle";
+    els.btnSave.textContent="Mettre à jour";
+    els.id.value = s.id;
+    els.nom.value = s.nom || "";
+    els.description.value = s.description || "";
+    els.batiment_id.value = String(s.batiment_id);
+
+    // ✅ charger étages selon bâtiment puis sélectionner le bon étage
+    await loadEtagesForBatiment(String(s.batiment_id), String(s.etage));
+
+    openModal();
+    setTimeout(()=>els.nom.focus(), 50);
+  }
+
+  if(action === "delete"){
+    const name = btn.getAttribute("data-name") || "cette salle";
+    if(!confirm(`Supprimer "${name}" ?`)) return;
+
+    const res = await fetch(URL_DELETE(id), {
+      method:"POST",
+      headers:{ "X-CSRFToken": CSRF, "Accept":"application/json" }
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data.ok){ alert(data.error || "Erreur suppression."); return; }
+
+    loadList();
+  }
+});
+
+/* Submit (create/update) */
+els.form.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  setError("");
+
+  const batId = els.batiment_id.value;
+  const nom = els.nom.value.trim();
+  const etage = els.etage.value;
+  const description = els.description.value.trim();
+
+  if(!batId){ setError("Choisis un bâtiment."); return; }
+  if(!nom){ setError("Le nom de la salle est obligatoire."); return; }
+  if(etage === "" || etage === null){ setError("Choisis un étage."); return; }
+
+  const payload = new URLSearchParams();
+  payload.set("batiment_id", batId);
+  payload.set("nom", nom);
+  payload.set("etage", String(etage));
+  payload.set("description", description);
+
+  const id = els.id.value;
+  const url = id ? URL_UPDATE(id) : URL_CREATE;
+
+  const res = await fetch(url, {
+    method:"POST",
+    headers:{
+      "X-CSRFToken": CSRF,
+      "Content-Type":"application/x-www-form-urlencoded",
+      "Accept":"application/json",
+    },
+    body: payload.toString()
+  });
+
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok || !data.ok){
+    setError(data.error || "Erreur lors de l'enregistrement.");
+    return;
+  }
+
+  closeModal();
+  loadList();
+});
+
+/* init */
+(async function(){
+  await loadBatiments();
+  await loadList();
+})();
+</script>
+
+{% endblock %}

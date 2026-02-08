@@ -1,0 +1,176 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S'inscrire</title>
+    <link rel="stylesheet" href="{% static 'css/css/bootstrap.min.css'%}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    
+
+
+
+<div class="containaire mt-5">
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png' %}" height="40" width="40" alt="">
+        <h2 style="margin-top: 1rem; margin-left: 1rem; "> S'inscrire </h2>
+    </div>
+    {% if form.errors %}
+        <div class="error-messages bg-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+         <div>
+            <label for="username">Username :</label>
+             {{form.username}}
+        </div>
+        <div>
+            <label for="nom_complet">Nom Complete :</label>
+            {{form.nom_complet }}
+        </div>
+        <div>
+            <label for="sexe">Sexe :</label>
+            {{ form.sexe }}
+        </div>
+        <div>
+            <label for="date_naissance">Date de naissance :</label>
+            {{ form.date_naissance }}
+        </div>
+        <div>
+            <label for="Pays">Pays</label>
+            {{ form.Pays }}
+        </div>
+        <div>
+            <label for="Ville">Ville :</label>
+            {{ form.Ville }}
+        </div>
+        <div>
+            <label for="Adresse">Adresse :</label>
+            {{ form.Adresse }}
+        </div>
+        <div>
+            <label for="num_tel">Num Telephone :</label>
+            {{ form.num_tel }}
+        </div>
+        <div>
+            <label for="email">Email :</label>
+           {{ form.email }}
+        </div>
+        <div>
+            <label for="role">Ecole :</label>
+            {{ form.ecole }}
+        </div>
+        <div>
+            <label for="password1">Password</label>
+            {{ form.password1 }}
+        </div>
+        <div>
+            <label for="password2">Confirmation du  password</label>
+            {{ form.password2 }}
+        </div>
+
+        <div class="full-width">
+            <button type="submit" class="btn btn-success"> S'inscrire</button>
+            <a href="{% url 'Connection'%}" type="submit" class="btn btn-primary ">Se connecte</a>
+        </div>
+
+    </form>
+</div>
+
+
+
+
+
+<!--
+
+<div style="margin-top: 12rem;" id="register">
+<h5>{{ erreur }}</h5>
+ <div style="display: flex; justify-content: space-evenly;" class="logos">
+         <img class="logo" src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" alt="Ecomanage">
+         <h2 style="margin-top: 0px;">Ajouter un Utilisateur</h2>
+    </div>
+
+<form action="" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+
+</div>
+
+
+<div class="form-container">
+    <h2>Ajouter un élève</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="id_nom_complet">Username :</label>
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                <label for="id_sexe">Nom complet :</label>
+                {{ form.nom_complet }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_date_naissance">Date de naissance :</label>
+                {{ form.date_naissance }}
+            </div>
+            <div class="form-group">
+                <label for="id_adresse">Adresse :</label>
+                {{ form.Adresse }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_num_tel">Téléphone :</label>
+                {{ form.num_tel }}
+            </div>
+            <div class="form-group">
+                <label for="id_email">Email :</label>
+                {{ form.email }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_image">Image :</label>
+                {{ form.image }}
+            </div>
+            <div class="form-group">
+                <label for="id_classe">Classe :</label>
+                {{ form.classe }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_nom_mere">Nom de la mère :</label>
+                {{ form.nom_mere }}
+            </div>
+            <div class="form-group">
+                <label for="id_tel_parent">Téléphone parent :</label>
+                {{ form.tel_parent }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_email_parent">Email parent :</label>
+                {{ form.email_parent }}
+            </div>
+        </div>
+        <button type="submit" class="btn-submit">Ajouter</button>
+    </form>
+</div>
+-->
+
+
+</body>
+</html>
