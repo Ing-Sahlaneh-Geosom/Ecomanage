@@ -11,11 +11,18 @@ from classe.form import ClasseForm
 
 
 
-class ClasseCreateView(EcoleAssignMixin,CreateView):
+class ClasseCreateView(EcoleAssignMixin, CreateView):
     model = Classe
     template_name = "AjouterUneClasse.html"
     fields = '__all__'
     success_url = reverse_lazy("ListeDesClasse")
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        ecole = self.request.user.ecole
+        # ✅ Filtrer les niveaux: seulement ceux de l'école + actifs
+        form.fields['niveau'].queryset = Niveau.objects.filter(ecole=ecole, actif=True).order_by('ordre', 'nom')
+        return form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -23,8 +30,16 @@ class ClasseCreateView(EcoleAssignMixin,CreateView):
         context['Title'] = "Ajouter une classe"
         return context
 
+    def get_queryset(self):
+        return Classe.objects.filter(ecole=self.request.user.ecole)
+
+
+
     def form_valid(self, form):
-        messages.success(self.request, "Le classe et ajouter avec success")
+        # ✅ au cas où ton mixin ne le fait pas
+        form.instance.ecole = self.request.user.ecole
+
+        messages.success(self.request, "La classe est ajoutée avec succès")
         return super().form_valid(form)
 
 class SpecialiteCreateView(EcoleAssignMixin,CreateView):
@@ -84,17 +99,33 @@ class ListeDesClasse(LoginRequiredMixin ,ListView):
 
 
 
-class ClasseUpdateView(EcoleAssignMixin , UpdateView):
+
+class ClasseUpdateView(EcoleAssignMixin, UpdateView):
     model = Classe
     template_name = "AjouterUneClasse.html"
     fields = "__all__"
     success_url = reverse_lazy("ListeDesClasse")
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        ecole = self.request.user.ecole
+        form.fields['niveau'].queryset = Niveau.objects.filter(ecole=ecole, actif=True).order_by('ordre', 'nom')
+        return form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["submit_text"] = "Modifier"
         context["Title"] = "Modifier une classe"
         return context
+    
+    def get_queryset(self):
+        return Classe.objects.filter(ecole=self.request.user.ecole)
+
+
+    def form_valid(self, form):
+        form.instance.ecole = self.request.user.ecole
+        messages.success(self.request, "La classe est modifiée avec succès")
+        return super().form_valid(form)
 
 class ClasseDeleteView(DeleteView):
     model = Classe

@@ -18,6 +18,41 @@
   <!-- ✅ AJOUT MINIMAL: ACTIVE + RTL sidebar -->
   <style>
 
+
+/* ===== SIDEBAR LOGO (image unique) ===== */
+.sidebar-logo-wrapper {
+  position: relative;
+  text-align: center;
+  
+}
+
+/* bouton fermer */
+.sidebar-close {
+  position: absolute;
+  top: 6px;
+  inset-inline-start: 10px; /* auto RTL/LTR */
+  text-decoration: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* image logo */
+.sidebar-logo {
+  display: block;
+  margin: 0 auto;
+  max-width: 180px;   /* desktop */
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* mobile */
+@media (max-width: 576px) {
+  .sidebar-logo {
+    max-width: 140px;
+  }
+}
+
     .navbar { overflow: visible !important; }
 .navbar .dropdown-menu { z-index: 2000 !important; }
 
@@ -56,21 +91,7 @@ body, .main-content, .content, .page-content {
 }
 
 
-    /* ===== SIDEBAR À DROITE SI AR (RTL) ===== */
-    html[dir="rtl"] .sidebar {
-      left: auto !important;
-      right: 0 !important;
-    }
-    /* option: si ton style.css met margin-left, on inverse en RTL */
-    html[dir="rtl"] .main-content {
-      margin-left: 0 !important;
-      margin-right: 250px; /* ajuste si ta sidebar a une autre largeur */
-    }
-    @media (max-width: 992px){
-      html[dir="rtl"] .main-content{
-        margin-right: 0 !important;
-      }
-    }
+  
   </style>
 </head>
 <body>
@@ -143,23 +164,17 @@ body, .main-content, .content, .page-content {
 
 
  
-  <div  class="sidebar" id="sidebarMenu">
+  <div style="z-index: 10001;"  class="sidebar" id="sidebarMenu">
    {% load i18n %}
 
-<div class="d-flex align-items-center" style="margin-left: 1rem; gap:8px;">
-  <a id="closeSidebar" style="text-decoration:none;">✖</a>
+<div class="sidebar-logo-wrapper">
+  <a style="height: 40px; width: 40px;" id="closeSidebar" class="sidebar-close">✖</a>
 
-  {% if request.LANGUAGE_CODE == 'ar' %}
-    <h4 class="m-3">
-      {% trans "Ecomanage" %}
-      <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" alt="Logo" width="25">
-    </h4>
-  {% else %}
-    <h4 class="m-3">
-      <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" alt="Logo" width="25">
-      {% trans "Ecomanage" %}
-    </h4>
-  {% endif %}
+  <img
+    src="{% static 'img/IMG-20260210-WA0001.jpg' %}"
+    alt="SmartSchool System"
+    class="sidebar-logo"
+  >
 </div>
 
   {% if user.role %}
@@ -234,7 +249,7 @@ body, .main-content, .content, .page-content {
 
       <div class="collapse submenu show" id="menuScolaire">
         <a class="{% if current == 'certificat_scolarite' %}active{% endif %}" href="{% url 'certificat_scolarite'%}">- {% trans "Attestation Scolaire" %}</a>
-        <a class="{% if current == 'convocation_parent' %}active{% endif %}" href="{% url 'convocation_parent'%}">- {% trans " Convocation des parents " %} </a>
+        <a class="{% if current == 'convocation_parent' %}active{% endif %}" href="{% url 'convocation_parent'%}">- {% trans "Convocation des parents" %}</a>
         <a class="{% if current == 'suivi_absences_par_mois' %}active{% endif %}" href="{% url 'suivi_absences_par_mois'%}">- {% trans "saisie des absences par mois" %} </a>
         <a class="{% if current == 'violence_list' %}active{% endif %}" href="{% url 'violence_list'%}">- {% trans "Violences des eleves" %}</a>
         <a class="{% if current == 'degradation_page' %}active{% endif %}" href="{% url 'degradation_page'%}">- {% trans "Degradation des eleves" %}</a>
@@ -258,18 +273,18 @@ body, .main-content, .content, .page-content {
         👥 {% trans "Gestion des Étudiants" %}<span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuEtudiants">
-        <a class="{% if current == 'les_eleves' %}active{% endif %}" href="{% url 'les_eleves'%}">👉 {% trans "Liste des étudiants" %} </a>
-        <a class="{% if current == 'Ajouter' %}active{% endif %}" href="{% url 'Ajouter'%}">👉 {% trans "Ajouter un étudiant" %} </a>
-        <a class="{% if current == 'cartes_scolaires' %}active{% endif %}" href="{% url 'cartes_scolaires'%}">👉 {% trans "Carte Scolaire" %} </a>
+        <a class="{% if current == 'les_eleves' %}active{% endif %}" href="{% url 'les_eleves'%}">-{% trans "Liste des étudiants" %} </a>
+        <a class="{% if current == 'Ajouter' %}active{% endif %}" href="{% url 'Ajouter'%}">-{% trans "Ajouter un étudiant" %} </a>
+        <a class="{% if current == 'cartes_scolaires' %}active{% endif %}" href="{% url 'cartes_scolaires'%}">-{% trans "Carte Scolaire" %} </a>
       </div>
     {% else %}
       <button class="btn d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#menuEtudiants" aria-expanded="false">
         👥 {% trans "Gestion des Étudiants" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuEtudiants">
-        <a href="{% url 'les_eleves'%}">👉 {% trans "Liste des étudiants" %} </a>
-        <a href="{% url 'Ajouter'%}">👉{% trans "Ajouter un étudiant" %}  </a>
-        <a href="{% url 'cartes_scolaires'%}">👉 {% trans "Carte Scolaire" %} </a>
+        <a href="{% url 'les_eleves'%}">-{% trans "Liste des étudiants" %} </a>
+        <a href="{% url 'Ajouter'%}">-{% trans "Ajouter un étudiant" %}  </a>
+        <a href="{% url 'cartes_scolaires'%}">-{% trans "Carte Scolaire" %} </a>
       </div>
     {% endif %}
 
@@ -279,16 +294,16 @@ body, .main-content, .content, .page-content {
          🏫 {% trans "Gestion des Classes" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuClasses">
-        <a class="{% if current == 'CreeDesClasses' %}active{% endif %}" href="{% url 'CreeDesClasses'%}">👉{% trans "Ajouter une classe" %}</a> 
-        <a class="{% if current == 'ListeDesClasse' %}active{% endif %}" href="{% url 'ListeDesClasse'%}">👉{% trans "Liste des classes" %} </a>
+        <a class="{% if current == 'CreeDesClasses' %}active{% endif %}" href="{% url 'CreeDesClasses'%}">-{% trans "Ajouter une classe" %}</a> 
+        <a class="{% if current == 'ListeDesClasse' %}active{% endif %}" href="{% url 'ListeDesClasse'%}">-{% trans "Liste des classes" %} </a>
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuClasses" aria-expanded="false">
          🏫 {% trans "Gestion des Classes" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuClasses">
-        <a href="{% url 'CreeDesClasses'%}">👉 {% trans "Ajouter une classe" %}</a> 
-        <a href="{% url 'ListeDesClasse'%}">👉 {% trans "Liste des classes" %} </a>
+        <a href="{% url 'CreeDesClasses'%}">-{% trans "Ajouter une classe" %}</a> 
+        <a href="{% url 'ListeDesClasse'%}">-{% trans "Liste des classes" %} </a>
       </div>
     {% endif %}
 
@@ -298,22 +313,22 @@ body, .main-content, .content, .page-content {
         👨‍🏫 {% trans "Enseignant" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuProfs">
-        <a class="{% if current == 'ressources' %}active{% endif %}" href="{% url 'ressources'%}">👉 {% trans "Envoiyer un document" %}</a>
-        <!-- <a href="{% url 'AjouteProf'%}">LesMessagerie 👉 Ajouter un professeur</a> -->
-        <a class="{% if current == 'Lesensiegnants' %}active{% endif %}" href="{% url 'Lesensiegnants'%}">👉 {% trans "Liste des professeurs" %}</a>
-        <a class="{% if current == 'absences_edt' %}active{% endif %}" href="{% url 'absences_edt'%}">👉 {% trans "Saisi quotidienne des apsences" %}</a>
-        <a href="">👉 {% trans "Coordinateur par discipline" %}</a>
+        <a class="{% if current == 'ressources' %}active{% endif %}" href="{% url 'ressources'%}">-{% trans "Envoiyer un document" %}</a>
+        
+        <a class="{% if current == 'Lesensiegnants' %}active{% endif %}" href="{% url 'Lesensiegnants'%}">-{% trans "Liste des professeurs" %}</a>
+        <a class="{% if current == 'absences_edt' %}active{% endif %}" href="{% url 'absences_edt'%}">-{% trans "Saisi quotidienne des apsences" %}</a>
+        <a href="">-{% trans "Coordinateur par discipline" %}</a>
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuProfs" aria-expanded="false">
         👨‍🏫 {% trans "Enseignant" %}  <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuProfs">
-        <a href="{% url 'ressources'%}">👉 {% trans "Envoiyer un document" %}</a>
-        <!-- <a href="{% url 'AjouteProf'%}">LesMessagerie 👉 Ajouter un professeur</a> -->
-        <a href="{% url 'Lesensiegnants'%}">👉 {% trans "Liste des professeurs" %}</a>
-        <a href="{% url 'absences_edt'%}">👉 {% trans "Saisi quotidienne des apsences" %}</a>
-        <a href="">👉 {% trans "Coordinateur par discipline" %}</a>
+        <a href="{% url 'ressources'%}">-{% trans "Envoiyer un document" %}</a>
+      
+        <a href="{% url 'Lesensiegnants'%}">-{% trans "Liste des professeurs" %}</a>
+        <a href="{% url 'absences_edt'%}">-{% trans "Saisi quotidienne des apsences" %}</a>
+        <a href="">-{% trans "Coordinateur par discipline" %}</a>
       </div>
     {% endif %}
 
@@ -324,15 +339,15 @@ body, .main-content, .content, .page-content {
       </button>
       <div class="collapse submenu show" id="menuMatiere">
         <a class="{% if current == 'AjouterDesMatiere' %}active{% endif %}" href="{% url 'AjouterDesMatiere'%}"> {% trans " - Ajouter une matière" %}</a>
-        <a class="{% if current == 'listesdesmetier' %}active{% endif %}" href="{% url 'listesdesmetier'%}">👉 {% trans " - Liste des matière" %}</a>
+        <a class="{% if current == 'listesdesmetier' %}active{% endif %}" href="{% url 'listesdesmetier'%}">{% trans " - Liste des matière" %}</a>
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuMatiere" aria-expanded="false">
         📘 {% trans "Matières" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuMatiere">
-        <a href="{% url 'AjouterDesMatiere'%}">👉 {% trans "Ajouter une matière" %}</a>
-        <a href="{% url 'listesdesmetier'%}">👉 {% trans "Liste des matière" %}</a>
+        <a href="{% url 'AjouterDesMatiere'%}">-{% trans "Ajouter une matière" %}</a>
+        <a href="{% url 'listesdesmetier'%}">-{% trans "Liste des matière" %}</a>
       </div>
     {% endif %}
 
@@ -342,20 +357,20 @@ body, .main-content, .content, .page-content {
         📋{% trans "Examen" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuNotes">
-        <a class="{% if current == 'periode_list' %}active{% endif %}" href="{% url 'periode_list'%}">👉 {% trans "Gestion des notes" %}</a>
-        <a class="{% if current == 'annuelle_list' %}active{% endif %}" href="{% url 'annuelle_list'%}">👉 {% trans "Configuration des apreciation" %}</a>
-        <a class="{% if current == 'rapport_conseil_classe' %}active{% endif %}" href="{% url 'rapport_conseil_classe'%}">👉 {% trans "Conseille de classe" %}</a>
-        <a href="{% url 'rapport_conseil_classe'%}">👉 {% trans "Resultat BEF" %}</a>
+        <a class="{% if current == 'periode_list' %}active{% endif %}" href="{% url 'periode_list'%}">- {% trans "Gestion des notes" %}</a>
+        <a class="{% if current == 'annuelle_list' %}active{% endif %}" href="{% url 'annuelle_list'%}">- {% trans "Configuration des apreciation" %}</a>
+        <a class="{% if current == 'rapport_conseil_classe' %}active{% endif %}" href="{% url 'rapport_conseil_classe'%}">- {% trans "Conseille de classe" %}</a>
+        <a href="{% url 'rapport_conseil_classe'%}">- {% trans "Resultat BEF" %}</a>
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuNotes" aria-expanded="false">
         📋 {% trans "Examen" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuNotes">
-        <a href="{% url 'periode_list'%}">👉 {% trans "Gestion des notes" %}</a>
-        <a href="{% url 'annuelle_list'%}">👉 {% trans "Configuration des apreciation" %}</a>
-        <a href="{% url 'rapport_conseil_classe'%}">👉 {% trans "Conseille de classe" %}</a>
-        <a href="{% url 'rapport_conseil_classe'%}">👉 {% trans "Resultat BEF" %}</a>
+        <a href="{% url 'periode_list'%}">- {% trans "Gestion des notes" %}</a>
+        <a href="{% url 'annuelle_list'%}">- {% trans "Configuration des apreciation" %}</a>
+        <a href="{% url 'rapport_conseil_classe'%}">- {% trans "Conseille de classe" %}</a>
+        <a href="{% url 'rapport_conseil_classe'%}">- {% trans "Resultat BEF" %}</a>
       </div>
     {% endif %}
 
@@ -367,24 +382,24 @@ body, .main-content, .content, .page-content {
          👨‍🏫 {% trans "Administrateur" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuAdministrateur">
-        <a class="{% if current == 'employe_list' %}active{% endif %}" href="{% url 'employe_list'%}">✉️ {% trans "Employés" %} </a>
-        <a class="{% if current == 'absences_enseignants' %}active{% endif %}" href="{% url 'absences_enseignants'%}">🕓  {% trans "Absences enseignants" %} </a>
-        <a class="{% if current == 'suivi_absences_enseignants' %}active{% endif %}" href="{% url 'suivi_absences_enseignants'%}">🕓 {% trans "Suivie des Absences enseignants" %} </a>
-        <a class="{% if current == 'absences_employes' %}active{% endif %}" href="{% url 'absences_employes'%}">🕓  {% trans "Absences employés" %} </a>
-        <a class="{% if current == 'suivi_absences_employes' %}active{% endif %}" href="{% url 'suivi_absences_employes'%}">🕓 {% trans "Suivie des Absences employés" %} </a>
-        <a class="{% if current == 'liste_parents' %}active{% endif %}" href="{% url 'liste_parents'%}">🕓 {% trans "Liste de parents" %} </a>
+        <a class="{% if current == 'employe_list' %}active{% endif %}" href="{% url 'employe_list'%}">- {% trans "Employés" %} </a>
+        <a class="{% if current == 'absences_enseignants' %}active{% endif %}" href="{% url 'absences_enseignants'%}">-  {% trans "Absences enseignants" %} </a>
+        <a class="{% if current == 'suivi_absences_enseignants' %}active{% endif %}" href="{% url 'suivi_absences_enseignants'%}">- {% trans "Suivie des Absences enseignants" %} </a>
+        <a class="{% if current == 'absences_employes' %}active{% endif %}" href="{% url 'absences_employes'%}">-  {% trans "Absences employés" %} </a>
+        <a class="{% if current == 'suivi_absences_employes' %}active{% endif %}" href="{% url 'suivi_absences_employes'%}">- {% trans "Suivie des Absences employés" %} </a>
+        <a class="{% if current == 'liste_parents' %}active{% endif %}" href="{% url 'liste_parents'%}">- {% trans "Liste de parents" %} </a>
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuAdministrateur" aria-expanded="false">
          👨‍🏫 {% trans "Administrateur" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuAdministrateur">
-        <a href="{% url 'employe_list'%}">✉️ {% trans "Employés" %}</a>
-        <a href="{% url 'absences_enseignants'%}">🕓  {% trans "Absences enseignants" %} </a>
-        <a href="{% url 'suivi_absences_enseignants'%}">🕓 {% trans "Suivie des Absences enseignants" %} </a>
-        <a href="{% url 'absences_employes'%}">🕓  {% trans "Absences employés" %} </a>
-        <a href="{% url 'suivi_absences_employes'%}">🕓 {% trans "Suivie des Absences employés" %} </a>
-        <a href="{% url 'liste_parents'%}">🕓 {% trans "Liste de parents" %} </a>
+        <a href="{% url 'employe_list'%}">- {% trans "Employés" %}</a>
+        <a href="{% url 'absences_enseignants'%}">-  {% trans "Absences enseignants" %} </a>
+        <a href="{% url 'suivi_absences_enseignants'%}">- {% trans "Suivie des Absences enseignants" %} </a>
+        <a href="{% url 'absences_employes'%}">-  {% trans "Absences employés" %} </a>
+        <a href="{% url 'suivi_absences_employes'%}">- {% trans "Suivie des Absences employés" %} </a>
+        <a href="{% url 'liste_parents'%}">- {% trans "Liste de parents" %} </a>
       </div>
     {% endif %}
     
@@ -393,26 +408,26 @@ body, .main-content, .content, .page-content {
         💳 {% trans "Finance & Gestionnaire" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuPaiements">
-        <a class="{% if current == 'ConfDePaiment' %}active{% endif %}" href="{% url 'ConfDePaiment'%}">👉 {% trans "Configuration des frais" %}</a>
-        <a class="{% if current == 'finance_frais' %}active{% endif %}" href="{% url 'finance_frais'%}">👉 {% trans "Frais par classe" %}</a>
-        <a class="{% if current == 'liste_de_paiment' %}active{% endif %}" href="{% url 'liste_de_paiment'%}">👉 {% trans "Exonéraition" %}</a>
-        <a class="{% if current == 'paiement_frais' %}active{% endif %}" href="{% url 'paiement_frais'%}">👉 {% trans "Fiche du Paiments" %}</a>
-        <a class="{% if current == 'caisse' %}active{% endif %}" href="{% url 'caisse'%}">👉 {% trans "Caisse" %}</a>     
-        <a class="{% if current == 'journal_caisse' %}active{% endif %}" href="{% url 'journal_caisse'%}">👉 {% trans "Historique" %}</a>
-        <a class="{% if current == 'cloture_caisse' %}active{% endif %}" href="{% url 'cloture_caisse'%}">👉{% trans "Cloture de la Caisse" %}</a>
+        <a class="{% if current == 'ConfDePaiment' %}active{% endif %}" href="{% url 'ConfDePaiment'%}">- {% trans "Configuration des frais" %}</a>
+        <a class="{% if current == 'finance_frais' %}active{% endif %}" href="{% url 'finance_frais'%}">- {% trans "Frais par classe" %}</a>
+        <a class="{% if current == 'liste_de_paiment' %}active{% endif %}" href="{% url 'liste_de_paiment'%}">- {% trans "Exonéraition" %}</a>
+        <a class="{% if current == 'paiement_frais' %}active{% endif %}" href="{% url 'paiement_frais'%}">- {% trans "Fiche du Paiments" %}</a>
+        <a class="{% if current == 'caisse' %}active{% endif %}" href="{% url 'caisse'%}">- {% trans "Caisse" %}</a>     
+        <a class="{% if current == 'journal_caisse' %}active{% endif %}" href="{% url 'journal_caisse'%}">- {% trans "Historique" %}</a>
+        <a class="{% if current == 'cloture_caisse' %}active{% endif %}" href="{% url 'cloture_caisse'%}">-{% trans "Cloture de la Caisse" %}</a>
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuPaiements" aria-expanded="false">
         💳 {% trans "Finance & Gestionnaire" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuPaiements">
-        <a href="{% url 'ConfDePaiment'%}">👉 {% trans "Configuration des frais" %}</a>
-        <a href="{% url 'finance_frais'%}">👉 {% trans "Frais par classe" %}</a>
-        <a href="{% url 'liste_de_paiment'%}">👉 {% trans "Exonéraition" %}</a>
-        <a href="{% url 'paiement_frais'%}">👉 {% trans "Fiche du Paiments" %}</a>
-        <a href="{% url 'caisse'%}">👉 {% trans "Caisse" %}</a>     
-        <a href="{% url 'journal_caisse'%}">👉{% trans "Historique" %}</a>
-        <a href="{% url 'cloture_caisse'%}">👉{% trans "Cloture de la Caisse" %}</a>
+        <a href="{% url 'ConfDePaiment'%}">- {% trans "Configuration des frais" %}</a>
+        <a href="{% url 'finance_frais'%}">- {% trans "Frais par classe" %}</a>
+        <a href="{% url 'liste_de_paiment'%}">- {% trans "Exonéraition" %}</a>
+        <a href="{% url 'paiement_frais'%}">- {% trans "Fiche du Paiments" %}</a>
+        <a href="{% url 'caisse'%}">- {% trans "Caisse" %}</a>     
+        <a href="{% url 'journal_caisse'%}">-{% trans "Historique" %}</a>
+        <a href="{% url 'cloture_caisse'%}">-{% trans "Cloture de la Caisse" %}</a>
       </div>
     {% endif %}
 
@@ -423,24 +438,24 @@ body, .main-content, .content, .page-content {
         ⚙️ {% trans "Réglages" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuParametre">
-        <a class="{% if current == 'AjouterDesMatiere' %}active{% endif %}" href="{% url 'AjouterDesMatiere'%}">👉 {% trans "Ajouter une matière" %}</a>
-        <a class="{% if current == 'CreeDesSpecialite' %}active{% endif %}" href="{% url 'CreeDesSpecialite'%}">👉 {% trans "Ajouter une Specialite" %}</a>
-        <a class="{% if current == 'CreeDesNiveau' %}active{% endif %}" href="{% url 'CreeDesNiveau'%}">👉 {% trans "Ajouter une Niveau" %}</a>
-        <a class="{% if current == 'batiments_page' %}active{% endif %}" href="{% url 'batiments_page'%}">👉 {% trans "Les Batiments" %} </a>
-        <a class="{% if current == 'salles_page' %}active{% endif %}" href="{% url 'salles_page'%}">👉 {% trans "Les salles des batiments" %} </a>
-        <a class="{% if current == 'emploi_list' %}active{% endif %}" href="{% url 'emploi_list'%}">📅 {% trans "Emplois du temps" %}</a>
+        <a class="{% if current == 'AjouterDesMatiere' %}active{% endif %}" href="{% url 'AjouterDesMatiere'%}">- {% trans "Ajouter une matière" %}</a>
+        <a class="{% if current == 'CreeDesSpecialite' %}active{% endif %}" href="{% url 'CreeDesSpecialite'%}">- {% trans "Ajouter une Specialite" %}</a>
+        <a class="{% if current == 'CreeDesNiveau' %}active{% endif %}" href="{% url 'CreeDesNiveau'%}">- {% trans "Ajouter une Niveau" %}</a>
+        <a class="{% if current == 'batiments_page' %}active{% endif %}" href="{% url 'batiments_page'%}">- {% trans "Les Batiments" %} </a>
+        <a class="{% if current == 'salles_page' %}active{% endif %}" href="{% url 'salles_page'%}">- {% trans "Les salles des batiments" %} </a>
+        <a class="{% if current == 'emploi_list' %}active{% endif %}" href="{% url 'emploi_list'%}">- {% trans "Emplois du temps" %}</a>
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuParametre" aria-expanded="false">
         ⚙️ {% trans "Réglages" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuParametre">
-        <a href="{% url 'AjouterDesMatiere'%}">👉 {% trans "Ajouter une matière" %}</a>
-        <a href="{% url 'CreeDesSpecialite'%}">👉 {% trans "Ajouter une Specialite" %}</a>
-        <a href="{% url 'CreeDesNiveau'%}">👉 {% trans "Ajouter une Niveau" %}</a>
-        <a href="{% url 'batiments_page'%}">👉 {% trans "Les Batiments" %} </a>
-        <a href="{% url 'salles_page'%}">👉 {% trans "Les salles des batiments" %} </a>
-        <a class="{% if current == 'emploi_list' %}active{% endif %}" href="{% url 'emploi_list'%}">📅 {% trans "Emplois du temps" %}</a>
+        <a href="{% url 'AjouterDesMatiere'%}">- {% trans "Ajouter une matière" %}</a>
+        <a href="{% url 'CreeDesSpecialite'%}">- {% trans "Ajouter une Specialite" %}</a>
+        <a href="{% url 'CreeDesNiveau'%}">- {% trans "Ajouter une Niveau" %}</a>
+        <a href="{% url 'batiments_page'%}">- {% trans "Les Batiments" %} </a>
+        <a href="{% url 'salles_page'%}">- {% trans "Les salles des batiments" %} </a>
+        <a class="{% if current == 'emploi_list' %}active{% endif %}" href="{% url 'emploi_list'%}">- {% trans "Emplois du temps" %}</a>
 
       </div>
     {% endif %}
@@ -617,7 +632,7 @@ body, .main-content, .content, .page-content {
 
 
     {% endif %} -->
-   
+    <div id="ssSidebarOverlay"></div>
 
 <div class="main-content">
 {% block main %}
@@ -682,57 +697,77 @@ body, .main-content, .content, .page-content {
 document.addEventListener("DOMContentLoaded", () => {
 
   // ===============================
-  // ✅ Sidebar mobile (SAFE)
+  // ✅ Sidebar mobile (FIX RTL/LTR + overlay propre)
   // ===============================
   const toggleSidebarBtn = document.getElementById("toggleSidebar");
-const closeSidebarBtn  = document.getElementById("closeSidebar");
-const sidebar          = document.getElementById("sidebarMenu");
-const overlay          = document.getElementById("sidebarOverlay");
+  const closeSidebarBtn  = document.getElementById("closeSidebar");
+  const sidebar          = document.getElementById("sidebarMenu");
 
-function openSidebar() {
-  if (!sidebar) return;
-  sidebar.classList.add("active");
-  sidebar.classList.remove("collapsed");
-  if (overlay) overlay.style.display = "block";
+// ✅ overlay جديد (id جديد)
+const overlay          = document.getElementById("ssSidebarOverlay");
+
+function isMobile(){
+  return window.matchMedia("(max-width: 991.98px)").matches;
 }
 
-function closeSidebar() {
+function openSidebar(){
   if (!sidebar) return;
-  sidebar.classList.remove("active");
-  sidebar.classList.add("collapsed");
-  if (overlay) overlay.style.display = "none";
-}
-
-// ✅ Au chargement : en mobile on cache par défaut
-function initSidebarState() {
-  if (!sidebar) return;
-  if (window.matchMedia("(max-width: 991.98px)").matches) {
-    sidebar.classList.add("collapsed");
-    sidebar.classList.remove("active");
-    if (overlay) overlay.style.display = "none";
-  } else {
-    // desktop: visible
-    sidebar.classList.remove("collapsed");
+  if (isMobile()){
     sidebar.classList.add("active");
-    if (overlay) overlay.style.display = "none";
+    sidebar.classList.remove("collapsed");
+    if (overlay) overlay.classList.add("show");
   }
 }
 
-if (toggleSidebarBtn) toggleSidebarBtn.addEventListener("click", () => {
+function closeSidebar(){
   if (!sidebar) return;
-  const isOpen = sidebar.classList.contains("active") && !sidebar.classList.contains("collapsed");
-  if (isOpen) closeSidebar();
-  else openSidebar();
-});
+  if (isMobile()){
+    sidebar.classList.remove("active");
+    sidebar.classList.add("collapsed");
+    if (overlay) overlay.classList.remove("show");
+  }
+}
 
-if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
+function initSidebarState(){
+  if (!sidebar) return;
+
+  if (isMobile()){
+    sidebar.classList.add("collapsed");
+    sidebar.classList.remove("active");
+    if (overlay) overlay.classList.remove("show");
+  } else {
+    // desktop: sidebar visible, pas d'overlay
+    sidebar.classList.remove("collapsed");
+    sidebar.classList.add("active");
+    if (overlay) overlay.classList.remove("show");
+  }
+}
+
+if (toggleSidebarBtn){
+  toggleSidebarBtn.addEventListener("click", () => {
+    if (!sidebar) return;
+    const isOpen = sidebar.classList.contains("active") && !sidebar.classList.contains("collapsed");
+    if (isOpen) closeSidebar();
+    else openSidebar();
+  });
+}
+
+if (closeSidebarBtn){
+  closeSidebarBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    closeSidebar();
+  });
+}
+
+// ✅ click overlay ferme
 if (overlay) overlay.addEventListener("click", closeSidebar);
 
-window.addEventListener("resize", initSidebarState);
+// ESC ferme
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeSidebar();
 });
 
+window.addEventListener("resize", initSidebarState);
 initSidebarState();
 
 
@@ -744,8 +779,6 @@ initSidebarState();
   async function loadNotif(){
     const badge = document.getElementById("notifBadge");
     const box   = document.getElementById("notifList");
-
-    // si la page n'a pas la cloche => pas d'erreur
     if(!badge || !box) return;
 
     try{
@@ -790,7 +823,6 @@ initSidebarState();
   const sessionKey = "unread_popup_shown_v1";
 
   async function runPopup(){
-    // si pas de modal sur la page => on ignore
     const modalEl = document.getElementById("unreadPopupModal");
     const bodyEl  = document.getElementById("unreadPopupBody");
     if(!modalEl || !bodyEl) return;
@@ -818,16 +850,13 @@ initSidebarState();
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
       sessionStorage.setItem(sessionKey, "1");
 
-    }catch(e){
-      // silence
-    }
+    }catch(e){}
   }
 
   runPopup();
 
 });
 </script>
-
 
 
 

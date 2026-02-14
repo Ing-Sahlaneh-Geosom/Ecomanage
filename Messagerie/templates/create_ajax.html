@@ -1,55 +1,75 @@
 {% extends "base.html" %}
-{% block title %}Envoyer une ressource{% endblock %}
+{% load i18n %}
+
+{% block title %}{% trans "Envoyer une ressource" %}{% endblock %}
 
 {% block main %}
-<div class="container-fluid px-4 py-3">
-    
 
-  <div class="d-flex">
-  <a class="btn btn-sm btn-outline-secondary" href="{% url 'ressources'%}">X</a>
-  <h6 class="fw-bold mx-4 ">Envoyer une ressource</h6>
-</div>
-  <div  style="background-color: rgb(43, 43, 46);" class="card text-light">
+<style>
+  .rtl { direction: rtl; }
+  .rtl .top-row { flex-direction: row-reverse; }
+</style>
+
+<div class="container-fluid px-4 py-3 {% if request.LANGUAGE_CODE == 'ar' %}rtl{% endif %}">
+
+  <div class="d-flex m-3">
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'ressources' %}">X</a>
+    <h5 class="fw-bold mx-4 text-dark">{% trans "Envoyer une ressource" %}</h5>
+  </div>
+
+  <div style="background-color: white;" class="card text-light">
     <div class="card-body">
       <form method="POST" enctype="multipart/form-data" class="row g-3">
         {% csrf_token %}
 
         <div class="col-md-6">
-          <label class="form-label fw-bold text-light" for="{{ form.professeur.id_for_label }}">Enseignant</label>
+          <label class="form-label fw-bold text-dark" for="{{ form.professeur.id_for_label }}">
+            {% trans "Enseignant" %}
+          </label>
           {{ form.professeur }}
           {% if form.professeur.errors %}
-            <div class="text-danger small text-light">{{ form.professeur.errors|striptags }}</div>
+            <div class="text-danger small text-dark">{{ form.professeur.errors|striptags }}</div>
           {% endif %}
         </div>
 
         <div class="col-md-6">
-          <label class="form-label fw-bold text-light" for="{{ form.matier.id_for_label }}">Matières</label>
+          <label class="form-label fw-bold text-dark" for="{{ form.matier.id_for_label }}">
+            {% trans "Matières" %}
+          </label>
           {{ form.matier }}
-          <div class="small text-muted d-none text-light" id="loadingMatieres">Chargement…</div>
-          <div class="small text-danger d-none text-light id="matierError">Erreur de chargement.</div>
+          <div class="small text-muted d-none text-dark" id="loadingMatieres">{% trans "Chargement…" %}</div>
+
+          <!-- ✅ corrigé: id + class -->
+          <div class="small text-danger d-none text-dark" id="matierError">{% trans "Erreur de chargement." %}</div>
+
           {% if form.matier.errors %}
-            <div class="text-danger small text-light">{{ form.matier.errors|striptags }}</div>
+            <div class="text-danger small text-dark">{{ form.matier.errors|striptags }}</div>
           {% endif %}
         </div>
 
         <div class="col-md-6">
-          <label class="form-label fw-bold text-light" for="{{ form.fichier.id_for_label }}">Fichier</label>
+          <label class="form-label fw-bold text-dark" for="{{ form.fichier.id_for_label }}">
+            {% trans "Fichier" %}
+          </label>
           {{ form.fichier }}
           {% if form.fichier.errors %}
-            <div class="text-danger small text-light">{{ form.fichier.errors|striptags }}</div>
+            <div class="text-danger small text-dark">{{ form.fichier.errors|striptags }}</div>
           {% endif %}
         </div>
 
         <div class="col-md-6">
-          <label class="form-label fw-bold text-light" for="{{ form.description.id_for_label }}">Description</label>
+          
+          <label class="form-label fw-bold text-dark" for="{{ form.description.id_for_label }}">
+            {% trans "description" %}
+          </label>
           {{ form.description }}
           {% if form.description.errors %}
-            <div class="text-danger small text-light">{{ form.description.errors|striptags }}</div>
+            <div class="text-danger small text-dark">{{ form.description.errors|striptags }}</div>
           {% endif %}
         </div>
 
         <div class="col-12 d-flex justify-content-end gap-2">
-          <button class="btn btn-dark" type="submit">Sauvegarder</button>
+          <button class="btn btn-success" type="submit">{% trans "Sauvegarder" %}</button>
         </div>
 
       </form>
@@ -65,6 +85,9 @@
   const loading = document.getElementById("loadingMatieres");
   const errorBox = document.getElementById("matierError");
 
+  // ✅ Traductions utilisées dans JS
+  const OPT_DEFAULT = "{% trans 'Sélectionner...' %}";
+
   // ✅ même URL que la page (une seule url)
   const SAME_URL = "{% url 'ressource_create' %}";
 
@@ -72,7 +95,7 @@
   function setError(on){ errorBox.classList.toggle("d-none", !on); }
 
   function resetMatier(){
-    matierSelect.innerHTML = '<option value="">Sélectionner...</option>';
+    matierSelect.innerHTML = `<option value="">${OPT_DEFAULT}</option>`;
   }
 
   async function loadMatieres(profId){
@@ -108,4 +131,5 @@
   // Si prof déjà choisi (après erreur validation)
   if (professeurSelect.value) loadMatieres(professeurSelect.value);
 </script>
+
 {% endblock %}

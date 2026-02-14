@@ -1,72 +1,264 @@
-{% extends 'base.html'%}
-{% load static %}
-{% block title %} Ajouter Un Professeur {% endblock %}
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Ajouter un Professeur" %}{% endblock %}
+
 {% block main %}
+<style>
+  .prof-wrap{max-width:1100px;margin:0 auto;padding:18px}
+  .prof-title{font-weight:900;text-align:center;margin:8px 0 18px}
+  .cardx{background:#fff;border:1px solid #e9eef5;border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(16,24,40,.06)}
+  .errbox{background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d;border-radius:12px;padding:10px 12px;margin-bottom:12px}
+  .field-err{color:#b91c1c;font-size:13px;margin-top:6px}
+  .rtl .prof-title,.rtl label{ text-align:right; }
+  .rtl .row{ direction:rtl; }
 
-<div class="containaire">
-    <h2>{{ Title }} </h2>
-    {% if form.errors %}
-        <div class="error-messages bg-danger">
-            <ul>
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-    <form method="POST" enctype="multipart/form-data" class="form">
-        {% csrf_token %}
-        <div>
-            <label for="nom_conplet">Nom Complete :</label>
-            {{ form.nom_conplet }}
-        </div>
-        <div>
-            <label for="sexe">Sexe :</label>
-            {{ form.sexe }}
-        </div>
-        <div>
-            <label for="telephone">Telephone :</label>
-            {{ form.telephone }}
-        </div>
-        <div>
-            <label for="email">Email :</label>
-            {{ form.email }}
-        </div>
-         <div>
-            <label for="adresse">Adrress</label>
-            {{ form.adresse }}
-        </div>
-        <div>
-            <label for="matieres">Matier :</label>
-            {{ form.matieres }}
-        </div>
-        <div>
-            <label for="diplome">Diplome :</label>
-            {{ form.diplome }}
-        </div>
-        <div>
-            <label for="date_empauche">Date d'empauche :</label>
-            {{ form.date_empauche }}
-        </div>
-        <div>
-            <label for="status">Status</label>
-            {{ form.status }}
-        </div>
-        <div>
-            <label for="actif"> Actif </label>
-            {{ form.actif }}
-        </div>
-          <div>
-            <label for="classes">Classes :</label>
-            {{ form.classes }}
-        </div>
-        <div class="full-width">
-            <button type="submit" class="submit-btn">{{ Submit_text }}</button>
-        </div>
+  /* ---- Classes picker container ---- */
+  .classes-box{border:1px solid #e9eef5;border-radius:14px;padding:12px;background:#fbfdff}
+  .classes-head{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .classes-head .title{font-weight:900}
 
-    </form>
+  /* ---- Checkbox fallback: render en grille propre ---- */
+  #id_classes{
+    max-height:260px; overflow:auto; padding:6px;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px;
+  }
+  #id_classes label{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border:1px solid #eef2f7; border-radius:12px; background:#fff;
+    margin:0;
+  }
+  #id_classes label:hover{border-color:#cfe0ff}
+  #id_classes input{transform:scale(1.05)}
+  .rtl #id_classes label{flex-direction:row-reverse;justify-content:flex-end}
 
+  /* ---- Select2 look (Bootstrap-like) ---- */
+  .select2-container{width:100%!important}
+  .select2-container--default .select2-selection--multiple{
+    min-height:38px;
+    border:1px solid #ced4da;
+    border-radius:.375rem;
+    padding:4px 6px;
+  }
+  .select2-container--default.select2-container--focus .select2-selection--multiple{
+    border-color:#86b7fe;
+    box-shadow:0 0 0 .25rem rgba(13,110,253,.25);
+  }
+  .rtl .select2-container--default .select2-selection--multiple .select2-selection__rendered{
+    direction:rtl;
+    text-align:right;
+  }
+  .prof-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+.prof-head .prof-title{
+  margin:0;
+  font-weight:900;
+  flex:1;
+  text-align:center;
+}
+.back-btn{
+  min-width:72px;
+  border-radius:10px;
+  padding:8px 14px;
+}
+.prof-head.rtl{
+  direction:rtl;
+}
+.prof-head.rtl .back-btn{
+  order:2; /* bouton à droite en AR */
+}
+.prof-head.rtl .prof-title{
+  order:1;
+}
+
+</style>
+
+<div class="prof-wrap {% if request.LANGUAGE_CODE == 'ar' %}rtl{% endif %}">
+  <div class="prof-head {% if request.LANGUAGE_CODE == 'ar' %}rtl{% endif %}">
+        <a href="{% url 'Lesensiegnants' %}" class="btn btn-sm btn-primary back-btn">
+            {% trans "Retour" %}
+        </a>
+
+        <h2 class="prof-title">
+            {% if Submit_text == "Modifier" or Submit_text == _("Modifier") %}
+            {% trans "Modifier un Professeur" %}
+            {% else %}
+            {% trans "Ajouter un Professeur" %}
+            {% endif %}
+        </h2>
 </div>
+  {% if form.errors %}
+    <div class="errbox">
+      <b>⚠️ {% trans "Veuillez corriger les erreurs ci-dessous." %}</b>
+      {% if form.non_field_errors %}
+        <div class="mt-2">{{ form.non_field_errors }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data" class="cardx">
+    {% csrf_token %}
+
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Nom complet" %}</label>
+        {{ form.nom_conplet }}
+        {% if form.nom_conplet.errors %}<div class="field-err">{{ form.nom_conplet.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Sexe" %}</label>
+        {{ form.sexe }}
+        {% if form.sexe.errors %}<div class="field-err">{{ form.sexe.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Téléphone" %}</label>
+        {{ form.telephone }}
+        {% if form.telephone.errors %}<div class="field-err">{{ form.telephone.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Matière" %}</label>
+        {{ form.matieres }}
+        {% if form.matieres.errors %}<div class="field-err">{{ form.matieres.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Adresse" %}</label>
+        {{ form.adresse }}
+        {% if form.adresse.errors %}<div class="field-err">{{ form.adresse.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Email" %}</label>
+        {{ form.email }}
+        {% if form.email.errors %}<div class="field-err">{{ form.email.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Statut" %}</label>
+        {{ form.status }}
+        {% if form.status.errors %}<div class="field-err">{{ form.status.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Date d'embauche" %}</label>
+        
+        {{ form.date_empauche }}
+        {% if form.date_empauche.errors %}<div class="field-err">{{ form.date_empauche.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">{% trans "Diplôme" %}</label>
+        <div id="fileHint" class="small mt-1 text-muted">
+            {% trans "Aucun fichier choisi" %}
+            </div>
+
+        {{ form.diplome }}
+        {% if form.diplome.errors %}<div class="field-err">{{ form.diplome.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-2 d-flex align-items-end">
+        <div class="form-check">
+          {{ form.actif }}
+          <label class="form-check-label ms-2">{% trans "Actif" %}</label>
+          {% if form.actif.errors %}<div class="field-err">{{ form.actif.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="classes-box">
+          <div class="classes-head">
+            <div class="title">{% trans "Classes" %}</div>
+
+            {# ✅ fallback search pour checkbox seulement #}
+            <input id="classesSearch" type="text" class="form-control form-control-sm"
+                   placeholder="{% trans 'Rechercher une classe…' %}">
+          </div>
+
+          {{ form.classes }}
+
+          {% if form.classes.errors %}
+            <div class="field-err mt-2">{{ form.classes.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-12">
+        <button type="submit" class="btn btn-success w-100">
+          {{ submit_text|default:_("Ajouter") }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("classesSearch");
+    const classesEl = document.getElementById("id_classes");
+    const isRTL = document.documentElement.getAttribute("lang") === "ar" || "{{ request.LANGUAGE_CODE }}" === "ar";
+
+    if (!classesEl) return;
+
+    // ✅ Si c'est un <select multiple> => Select2 (tags + recherche)
+    if (classesEl.tagName === "SELECT" && classesEl.multiple) {
+      if (searchInput) searchInput.style.display = "none"; // select2 a déjà la recherche
+
+      $(classesEl).select2({
+        placeholder: isRTL ? "اختر الأقسام..." : "Choisir les classes...",
+        width: "100%",
+        dir: isRTL ? "rtl" : "ltr",
+        closeOnSelect: false
+      });
+      return;
+    }
+
+    // ✅ Sinon (checkbox list) => garder grille + recherche
+    if (searchInput) {
+      searchInput.addEventListener("input", function () {
+        const q = searchInput.value.trim().toLowerCase();
+        classesEl.querySelectorAll("label").forEach(function (lbl) {
+          const txt = (lbl.textContent || "").toLowerCase();
+          lbl.style.display = txt.includes(q) ? "" : "none";
+        });
+      });
+    }
+  });
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const lang = "{{ request.LANGUAGE_CODE }}";
+    const i18n = {
+      fr: { noFile: "Aucun fichier choisi" },
+      en: { noFile: "No file chosen" },
+      ar: { noFile: "لم يتم اختيار ملف" }
+    };
+
+    function t(key){
+      return (i18n[lang] && i18n[lang][key]) ? i18n[lang][key] : (i18n.fr[key] || key);
+    }
+
+    // ✅ Pour tous les inputs file de la page
+    document.querySelectorAll('input[type="file"]').forEach(function (inp) {
+      const hint = document.getElementById("fileHint");
+      if (!hint) return;
+
+      // init
+      hint.textContent = t("noFile");
+
+      inp.addEventListener("change", function () {
+        hint.textContent = inp.files && inp.files.length ? inp.files[0].name : t("noFile");
+      });
+    });
+  });
+
+</script>
 {% endblock %}

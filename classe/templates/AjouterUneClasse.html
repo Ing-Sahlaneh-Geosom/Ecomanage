@@ -1,88 +1,84 @@
-{% extends 'base.html'%}
+{% extends 'base.html' %}
 {% load static %}
-{% block title %} Ajouter Une classe {% endblock %}
+{% load i18n %}
+
+{% block title %}{% trans "Ajouter Une classe" %}{% endblock %}
+
 {% block main %}
-
 <div class="containaire">
-    <h2>{{ Title }} </h2>
-    {% if form.errors %}
-        <div class="error-messages bg-danger">
-            <ul>
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-<form method="post" id="classeForm">
-  {% csrf_token %}
+  <h2>
+    {% if Title %}{{ Title }}{% else %}{% trans "Ajouter Une classe" %}{% endif %}
+  </h2>
 
-  <div class="row g-3">
-
-    <div class="col-md-6">
-      <label class="form-label">Niveau <span class="text-danger">*</span></label>
-      {{ form.niveau }}
+  {% if form.errors %}
+    <div class="error-messages bg-danger">
+      <ul>
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
     </div>
+  {% endif %}
 
-    <div class="col-md-6">
-      <label class="form-label">Classe avec spécialité ? <span class="text-danger">*</span></label>
-      {{ form.a_specialite }}
+  <form method="post" id="classeForm">
+    {% csrf_token %}
+
+    <div class="row g-3">
+
+      <div class="col-md-6">
+        <label class="form-label">{% trans "Niveau" %} <span class="text-danger">*</span></label>
+        {{ form.niveau }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">{% trans "Classe avec spécialité ?" %} <span class="text-danger">*</span></label>
+        {{ form.a_specialite }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">{% trans "Nom de la classe" %} <span class="text-danger">*</span></label>
+        {{ form.nom }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">{% trans "Status" %} <span class="text-danger">*</span></label>
+        {{ form.actif }}
+      </div>
+
+      <!-- Spécialité (cachée par défaut) -->
+      <div class="col-md-6" id="specialite-field">
+        <label class="form-label">{% trans "Spécialité" %} <span class="text-danger">*</span></label>
+        {{ form.specialite }}
+      </div>
+
+      <div class="col-md-12 d-flex justify-content-end gap-2 mt-3">
+        <a class="btn btn-success" href="{% url 'ListeDesClasse' %}">{% trans "Retour" %}</a>
+        <button type="submit" class="btn btn-dark">{% trans "Enregistre" %}</button>
+      </div>
+
     </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Nom de la classe <span class="text-danger">*</span></label>
-      {{ form.nom }}
-    </div>
-     <!-- <div class="col-md-6">
-      <label class="form-label">Ecole <span class="text-danger">*</span></label>
-      {{ form.ecole }}
-    </div> -->
-    <div class="col-md-6">
-      <label class="form-label">Status <span class="text-danger">*</span></label>
-      {{ form.actif }}
-    </div>
-    <!-- Spécialité (cachée par défaut) -->
-    
-   
-    <div class="col-md-6" id="specialite-field">
-      <label class="form-label">Spécialité <span class="text-danger">*</span></label>
-      {{ form.specialite }}
-    </div>
-
-    <div class="col-md-12 d-flex justify-content-end gap-2 mt-3">
-      <a class="btn btn-success" href="{% url 'ListeDesClasse'%}">Retour</a>
-      <button type="submit" class="btn btn-dark">
-        Enregistre
-      </button>
-    </div>
-
-  </div>
-</form>
-
-
+  </form>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const toggleSpecialite = document.getElementById('id_a_specialite');
-    const specialiteField = document.getElementById('specialite-field');
+  const toggleSpecialite = document.getElementById('id_a_specialite');
+  const specialiteField = document.getElementById('specialite-field');
 
-    function updateSpecialite() {
-        if (toggleSpecialite.checked) {
-            specialiteField.style.display = 'block';
-        } else {
-            specialiteField.style.display = 'none';
-            document.getElementById('id_specialite').value = '';
-        }
+  function updateSpecialite() {
+    if (toggleSpecialite && toggleSpecialite.checked) {
+      specialiteField.style.display = 'block';
+    } else {
+      specialiteField.style.display = 'none';
+      const sp = document.getElementById('id_specialite');
+      if (sp) sp.value = '';
     }
+  }
 
-    updateSpecialite();
-    toggleSpecialite.addEventListener('change', updateSpecialite);
+  updateSpecialite();
+  if (toggleSpecialite) toggleSpecialite.addEventListener('change', updateSpecialite);
 });
 </script>
-
 {% endblock %}
-
-

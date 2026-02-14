@@ -149,7 +149,7 @@ class AnneeScolaire(models.Model):
 class Niveau(models.Model):
     nom = models.CharField(
         max_length=50,
-        unique=True
+    
     )  # ex: 6ème, 5ème, Terminale
 
    
@@ -169,6 +169,9 @@ class Niveau(models.Model):
 
     class Meta:
         ordering = ['ordre', 'nom']
+        constraints = [
+            models.UniqueConstraint(fields=['ecole', 'nom'], name='uniq_niveau_ecole_nom')
+        ]
 
     def __str__(self):
         return self.nom
@@ -320,9 +323,14 @@ class Matier(models.Model):
 
 class Proffeseur(models.Model):
     SEXE = (
-        ('M', 'musculin'),
-        ('F', 'feminin'),
+        ('M', _('musculin')),
+        ('F', _('feminin')),
     )
+    STATUS_CHOICES = [
+    ('Permanent',  _('Permanent')),
+    ('Vacataire',  _('Vacataire')),
+    ('Stagiaire',  _('Stagiaire')),
+]
     user = models.OneToOneField("User", on_delete=models.SET_NULL, null=True, blank=True, related_name="profil_prof")
     nom_conplet = models.CharField(max_length=150)
     sexe = models.CharField(choices=SEXE)
@@ -333,11 +341,11 @@ class Proffeseur(models.Model):
     classes = models.ManyToManyField('Classe', related_name='professeurs')
     diplome = models.FileField(upload_to='diplomes/', null=True, blank=True)
     date_empauche = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=[
-        ('Permanent','Permanent'),
-        ('Vacataire','Vacataire'),
-        ('Stagiaire','Stagiaire')
-    ], default='Permanent')
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='Permanent'
+    )
     actif = models.BooleanField(default=True)
     ecole = models.ForeignKey(Ecole, on_delete=models.CASCADE, null=True, blank=True)
   

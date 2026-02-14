@@ -147,14 +147,18 @@ class MessageDeleteView(DeleteView):
 
 
 
-class RessourceCreateAjaxView(ActiveYearMixin , EcoleAssignMixin , CreateView):
+# views.py
+from django.http import HttpResponse
+from django.utils.translation import gettext as _
+from django.utils.html import escape
+
+class RessourceCreateAjaxView(ActiveYearMixin, EcoleAssignMixin, CreateView):
     model = Ressource
     form_class = RessourceForm
     template_name = "create_ajax.html"
-    success_url = reverse_lazy("ressources")  # reste sur la même page après save
+    success_url = reverse_lazy("ressources")
 
     def get(self, request, *args, **kwargs):
-        # ✅ AJAX : retourne options matières
         if request.headers.get("x-requested-with") == "XMLHttpRequest" and request.GET.get("ajax") == "matieres":
             return self._ajax_matieres(request)
         return super().get(request, *args, **kwargs)
@@ -162,24 +166,30 @@ class RessourceCreateAjaxView(ActiveYearMixin , EcoleAssignMixin , CreateView):
     def _ajax_matieres(self, request):
         professeur_id = (request.GET.get("professeur_id") or "").strip()
 
+        # ✅ pas de prof => garder Sélectionner...
         if not professeur_id.isdigit():
-            return HttpResponse('<option value="">Sélectionner...</option>')
+            return HttpResponse(f'<option value="">{escape(_("Sélectionner..."))}</option>')
 
         prof = (
             Proffeseur.objects
-            .select_related("matieres")  # ton FK Professeur -> Matier = "matieres"
+            .select_related("matieres")
             .filter(id=int(professeur_id))
             .first()
         )
 
-        if not prof or not prof.matieres_id:
-            return HttpResponse('<option value="">Aucune matière</option>')
+        # ✅ prof sans matière
+        if not prof or not getattr(prof, "matieres_id", None):
+            return HttpResponse(
+                f'<option value="">{escape(_("Sélectionner..."))}</option>'
+                f'<option value="">{escape(_("Aucune matière"))}</option>'
+            )
 
         m = prof.matieres
         return HttpResponse(
-            '<option value="">Sélectionner...</option>'
+            f'<option value="">{escape(_("Sélectionner..."))}</option>'
             f'<option value="{m.id}">{escape(str(m))}</option>'
         )
+
     
     
 

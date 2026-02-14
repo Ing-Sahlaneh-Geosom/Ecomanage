@@ -1,14 +1,21 @@
 {% extends "base.html" %}
 {% load dict_tools %}
+{% load i18n %}
 
-{% block title %}Saisie Absences EDT{% endblock %}
+{% block title %}{% trans "Saisie Absences EDT" %}{% endblock %}
 
 {% block main %}
-<div class="container-fluid px-4 py-3">
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 class="fw-bold m-0">SAISIE DES ABSENCES DES ÉLÈVES (EDT)</h6>
-    <div class="text-muted small">Enseignant &nbsp;›&nbsp; Saisie des absences des élèves (EDT)</div>
+<div class="container-fluid px-4 py-3" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+
+  <div class="d-flex justify-content-between align-items-center mb-3 {% if LANGUAGE_BIDI %}flex-row-reverse{% endif %}">
+    <h6 class="fw-bold m-0">{% trans "SAISIE DES ABSENCES DES ÉLÈVES (EDT)" %}</h6>
+
+    <div class="text-muted small {% if LANGUAGE_BIDI %}text-end{% endif %}">
+      {% blocktrans %}Enseignant › Saisie des absences des élèves{% endblocktrans %}
+    </div>
   </div>
 
   {% if messages %}
@@ -23,9 +30,9 @@
       <div class="row g-3 align-items-end">
 
         <div class="col-md-2">
-          <label class="form-label fw-bold">Enseignant</label>
+          <label class="form-label fw-bold">{% trans "Enseignant" %}</label>
           <select class="form-select" name="prof" id="profSelect" required>
-            <option value="">Sélectionner...</option>
+            <option value="">{% trans "Sélectionner..." %}</option>
             {% for p in profs %}
               <option value="{{ p.id }}" {% if prof_id|stringformat:"s" == p.id|stringformat:"s" %}selected{% endif %}>
                 {{ p.nom_conplet }}
@@ -35,36 +42,36 @@
         </div>
 
         <div class="col-md-2">
-          <label class="form-label fw-bold">Matière</label>
+          <label class="form-label fw-bold">{% trans "Matière" %}</label>
           <select class="form-select" name="matier" id="matierSelect">
-            <option value="">Sélectionner...</option>
+            <option value="">{% trans "Sélectionner..." %}</option>
           </select>
         </div>
 
         <div class="col-md-3">
-          <label class="form-label fw-bold">La liste des classes</label>
+          <label class="form-label fw-bold">{% trans "La liste des classes" %}</label>
           <select class="form-select" name="classe" id="classeSelect" required>
-            <option value="">Sélectionner...</option>
+            <option value="">{% trans "Sélectionner..." %}</option>
           </select>
         </div>
 
         <div class="col-md-2">
-          <label class="form-label fw-bold">Date</label>
+          <label class="form-label fw-bold">{% trans "Date" %}</label>
           <input type="date" class="form-control" name="date" value="{{ date }}" required>
         </div>
 
         <div class="col-md-1">
-          <label class="form-label fw-bold">À partir</label>
+          <label class="form-label fw-bold">{% trans "À partir" %}</label>
           <input type="time" class="form-control" name="h_debut" value="{{ h_debut }}" required>
         </div>
 
         <div class="col-md-2">
-          <label class="form-label fw-bold">Le temps de</label>
+          <label class="form-label fw-bold">{% trans "Le temps de" %}</label>
           <input type="time" class="form-control" name="h_fin" value="{{ h_fin }}" required>
         </div>
 
         <div class="col-12">
-          <button class="btn btn-success w-100 fw-bold">Filtrer</button>
+          <button class="btn btn-success w-100 fw-bold">{% trans "Filtrer" %}</button>
         </div>
 
       </div>
@@ -86,10 +93,10 @@
         <table class="table align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th style="width:80px;">ID</th>
-              <th>Nom</th>
-              <th style="width:520px;">Statut</th>
-              <th style="width:260px;">Motif</th>
+              <th style="width:80px;">{% trans "ID" %}</th>
+              <th>{% trans "Nom" %}</th>
+              <th style="width:520px;">{% trans "Statut" %}</th>
+              <th style="width:260px;">{% trans "Motif" %}</th>
             </tr>
           </thead>
 
@@ -101,44 +108,49 @@
               <td class="fw-semibold">{{ e.nom }}</td>
 
               <td>
-                <div class="d-flex flex-wrap gap-3 align-items-center">
+                <div class="d-flex flex-wrap gap-3 align-items-center {% if LANGUAGE_BIDI %}justify-content-end{% endif %}">
 
                   <label class="d-flex align-items-center gap-2">
                     <input class="form-check-input" type="radio" name="statut_{{ e.id }}" value="present"
                            {% if not a %}checked{% elif a.statut == "present" %}checked{% endif %}>
-                    <span class="badge bg-success">Présent</span>
+                    <span class="badge bg-success">{% trans "Présent" %}</span>
                   </label>
 
                   <label class="d-flex align-items-center gap-2">
                     <input class="form-check-input" type="radio" name="statut_{{ e.id }}" value="absence"
                            {% if a and a.statut == "absence" %}checked{% endif %}>
-                    <span class="badge bg-danger">Absence</span>
+                    <span class="badge bg-danger">{% trans "Absence" %}</span>
                   </label>
 
                   <label class="d-flex align-items-center gap-2">
                     <input class="form-check-input" type="radio" name="statut_{{ e.id }}" value="retard"
                            {% if a and a.statut == "retard" %}checked{% endif %}>
-                    <span class="badge bg-warning text-dark">Retard</span>
+                    <span class="badge bg-warning text-dark">{% trans "Retard" %}</span>
                   </label>
 
                   <label class="d-flex align-items-center gap-2">
                     <input class="form-check-input" type="checkbox" name="justifiee_{{ e.id }}" value="1"
                            {% if a and a.justifiee %}checked{% endif %}>
-                    <span class="badge bg-primary">Justifier</span>
+                    <span class="badge bg-primary">{% trans "Justifier" %}</span>
                   </label>
 
                 </div>
               </td>
 
               <td>
-                <input class="form-control form-control-sm" name="motif_{{ e.id }}" value="{% if a %}{{ a.motif }}{% endif %}">
+                <input
+                  class="form-control form-control-sm"
+                  name="motif_{{ e.id }}"
+                  value="{% if a %}{{ a.motif }}{% endif %}"
+                  placeholder="{% trans 'Ex: Maladie, rendez-vous...' %}"
+                >
               </td>
             </tr>
             {% endwith %}
           {% empty %}
             <tr>
               <td colspan="4" class="text-center text-muted py-4">
-                Choisissez Enseignant + Classe + Date + Heure, puis cliquez sur Filtrer.
+                {% trans "Choisissez Enseignant + Classe + Date + Heure, puis cliquez sur Filtrer." %}
               </td>
             </tr>
           {% endfor %}
@@ -148,8 +160,10 @@
       </div>
     </div>
 
-    <div class="card-footer d-flex justify-content-end">
-      <button class="btn btn-dark px-4" {% if not eleves %}disabled{% endif %}>Enregistrer</button>
+    <div class="card-footer d-flex {% if LANGUAGE_BIDI %}justify-content-start{% else %}justify-content-end{% endif %}">
+      <button class="btn btn-dark px-4" {% if not eleves %}disabled{% endif %}>
+        {% trans "Enregistrer" %}
+      </button>
     </div>
   </form>
 
@@ -161,9 +175,12 @@
   const matierSelect = document.getElementById("matierSelect");
   const classeSelect = document.getElementById("classeSelect");
 
+  // ✅ texte traduit même dans JS
+  const SELECT_TXT = "{% trans 'Sélectionner...' %}";
+
   async function loadProfData(profId){
-    matierSelect.innerHTML = '<option value="">Sélectionner...</option>';
-    classeSelect.innerHTML = '<option value="">Sélectionner...</option>';
+    matierSelect.innerHTML = `<option value="">${SELECT_TXT}</option>`;
+    classeSelect.innerHTML = `<option value="">${SELECT_TXT}</option>`;
     if(!profId) return;
 
     const url = new URL(URL_PROF_DATA, window.location.origin);

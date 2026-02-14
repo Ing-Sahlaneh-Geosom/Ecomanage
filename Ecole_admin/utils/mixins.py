@@ -17,10 +17,46 @@ class UserAssignMixin:
         return super().form_valid(form)
 
 
+# mixins.py
+from django.core.exceptions import PermissionDenied
+
 class EcoleAssignMixin:
+    """
+    - Sur CREATE: force instance.ecole = request.user.ecole
+    - Sur UPDATE/DELETE/DETAIL: empêche accès aux objets d'une autre école via get_queryset()
+    """
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user_ecole = getattr(self.request.user, "ecole", None)
+
+        # si user n'a pas d'école => pas d'accès
+        if not user_ecole:
+            return qs.none()
+
+        # si le modèle a un champ ecole => filtrer (sécurité anti IDOR)
+        try:
+            qs.model._meta.get_field("ecole")
+            return qs.filter(ecole=user_ecole)
+        except Exception:
+            return qs
+
     def form_valid(self, form):
-        form.instance.ecole = self.request.user.ecole
+        user_ecole = getattr(self.request.user, "ecole", None)
+        if not user_ecole:
+            raise PermissionDenied("Aucune école associée à cet utilisateur.")
+
+        # ✅ CREATE => on force l'école
+        if not form.instance.pk:
+            form.instance.ecole = user_ecole
+            return super().form_valid(form)
+
+        # ✅ UPDATE => on vérifie que l'objet appartient à la même école
+        instance_ecole_id = getattr(form.instance, "ecole_id", None)
+        if instance_ecole_id != user_ecole.id:
+            raise PermissionDenied("Accès refusé: objet d'une autre école.")
+
         return super().form_valid(form)
+
 
 
 class RoleRequiredMixin:

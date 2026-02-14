@@ -169,7 +169,7 @@ def DetailsDesEleves(request, id):
 
 
 
-class ElevesUpdateView( LoginRequiredMixin , RoleRequiredMixin ,UpdateView):
+class ElevesUpdateView( LoginRequiredMixin , RoleRequiredMixin , ActiveYearMixin, EcoleAssignMixin,UpdateView):
     model = Eleve
     template_name = 'Ajoute_eleve.html'
     form_class = EleveForm

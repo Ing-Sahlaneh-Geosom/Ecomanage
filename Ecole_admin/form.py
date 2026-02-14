@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.template.context_processors import request
 from .models import User, Eleve, Proffeseur, Classe, Paiment, Absence, Matier, Message, AnneeScolaire, Note , ProfesseurAbsence ,   EmploiDuTemps , Ressource , Specialite , Niveau , Batiment
 from .utils.utils import get_annee_active
+from django.core.exceptions import ValidationError
 
 
 class UserForm(UserCreationForm):
@@ -93,17 +94,45 @@ class ProfesseurForm(forms.ModelForm):
             'matieres': forms.Select(attrs={"class":"form-select"}),
             'classes': forms.CheckboxSelectMultiple(),
             'actif': forms.CheckboxInput(attrs={"class":"form-check-input"}),
+            'date_empauche':forms.DateInput(attrs={
+                    'class': 'form-control',
+                    'type': 'date'
+                })
         }
+
+        
 
 class ClasseForm(forms.ModelForm):
     class Meta:
         model = Classe
-        fields = ['nom','a_specialite','specialite']
-        exclude = ['ecole']
-        widgets = {
-            'nom': forms.TextInput(),
-            
-        }
+        fields = ['niveau', 'nom', 'a_specialite', 'specialite']
+
+    def __init__(self, *args, ecole=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._ecole = ecole
+
+        qs = Niveau.objects.filter(actif=True)
+
+        if ecole is not None:
+            qs = qs.filter(ecole=ecole)
+
+        self.fields['niveau'].queryset = qs  # ✅ Ici le filtre
+        # optionnel: self.fields['niveau'].empty_label = "— Choisir —"
+
+    def clean_niveau(self):
+        niveau = self.cleaned_data.get("niveau")
+        if self._ecole and niveau and niveau.ecole_id != self._ecole.id:
+            raise ValidationError("Niveau invalide pour cette école.")
+        return niveau
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        if self._ecole:
+            obj.ecole = self._ecole  # ✅ IMPORTANT si Classe a ecole
+        if commit:
+            obj.save()
+            self.save_m2m()
+        return obj
 
 class PaimentForm(forms.ModelForm):
     class Meta:
@@ -361,6 +390,10 @@ class EmploiDuTempsForm(forms.ModelForm):
         return cleaned
 
 
+# forms.py
+from django import forms
+from django.utils.translation import gettext_lazy as _
+from .models import Ressource, Matier  # adapte si ton modèle s'appelle Matiere
 
 class RessourceForm(forms.ModelForm):
     class Meta:
@@ -369,10 +402,40 @@ class RessourceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields["professeur"].widget.attrs.update({"class": "form-select"})
         self.fields["matier"].widget.attrs.update({"class": "form-select"})
         self.fields["fichier"].widget.attrs.update({"class": "form-control"})
-        self.fields["description"].widget.attrs.update({"class": "form-control", "placeholder": "description"})
+        self.fields["description"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": _("Description"),
+        })
+
+        # ✅ Placeholder des selects (au lieu de "---------")
+        if "professeur" in self.fields:
+            self.fields["professeur"].empty_label = _("Sélectionner...")
+
+        if "matier" in self.fields:
+            self.fields["matier"].empty_label = _("Sélectionner...")
+
+            # ✅ IMPORTANT: par défaut on ne montre AUCUNE matière
+            self.fields["matier"].queryset = Matier.objects.none()
+
+            # ✅ si prof choisi (POST) ou instance (update), on autorise la(les) matière(s)
+            prof_id = None
+            if self.data.get("professeur"):
+                prof_id = self.data.get("professeur")
+            elif getattr(self.instance, "professeur_id", None):
+                prof_id = self.instance.professeur_id
+
+            if prof_id and str(prof_id).isdigit():
+                # Ton modèle Proffeseur -> Matier via FK "matieres"
+                # Donc on met uniquement la matière du prof
+                from .models import Proffeseur
+                prof = Proffeseur.objects.select_related("matieres").filter(id=int(prof_id)).first()
+                if prof and getattr(prof, "matieres_id", None):
+                    self.fields["matier"].queryset = Matier.objects.filter(id=prof.matieres_id)
+
 
 
 class SpecialiteForm(forms.ModelForm):

@@ -866,6 +866,8 @@ msgstr "معيد"
 msgid "Page de detaille"
 msgstr "تفاصيل التلميذ"
 
+msgid "Detaille" msgstr "تفاصيل"
+
 msgid "Ajouter une Absence"
 msgstr "إضافة غياب"
 
@@ -1000,3 +1002,161 @@ msgstr "التفاصيل"
 
 
 
+
+
+
+msgid "Ajouter Une classe"
+msgstr "إضافة صف"
+
+msgid "Niveau"
+msgstr "المستوى"
+
+msgid "Classe avec spécialité ?"
+msgstr "صف مع تخصص؟"
+
+msgid "Nom de la classe"
+msgstr "اسم الصف"
+
+
+
+msgid "Spécialité"
+msgstr "التخصص"
+
+msgid "Retour"
+msgstr "رجوع"
+
+msgid "Enregistre"
+msgstr "حفظ"
+
+
+
+
+
+msgid "Envoi des ressources"
+msgstr "إرسال الموارد"
+
+msgid "ENVOYER UNE RESSOURCE"
+msgstr "إرسال مورد"
+
+msgid "Envoyer"
+msgstr "إرسال"
+
+msgid "Matière"
+msgstr "المادة"
+
+
+
+msgid "Document"
+msgstr "الملف"
+
+msgid "Date d'action"
+msgstr "تاريخ الإجراء"
+
+msgid "Ressource"
+msgstr "مورد"
+
+msgid "Aucune ressource pour le moment."
+msgstr "لا توجد موارد حالياً."
+
+msgid "Envoyer une ressource"
+msgstr "إرسال مورد"
+
+msgid "Chargement…"
+msgstr "جارٍ التحميل…"
+
+msgid "Erreur de chargement."
+msgstr "خطأ في التحميل."
+
+msgid "Fichier"
+msgstr "ملف"
+
+msgid "Description"
+msgstr "الوصف"
+
+msgid "description"
+msgstr "الوصف"
+
+msgid "Permanent"
+msgstr "دائم"
+
+msgid "Vacataire"
+msgstr "متعاقد"
+
+msgid "Stagiaire"
+msgstr "متدرب"
+
+
+msgid "Oui"
+msgstr "نعم"
+
+msgid "Non"
+msgstr "لا"
+
+msgid "Aucun professeur trouvé."
+msgstr "لم يتم العثور على أي أستاذ."
+
+msgid "Ajouter un Professeur"
+msgstr "إضافة أستاذ"
+
+
+msgid "Veuillez corriger les erreurs ci-dessous."
+msgstr "يرجى تصحيح الأخطاء أدناه."
+
+msgid "Date d'embauche"
+msgstr "تاريخ التوظيف"
+
+msgid "Diplôme"
+msgstr "الشهادة"
+
+msgid "Rechercher une classe…"
+msgstr "ابحث عن قسم…"
+
+msgid "Classes"
+msgstr "الأقسام"
+
+msgid "Actif"
+msgstr "نشط"
+
+msgid "Liste des enseignants"
+msgstr "قائمة الأساتذة"
+
+
+msgid "Saisie Absences EDT"
+msgstr "إدخال الغيابات (الجدول)"
+
+msgid "SAISIE DES ABSENCES DES ÉLÈVES (EDT)"
+msgstr "إدخال غيابات التلاميذ (الجدول)"
+
+msgid "Enseignant › Saisie des absences des élèves"
+msgstr "المعلم › إدخال غيابات التلاميذ"
+
+
+msgid "À partir"
+msgstr "من"
+
+msgid "Le temps de"
+msgstr "إلى"
+
+msgid "Choisissez Enseignant + Classe + Date + Heure, puis cliquez sur Filtrer."
+msgstr "اختر المعلم + القسم + التاريخ + الوقت، ثم اضغط على تصفية."
+
+msgid "ID"
+msgstr "المعرف"
+
+msgid "Motif"
+msgstr "السبب"
+
+msgid "Présent"
+msgstr "حاضر"
+
+msgid "Absence"
+msgstr "غياب"
+
+msgid "Retard"
+msgstr "تأخر"
+
+msgid "Justifier"
+msgstr "مبرر"
+
+msgid "Ex: Maladie, rendez-vous..."
+msgstr "مثال: مرض، موعد..."

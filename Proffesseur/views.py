@@ -39,16 +39,25 @@ class ProffeseurDeataille(DetailView):
     template_name = "detailleProf.html"
     context_object_name = 'Prof'
 
-# views.py (ou views_profs.py)
+# views.py
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
-from django.urls import reverse
 from django.db import transaction
+from django.urls import reverse
+from django.utils.translation import gettext as _
+from django.views.generic import CreateView, UpdateView
 
+from Ecole_admin.models import Proffeseur
+from Ecole_admin.form import ProfesseurForm
+from Ecole_admin.utils.mixins import EcoleAssignMixin
+
+# build_username() et unique_username() doivent déjà exister chez toi
+# from .utils import build_username, unique_username
+# from accounts.models import User  (ou ton import User)
 
 class AjouterProfesseur(EcoleAssignMixin, CreateView):
     model = Proffeseur
-    template_name = 'cree_professeur.html'
+    template_name = "cree_professeur.html"
     form_class = ProfesseurForm
 
     def form_valid(self, form):
@@ -58,8 +67,9 @@ class AjouterProfesseur(EcoleAssignMixin, CreateView):
         created_prof_user = None
         tel = (prof.telephone or "").strip()
 
+        # ✅ Créer user si pas lié
         if not prof.user_id and tel:
-            base = build_username(prof.nom_conplet, "prof")  # ahmed@prof
+            base = build_username(prof.nom_conplet, "prof")
             username = unique_username(User, base)
             email = (prof.email or "").strip() or f"{username}@prof.local"
 
@@ -76,7 +86,7 @@ class AjouterProfesseur(EcoleAssignMixin, CreateView):
                 prof.user = created_prof_user
                 prof.save(update_fields=["user"])
 
-        msg = "Professeur ajouté avec succès ✅"
+        msg = _("Professeur ajouté avec succès ✅")
         if created_prof_user:
             msg += f" | Prof login: {created_prof_user.username} | MDP: {tel}"
         messages.success(self.request, msg)
@@ -88,8 +98,80 @@ class AjouterProfesseur(EcoleAssignMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['Title'] = 'Ajouter un Professeur'
-        context['Submit_text'] = 'Ajouter'
+        context["Title"] = _("Ajouter un Professeur")
+        context["Submit_text"] = _("Ajouter")
+        return context
+
+
+class ModifieProfesseur(EcoleAssignMixin, UpdateView):
+    model = Proffeseur
+    template_name = "cree_professeur.html"
+    form_class = ProfesseurForm
+
+    def form_valid(self, form):
+        response = super().form_valid(form)  # self.object = prof MAJ
+        prof = self.object
+
+        tel = (prof.telephone or "").strip()
+        created_prof_user = None
+
+        # ✅ 1) Si user existe => synchroniser infos
+        if prof.user_id:
+            u = prof.user
+            fields_to_update = []
+
+            # adapte si tes champs User s'appellent différemment
+            if hasattr(u, "nom_complet") and u.nom_complet != prof.nom_conplet:
+                u.nom_complet = prof.nom_conplet
+                fields_to_update.append("nom_complet")
+
+            if hasattr(u, "num_tel") and tel and u.num_tel != tel:
+                u.num_tel = tel
+                fields_to_update.append("num_tel")
+
+            # email seulement si prof.email est renseigné
+            if getattr(prof, "email", None):
+                prof_email = (prof.email or "").strip()
+                if prof_email and u.email != prof_email:
+                    u.email = prof_email
+                    fields_to_update.append("email")
+
+            if fields_to_update:
+                u.save(update_fields=fields_to_update)
+
+        # ✅ 2) Si pas de user et tel existe => créer user
+        if not prof.user_id and tel:
+            base = build_username(prof.nom_conplet, "prof")
+            username = unique_username(User, base)
+            email = (prof.email or "").strip() or f"{username}@prof.local"
+
+            with transaction.atomic():
+                created_prof_user = User.objects.create(
+                    username=username,
+                    email=email,
+                    nom_complet=prof.nom_conplet,
+                    num_tel=tel,
+                    role="proffesseur",
+                    ecole=prof.ecole,
+                    password=make_password(tel)
+                )
+                prof.user = created_prof_user
+                prof.save(update_fields=["user"])
+
+        msg = _("Professeur modifié avec succès ✅")
+        if created_prof_user:
+            msg += f" | Prof login: {created_prof_user.username} | MDP: {tel}"
+        messages.success(self.request, msg)
+
+        return response
+
+    def get_success_url(self):
+        return reverse("Lesensiegnants")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["Title"] = _("Modifier un Professeur")
+        context["Submit_text"] = _("Modifier")
         return context
 
 
@@ -1166,13 +1248,6 @@ def violence_delete(request, pk):
 
 
 
-from django.contrib.staticfiles import finders
-print(finders.find("fonts/DejaVuSans.ttf"))
 
 
 
-
-
-from weasyprint import HTML;
-    
-HTML(string='<h1>مرحبا</h1>').write_pdf('test.pdf'); print('OK')

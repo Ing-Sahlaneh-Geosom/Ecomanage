@@ -8,7 +8,7 @@
 <div class="container py-4" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
     <h2 class="m-0 text-dark">
-      {% trans "Classe" %} : {{ classe.nom }}
+      {% trans "Classe" %} : {{ classes.nom }}
     </h2>
 
     <a href="{% url 'ListeDesClasse'%}" class="btn btn-outline-dark">
@@ -18,7 +18,7 @@
 
   {% if eleves %}
     <div class="mb-3 text-dark">
-      <strong>{% trans "Nombre d’élèves" %} :</strong> {{ eleves|length }}
+      <strong>{% trans "Nombre d'élèves" %} :</strong> {{ eleves|length }}
     </div>
 
     <div class="table-responsive">

@@ -43,9 +43,9 @@
 </style>
 
 
-<div style="margin: rem 0;" class="container">
+<div style="margin-bottom: 2rem;" class="container">
 
-  <button type="button" class="btn btn-sm btn-primary">
+  <!-- <button type="button" class="btn btn-sm btn-primary">
     <a class="btn btn-sm btn-primary" href="{% url 'addEleveAbsence' eleve.id %}">
       {% trans "Ajouter une Absence" %}
     </a>
@@ -55,9 +55,9 @@
     <a class="btn btn-sm btn-secondary" href="{% url 'paiment_par_eleve' eleve.id %}">
       {% trans "Ajouter un Paiement" %}
     </a>
-  </button>
+  </button> -->
 
-  <button type="button" class="btn btn-sm btn-danger">
+  <!-- <button type="button" class="btn btn-sm btn-danger">
     <a class="btn btn-sm btn-danger" href="{% url 'Notes_eleve' eleve.id %}">
       {% trans "Ajouter une Note" %}
     </a>
@@ -67,18 +67,19 @@
     <a class="btn btn-sm" href="{% url 'messageParEleve' eleve.id %}">
       {% trans "Envoyer un message" %}
     </a>
-  </button>
+  </button> -->
 
   <button type="button" class="btn btn-info" onclick="printFiche()">
     {% trans "Imprimer la fiche" %}
   </button>
 
-  <a class="btn btn-sm" href="{% url 'bulletin_bdf' eleve.id %}">
+  <!-- <a class="btn btn-sm" href="{% url 'bulletin_bdf' eleve.id %}">
     {% trans "Generer un Bulletin" %}
-  </a>
+  </a> -->
 </div>
 
 <div style="background-color: white; color: black;" class="container">
+  <a href="{% url 'les_eleves'%}" class="btn btn-sm btn-outline-success m-3">Retour</a>
   <div id="fiche-eleve">
     <div class="row">
       <div class="col-md-6">

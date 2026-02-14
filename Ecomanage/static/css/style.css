@@ -19,23 +19,25 @@
     /* --- Sidebar --- */
 
 
-   
+   /* =========================
+   SIDEBAR
+   ========================= */
 .sidebar {
   width: 250px;
   height: 100vh;
   background-color: white;
-  border-right: 1px solid #2a2a2a;
   position: fixed;
   top: 0;
-  transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 1001;            /* ✅ au-dessus overlay */
   overflow-y: auto;
+  transition: all 0.3s ease;
 }
 
 /* ✅ LTR : sidebar à gauche */
 [dir="ltr"] .sidebar {
   left: 0;
   right: auto;
+  border-right: 1px solid #2a2a2a;
 }
 
 /* ✅ RTL : sidebar à droite */
@@ -46,15 +48,30 @@
   border-left: 1px solid #2a2a2a;
 }
 
-/* ✅ Etat caché (collapsed) */
-[dir="ltr"] .sidebar.collapsed { left: -260px; }
-[dir="rtl"] .sidebar.collapsed { right: -260px; }
 
-/* ✅ Etat ouvert en mobile (active) */
-[dir="ltr"] .sidebar.active { left: 0; }
-[dir="rtl"] .sidebar.active { right: 0; }
+/* =========================
+   MOBILE
+   ========================= */
+@media (max-width: 991.98px) {
 
-/* Desktop : toujours visible (tu peux garder si tu veux) */
+  /* ✅ cachée par défaut en mobile */
+  [dir="ltr"] .sidebar { left: -260px; right: auto; }
+  [dir="rtl"] .sidebar { right: -260px; left: auto; }
+
+  /* ✅ ouverte */
+  [dir="ltr"] .sidebar.active { left: 0; }
+  [dir="rtl"] .sidebar.active { right: 0; }
+
+  /* ✅ close btn visible en mobile */
+  #closeSidebar { display: inline-flex; }
+
+  .main-content { margin-left: 0; margin-right: 0; }
+}
+
+/* Scrollbar (comme tu avais) */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #343a40; border-radius: 4px; }
+
 
 
 .sidebar-overlay{
@@ -65,12 +82,7 @@
   display: none;
 }
 
-@media (max-width: 991.98px){
-  .sidebar.active + .sidebar-overlay,
-  body.sidebar-open .sidebar-overlay{
-    display:block;
-  }
-}
+
 
 
     /* --- Bouton fermer mobile --- */
@@ -129,9 +141,54 @@
       min-height: 100vh;
     }
 
+    /* =========================
+   MAIN CONTENT (desktop)
+   ========================= */
+.main-content{
+  background-color: whitesmoke;
+  padding: 20px;
+  transition: all 0.3s;
+  min-height: 100vh;
+}
+
+/* LTR: sidebar à gauche => pousse main à droite */
+[dir="ltr"] .main-content{
+  margin-left: 250px;
+  margin-right: 0;
+}
+
+/* RTL: sidebar à droite => pousse main à gauche */
+[dir="rtl"] .main-content{
+  margin-right: 250px;
+  margin-left: 0;
+}
+
+/* =========================
+   Quand sidebar est collapsed (desktop)
+   ========================= */
+@media (min-width: 992px){
+  [dir="ltr"] .sidebar.collapsed ~ .main-content{
+    margin-left: 0;
+  }
+  [dir="rtl"] .sidebar.collapsed ~ .main-content{
+    margin-right: 0;
+  }
+}
+
+/* =========================
+   Mobile: main content prend toute la largeur
+   ========================= */
+@media (max-width: 991.98px){
+  .main-content{
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
     .collapsed + .main-content {
       margin-left: 0;
     }
+
 
     /* --- Topbar --- */
     .topbar {
@@ -154,33 +211,21 @@
       cursor: pointer;
       
     }
+@media (max-width: 991px) {
 
-    @media (max-width: 991px) {
-      .sidebar {
-        left: -260px;
-      }
+  /* ✅ cachée par défaut en mobile */
+  [dir="ltr"] .sidebar { left: -260px; right: auto; }
+  [dir="rtl"] .sidebar { right: -260px; left: auto; }
 
-      .sidebar.active {
-        left: 0;
-      }
+  /* ✅ ouverte */
+  [dir="ltr"] .sidebar.active { left: 0; }
+  [dir="rtl"] .sidebar.active { right: 0; }
 
-      #closeSidebar {
-        display: block;
-      }
+  /* ✅ close btn visible en mobile */
+  #closeSidebar { display: inline-flex; }
 
-      .main-content {
-        margin-left: 0;
-      }
-    }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #343a40;
-      border-radius: 4px;
-    }
-
+  .main-content { margin-left: 0; margin-right: 0; }
+}
     /* Sidebar */
 
 /* 
@@ -536,7 +581,7 @@
 .containaire{
   max-width: 1100px;
   margin: auto;
-  background: #dbeafe;
+  background: #fff;
   padding: 25px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -857,4 +902,25 @@ tr:nth-child(even){
 
 .modal-backdrop {
   z-index: 20040 !important;
+}
+
+
+
+
+/* Overlay جديد خاص بالـ sidebar فقط */
+#ssSidebarOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 1000;      /* تحت sidebar (sidebar لازم 1001) */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s ease, visibility .2s ease;
+}
+
+#ssSidebarOverlay.show{
+  opacity: 1;
+  visibility: visible;
 }

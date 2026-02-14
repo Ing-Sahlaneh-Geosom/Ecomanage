@@ -1,25 +1,35 @@
-{% extends 'base.html'%}
-{% block title %} Envoi des resource {% endblock %}
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Envoi des ressources" %}{% endblock %}
+
 {% block main %}
 
+<style>
+  /* ✅ RTL safe: on ne casse pas tout, seulement les zones clés */
+  .rtl { direction: rtl; }
+  .rtl .header-row { flex-direction: row-reverse; }
+  .rtl .search-row { justify-content: flex-start !important; }
+  .rtl .page-title { text-align: right; }
+</style>
 
+<div class="container-fluid px-4 py-3 {% if request.LANGUAGE_CODE == 'ar' %}rtl{% endif %}">
 
-<div class="container-fluid px-4 py-3">
-
-  <!-- Titre comme ton image -->
-  <div class="d-flex align-items-center justify-content-between mb-3">
+  <!-- Titre -->
+  <div class="d-flex align-items-center justify-content-between mb-3 header-row">
     <div>
-      <div class="page-title text-uppercase text-light">ENVOYER UNE RESSOURCE</div>
+      <div class="page-title text-uppercase text-light">{% trans "ENVOYER UNE RESSOURCE" %}</div>
       <div class="muted-line mt-2 text-light"></div>
     </div>
 
-    <!-- bouton violet à droite -->
-    <a class="btn btn-sm btn-success" href="{% url 'ressource_create'%}">Envoiyer</a>
+    <!-- bouton à droite -->
+    <a class="btn btn-sm btn-success" href="{% url 'ressource_create' %}">{% trans "Envoyer" %}</a>
   </div>
 
-  <!-- Barre actions: recherche -->
-  <div class="d-flex justify-content-end mb-3">
-    <input id="searchInput" type="text" class="form-control form-control-sm search-input" placeholder="Rechercher ici">
+  <!-- Recherche -->
+  <div class="d-flex justify-content-end mb-3 search-row">
+    <input id="searchInput" type="text" class="form-control form-control-sm search-input"
+           placeholder="{% trans 'Rechercher ici' %}">
   </div>
 
   <!-- Table list -->
@@ -28,24 +38,30 @@
       <table class="table table-hover align-middle mb-0" id="ressourceTable">
         <thead class="bg-white">
           <tr>
-            <th style="width: 30%;">Nom</th>
-            <th style="width: 20%;">Enseignant</th>
-            <th style="width: 20%;">Matière</th>
-            <th style="width: 15%;">Document</th>
-            <th style="width: 15%;">Date d'action</th>
+            <th style="width: 30%;">{% trans "Nom" %}</th>
+            <th style="width: 20%;">{% trans "Enseignant" %}</th>
+            <th style="width: 20%;">{% trans "Matière" %}</th>
+            <th style="width: 15%;">{% trans "Document" %}</th>
+            <th style="width: 15%;">{% trans "Date d'action" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for r in ressources %}
             <tr>
               <td class="fw-semibold">
-                {% if r.description %}{{ r.description }}{% else %}Ressource{% endif %}
+                {% if r.description %}
+                  {{ r.description }}
+                {% else %}
+                  {% trans "Ressource" %}
+                {% endif %}
               </td>
               <td>{{ r.professeur }}</td>
               <td>{{ r.matier }}</td>
               <td>
                 {% if r.fichier %}
-                  <a class="btn btn-sm btn-outline-secondary" href="{{ r.fichier.url }}" target="_blank">Voir</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ r.fichier.url }}" target="_blank">
+                    {% trans "Voir" %}
+                  </a>
                 {% else %}
                   <span class="text-muted">—</span>
                 {% endif %}
@@ -55,7 +71,7 @@
           {% empty %}
             <tr>
               <td colspan="5" class="text-center text-muted py-4">
-                Aucune ressource pour le moment.
+                {% trans "Aucune ressource pour le moment." %}
               </td>
             </tr>
           {% endfor %}
@@ -74,6 +90,5 @@
   {% endif %}
 
 </div>
-
 
 {% endblock %}

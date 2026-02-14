@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from Proffesseur.views import ProffeseurList , ProffeseurDeataille , ProffesseurDelete ,AjouterProfesseur , ProffesseurMessagerie 
+from Proffesseur.views import ProffeseurList , ProffeseurDeataille , ProffesseurDelete ,AjouterProfesseur , ProffesseurMessagerie  , ModifieProfesseur
 from django.views.i18n import JavaScriptCatalog
 
 
@@ -9,7 +9,9 @@ urlpatterns = [
     path('LeMessagerie/',ProffesseurMessagerie.as_view(), name="LesMessagerie"),
     path('LesDetailleDeProf/<int:pk>/',ProffeseurDeataille.as_view(), name='LesDetailleDeProf'),
     path('DeleteProf/<int:pk>/Supprimer/', ProffesseurDelete.as_view(), name='DeleteProf'),
-    path('AjouterProf/', AjouterProfesseur.as_view(), name='AjouteProf'),
+    path("professeurs/ajouter/", AjouterProfesseur.as_view(), name="AjouterProfesseur"),
+    path("professeurs/<int:pk>/modifier/", ModifieProfesseur.as_view(), name="ModifieProfesseur"),
+
     path("violence/", views.violence_list, name="violence_list"),
     path("violence/save/", views.violence_save, name="violence_save"),   # create/update ajax
     path("violence/<int:pk>/json/", views.violence_json, name="violence_json"),
