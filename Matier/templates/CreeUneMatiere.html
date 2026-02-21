@@ -1,33 +1,63 @@
-{% extends 'base.html'%}
-{% load static %}
-{% block title %} Ajouter Une Matiere {% endblock %}
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}
+  {% if object %}{% trans "Modifier une matière" %}{% else %}{% trans "Ajouter une matière" %}{% endif %}
+{% endblock %}
+
 {% block main %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
 
-<div class="containaire">
-    <h2>{{Title}} </h2>
-    <form method="POST" enctype="multipart/form-data" class="form">
-        {% csrf_token %}
+<div class="containaire p-3" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
 
-         <div>
-            <label for="nom">Nom :</label>
-            <input type="text" name="nom" id="nom" required>
-        </div>
+  <!-- Top bar: Retour + petit breadcrumb -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <a href="javascript:history.back()" class="btn btn-outline-primary btn-sm">
+      {% trans "Retour" %}
+    </a>
 
-        <div>
-            <label for="classe">Classe :</label>
-            <select name="classe" id="classe" required>
-                <option value="">-- choisir --</option>
-                 {% for classe in classes %}
-                 <option value="{{ classe.id }}">{{ classe.nom }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="full-width">
-            <button type="submit" class="submit-btn">{{submit_text}}</button>
-        </div>
-
-    </form>
+    <div class="small text-muted">
+      <span>{% trans "Matières" %}</span>
+      <span class="mx-1">-></span>
+      <span>
+        {% if object %}{% trans "Modifier" %}{% else %}{% trans "Ajouter" %}{% endif %}
+      </span>
     </div>
+  </div>
+
+  <h2 class="mb-3">
+    {% if object %}{% trans "Modifier une matière" %}{% else %}{% trans "Ajouter une matière" %}{% endif %}
+  </h2>
+
+  <form method="POST" enctype="multipart/form-data" class="form">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label for="nom" class="form-label">{% trans "Nom" %} :</label>
+      <input type="text" name="nom" id="nom" class="form-control" required
+             value="{% if form.nom.value %}{{ form.nom.value }}{% endif %}">
+    </div>
+
+    <div class="mb-3">
+      <label for="classe" class="form-label">{% trans "Classe" %} :</label>
+      <select name="classe" id="classe" class="form-select" required>
+        <option value="">{% trans "-- choisir --" %}</option>
+        {% for classe in classes %}
+          <option value="{{ classe.id }}"
+            {% if form.classe.value|stringformat:"s" == classe.id|stringformat:"s" %}selected{% endif %}>
+            {{ classe.nom }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+     <div class="full-width">
+            <button type="submit" class="submit-btn">{% if object %}{% trans "Modifier" %}{% else %}{% trans "Ajouter" %}{% endif %}</button>
+        </div>
+
+
+  </form>
+
+</div>
 
 {% endblock %}

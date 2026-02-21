@@ -758,6 +758,9 @@ msgstr "العنوان"
 msgid "N° de Telephone"
 msgstr "رقم الهاتف"
 
+msgid "N°"
+msgstr "رقم"
+
 msgid "Email"
 msgstr "البريد الإلكتروني"
 
@@ -1160,3 +1163,93 @@ msgstr "مبرر"
 
 msgid "Ex: Maladie, rendez-vous..."
 msgstr "مثال: مرض، موعد..."
+
+msgid "Né(e) le"  msgstr "تاريخ الميلاد"
+
+msgid "Vérifiez l'authenticité sur" msgstr "تحقق من الأصالة عبر"
+
+msgid "Le Directeur" msgstr "المدير"
+
+msgid "Aucune donnée trouvée" msgstr "لا توجد بيانات"
+
+msgid "Choisissez un niveau et une classe puis cliquez sur filtrer." msgstr  "اختر مستوى وفصلًا ثم اضغط على تصفية"
+
+msgid "Cartes scolaires" msgstr "بطاقات مدرسية"
+
+ msgid "Scannez ce QR code" msgstr "امسح رمز QR"
+
+msgid "Liste des matières"
+msgstr "قائمة المواد الدراسية"
+
+msgid "Nom de la matière"
+msgstr "اسم المادة"
+
+msgid "Le prof"
+msgstr "الأستاذ"
+
+msgid "Aucune matière trouvée."
+msgstr "لم يتم العثور على أي مادة."
+
+msgid "Modifier une matière"
+msgstr "تعديل مادة"
+
+msgid "-- choisir --"
+msgstr "-- اختر --"
+
+
+
+msgid "Supprimer '%(nom)s'"
+msgstr "حذف '%(nom)s'"
+
+
+msgid "Voulez vous vraiment supprimer le matiere"
+msgstr "هل تريد فعلاً حذف المادة"
+
+
+msgid "Périodes scolaires"
+msgstr "الفترات الدراسية"
+
+msgid "Ajouter une période"
+msgstr "إضافة فترة"
+
+
+msgid "Début"
+msgstr "البداية"
+
+msgid "Fin"
+msgstr "النهاية"
+
+msgid "Active"
+msgstr "فعالة"
+
+msgid "Activer"
+msgstr "تفعيل"
+
+msgid "Aucune période"
+msgstr "لا توجد فترات"
+
+
+msgid "Est active"
+msgstr "فعّالة"
+
+
+msgid "Périodes"
+msgstr "الفترات"
+
+msgid "Devoirs"
+msgstr "الواجبات"
+
+msgid "Gestion notes"
+msgstr "إدارة الدرجات"
+
+msgid "Saisie"
+msgstr "إدخال"
+
+msgid "Import"
+msgstr "استيراد"
+
+msgid "Dispenses"
+msgstr "الإعفاءات"
+
+msgid "Bulletins"
+msgstr "كشوف الدرجات"

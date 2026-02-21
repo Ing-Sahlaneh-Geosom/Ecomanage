@@ -412,6 +412,123 @@ def export_paiement_csv(request):
 
     return response
 
+
+
+
+# app/views.py
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.views.decorators.http import require_POST
+from django.views.generic import ListView
+from django.contrib.auth.decorators import login_required
+
+from Ecole_admin.models import TypePaiement
+from Ecole_admin.form import TypePaiementForm
+
+
+class TypePaiementListView(ListView):
+    model = TypePaiement
+    template_name = "type_paiemen_list.html"
+    context_object_name = "items"
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related("ecole")
+        # ✅ Filtrage si tu veux par école (si tu as request.user.ecole par ex)
+        # if hasattr(self.request.user, "ecole") and self.request.user.ecole_id:
+        #     qs = qs.filter(ecole=self.request.user.ecole)
+        return qs.order_by("-id")
+
+
+@login_required
+def type_paiement_form_partial(request, pk=None):
+    """
+    ✅ Retourne le HTML du formulaire (pour modal) via GET
+    """
+    obj = None
+    if pk is not None:
+        obj = get_object_or_404(TypePaiement, pk=pk)
+
+    form = TypePaiementForm(instance=obj)
+    html = render_to_string(
+        "type_paiement/_form.html",
+        {"form": form, "object": obj},
+        request=request
+    )
+    return JsonResponse({"ok": True, "html": html})
+
+
+@login_required
+@require_POST
+def type_paiement_create(request):
+    """
+    ✅ Crée via AJAX POST (JSON)
+    """
+    form = TypePaiementForm(request.POST)
+    if form.is_valid():
+        obj = form.save(commit=False)
+        # ⚠️ IMPORTANT: tu dois définir l'école ici (car ecole n'est pas dans le form)
+        # Adapte selon ton projet (ex: request.user.ecole)
+        if hasattr(request.user, "ecole") and request.user.ecole_id:
+            obj.ecole = request.user.ecole
+        else:
+            return JsonResponse({"ok": False, "error": "École introuvable pour cet utilisateur."}, status=400)
+
+        obj.save()
+
+        row_html = render_to_string(
+            "_row.html",
+            {"item": obj},
+            request=request
+        )
+        return JsonResponse({
+            "ok": True,
+            "id": obj.pk,
+            "row_html": row_html,
+            "message": "Type de paiement ajouté."
+        })
+
+    html = render_to_string("_form.html", {"form": form, "object": None}, request=request)
+    return JsonResponse({"ok": False, "html": html}, status=400)
+
+
+@login_required
+@require_POST
+def type_paiement_update(request, pk):
+    """
+    ✅ Update via AJAX POST (JSON)
+    """
+    obj = get_object_or_404(TypePaiement, pk=pk)
+
+    form = TypePaiementForm(request.POST, instance=obj)
+    if form.is_valid():
+        obj = form.save()
+
+        row_html = render_to_string("_row.html", {"item": obj}, request=request)
+        return JsonResponse({
+            "ok": True,
+            "id": obj.pk,
+            "row_html": row_html,
+            "message": "Type de paiement modifié."
+        })
+
+    html = render_to_string("_form.html", {"form": form, "object": obj}, request=request)
+    return JsonResponse({"ok": False, "html": html}, status=400)
+
+
+@login_required
+@require_POST
+def type_paiement_delete(request, pk):
+    obj = get_object_or_404(TypePaiement, pk=pk)
+    obj.delete()
+    return JsonResponse({"ok": True, "id": pk, "message": "Type de paiement supprimé."})
+
+
+
+
+
 from django.http import HttpResponse
 from django.views.decorators.http import require_GET
 from django.utils.html import escape

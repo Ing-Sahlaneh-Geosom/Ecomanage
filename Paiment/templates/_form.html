@@ -1,0 +1,36 @@
+{% load i18n %}
+<form class="fx"
+      method="post"
+      action="{% if object %}{% url 'app_name:type_paiement_update' object.pk %}{% else %}{% url 'app_name:type_paiement_create' %}{% endif %}">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="errbox">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <div>
+    <label for="{{ form.nom.id_for_label }}">{% trans "Nom" %}</label>
+    {{ form.nom }}
+    {% if form.nom.errors %}
+      <div class="field-error">{{ form.nom.errors|striptags }}</div>
+    {% endif %}
+  </div>
+
+  <div>
+    <label for="{{ form.description.id_for_label }}">{% trans "Description" %}</label>
+    {{ form.description }}
+    {% if form.description.errors %}
+      <div class="field-error">{{ form.description.errors|striptags }}</div>
+    {% endif %}
+  </div>
+
+  <div class="checkline">
+    {{ form.actif }}
+    <label for="{{ form.actif.id_for_label }}">{% trans "Actif" %}</label>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btnx btnx--ghost" data-close="1">{% trans "Annuler" %}</button>
+    <button type="submit" class="btnx">{% trans "Enregistrer" %}</button>
+  </div>
+</form>

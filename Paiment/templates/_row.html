@@ -1,0 +1,28 @@
+{% load i18n %}
+<tr id="tpRow-{{ item.pk }}">
+  <td>{{ item.pk }}</td>
+  <td>{{ item.nom }}</td>
+  <td>{{ item.description|default:"-"|truncatechars:80 }}</td>
+  <td>
+    {% if item.actif %}
+      <span class="badge bg-success">{% trans "Oui" %}</span>
+    {% else %}
+      <span class="badge bg-secondary">{% trans "Non" %}</span>
+    {% endif %}
+  </td>
+  <td class="text-end">
+    <button type="button"
+            class="btn btn-outline-dark btn-sm"
+            data-tp-action="edit"
+            data-tp-id="{{ item.pk }}">
+      {% trans "Modifier" %}
+    </button>
+
+    <button type="button"
+            class="btn btn-outline-danger btn-sm"
+            data-tp-action="delete"
+            data-tp-id="{{ item.pk }}">
+      {% trans "Supprimer" %}
+    </button>
+  </td>
+</tr>

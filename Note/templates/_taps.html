@@ -1,10 +1,45 @@
-<ul class="nav nav-tabs mb-3 ">
-  <li class="nav-item"><a class="nav-link text-light" href="{% url 'periode_list' %}">Périodes</a></li>
-  <li class="nav-item"><a class="nav-link text-light" href="{% url 'devoir_list' %}">Devoirs</a></li>
-  <li class="nav-item"><a class="nav-link text-light" href="{% url 'notes_gestion' %}">Gestion notes</a></li>
-  <li class="nav-item"><a class="nav-link text-light" href="{% url 'note_saisie_setup' %}">Saisie</a></li>
-  <li class="nav-item"><a class="nav-link text-light" href="{% url 'note_import' %}">Import</a></li>
-  <li class="nav-item"><a class="nav-link text-light " href="{% url 'dispense_list' %}">Dispenses</a></li>
-  <li class="nav-item"><a class="nav-link text-light" href="{% url 'bulletins_visual' %}">Bulletins</a></li>
-   
+{% load i18n %}
+
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'periode_list' %}">
+      {% trans "Périodes" %}
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'devoir_list' %}">
+      {% trans "Devoirs" %}
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'notes_gestion' %}">
+      {% trans "Gestion notes" %}
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'note_saisie_setup' %}">
+      {% trans "Saisie" %}
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'note_import' %}">
+      {% trans "Import" %}
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'dispense_list' %}">
+      {% trans "Dispenses" %}
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'bulletins_visual' %}">
+      {% trans "Bulletins" %}
+    </a>
+  </li>
 </ul>

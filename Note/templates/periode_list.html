@@ -1,23 +1,24 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block main %}
 {% include "_taps.html" %}
 
-<div class="d-flex justify-content-between align-items-center mb-2">
-  <h4 class="mb-0">Périodes scolaires</h4>
+<div class="d-flex justify-content-between align-items-center mb-2 text-dark">
+  <h4 class="mb-0">{% trans "Périodes scolaires" %}</h4>
 </div>
 
 <div class="row g-3">
   <div class="col-lg-4">
     <div class="card">
       <div class="card-body">
-        <h6>Ajouter une période</h6>
+        <h6>{% trans "Ajouter une période" %}</h6>
         <form method="post">
           {% csrf_token %}
           <div class="mb-2">{{ form.nom.label_tag }}{{ form.nom }}</div>
           <div class="mb-2">{{ form.debut.label_tag }}{{ form.debut }}</div>
           <div class="mb-2">{{ form.fin.label_tag }}{{ form.fin }}</div>
           <div class="form-check mb-3">{{ form.est_active }} {{ form.est_active.label_tag }}</div>
-          <button class="btn btn-primary w-100">Enregistrer</button>
+          <button class="btn btn-primary w-100">{% trans "Enregistrer" %}</button>
         </form>
       </div>
     </div>
@@ -29,10 +30,10 @@
         <table class="table table-sm table-striped align-middle">
           <thead>
             <tr>
-              <th>Nom</th>
-              <th>Début</th>
-              <th>Fin</th>
-              <th>Active</th>
+              <th>{% trans "Nom" %}</th>
+              <th>{% trans "Début" %}</th>
+              <th>{% trans "Fin" %}</th>
+              <th>{% trans "Active" %}</th>
               <th></th>
             </tr>
           </thead>
@@ -44,19 +45,19 @@
               <td>{{ p.fin }}</td>
               <td>
                 {% if p.est_active %}
-                  <span class="badge bg-success">Active</span>
+                  <span class="badge bg-success">{% trans "Active" %}</span>
                 {% else %}
-                  <span class="badge bg-secondary">Non</span>
+                  <span class="badge bg-secondary">{% trans "Non" %}</span>
                 {% endif %}
               </td>
               <td class="text-end">
                 {% if not p.est_active %}
-                <a class="btn btn-sm btn-outline-success" href="{% url 'periode_toggle_active' p.id %}">Activer</a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'periode_toggle_active' p.id %}">{% trans "Activer" %}</a>
                 {% endif %}
               </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="text-center text-muted">Aucune période</td></tr>
+            <tr><td colspan="5" class="text-center text-muted">{% trans "Aucune période" %}</td></tr>
             {% endfor %}
           </tbody>
         </table>

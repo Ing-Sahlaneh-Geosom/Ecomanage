@@ -514,11 +514,20 @@ from django import forms
 from django.db.models import Q
 from .models import PeriodeScolaire, Devoir, Note, DispenseMatiere, Classe, Matier, Niveau, Eleve, Proffeseur
 
+from django.utils.translation import gettext_lazy as _
 
 class PeriodeScolaireForm(forms.ModelForm):
     class Meta:
         model = PeriodeScolaire
         fields = ["nom", "debut", "fin", "est_active"]
+
+        labels = {
+            "nom": _("Nom"),
+            "debut": _("Début"),
+            "fin": _("Fin"),
+            "est_active": _("Est active"),
+        }
+
         widgets = {
             "debut": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
             "fin": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
@@ -847,3 +856,26 @@ class BatimentForm(forms.ModelForm):
             "actif": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Description (optionnel)"}),
         }
+
+
+# app/forms.py
+from django import forms
+from .models import TypePaiement
+
+class TypePaiementForm(forms.ModelForm):
+    class Meta:
+        model = TypePaiement
+        fields = ["nom", "description", "actif"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # ✅ Pas bootstrap pour les inputs (tu as dit modal custom)
+        self.fields["nom"].widget.attrs.update({
+            "placeholder": "Nom",
+            "autocomplete": "off",
+        })
+        self.fields["description"].widget.attrs.update({
+            "placeholder": "Description",
+            "rows": 4,
+        })

@@ -338,8 +338,8 @@ body, .main-content, .content, .page-content {
         📘 {% trans "Matières" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuMatiere">
-        <a class="{% if current == 'AjouterDesMatiere' %}active{% endif %}" href="{% url 'AjouterDesMatiere'%}"> {% trans " - Ajouter une matière" %}</a>
-        <a class="{% if current == 'listesdesmetier' %}active{% endif %}" href="{% url 'listesdesmetier'%}">{% trans " - Liste des matière" %}</a>
+        <a class="{% if current == 'AjouterDesMatiere' %}active{% endif %}" href="{% url 'AjouterDesMatiere'%}"> -{% trans "Ajouter une matière" %}</a>
+        <a class="{% if current == 'listesdesmetier' %}active{% endif %}" href="{% url 'listesdesmetier'%}">-{% trans "Liste des matière" %}</a>
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuMatiere" aria-expanded="false">
@@ -375,6 +375,34 @@ body, .main-content, .content, .page-content {
     {% endif %}
 
     
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuPromotion" aria-expanded="false">
+        📋 Promotions <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuPromotion">
+        <a href="">- Etudiants en attente d'une decisions</a>
+        <a href="">- Évaluer l'élève pour la promotion</a>
+        <a href="">- Afficher la decision finale</a>
+        <a href="">- Eleve diplome</a>
+        <a href="">- Voir les eleves en promotion </a>
+        <a href="">- Promouvior les eleves en attente</a>
+        <a href="">- decision d'orientation </a>
+        <a href="">Promotions pas classe</a>
+        <a href="">Promotions par niveaux </a>
+        <a href=""> Changement de classes d'un eleve</a>
+      </div>
+
+       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuOrientation" aria-expanded="false">
+        📋 Orientation <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuOrientation">
+        <a href="">- orientation scolaire</a>
+        <a href="">- Fiche de voeux </a>
+        <a href="">- Enregistrement des voeux </a>
+        <a href="">- Afficher les voeux des eleves</a>
+        <a href="">- orientation finale </a>
+        <a href="">- Rapport des orientation </a>
+
+      </div>
     
 
     {% if current == 'employe_list' or current == 'absences_enseignants' or current == 'suivi_absences_enseignants' or current == 'absences_employes' or current == 'suivi_absences_employes' or current == 'liste_parents' %}
@@ -408,6 +436,7 @@ body, .main-content, .content, .page-content {
         💳 {% trans "Finance & Gestionnaire" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuPaiements">
+        <a class="{% if current == 'type_paiement_list' %}active{% endif %}" href="{% url 'type_paiement_list'%}">- {% trans "Configuration des frais" %}</a>
         <a class="{% if current == 'ConfDePaiment' %}active{% endif %}" href="{% url 'ConfDePaiment'%}">- {% trans "Configuration des frais" %}</a>
         <a class="{% if current == 'finance_frais' %}active{% endif %}" href="{% url 'finance_frais'%}">- {% trans "Frais par classe" %}</a>
         <a class="{% if current == 'liste_de_paiment' %}active{% endif %}" href="{% url 'liste_de_paiment'%}">- {% trans "Exonéraition" %}</a>
@@ -421,6 +450,7 @@ body, .main-content, .content, .page-content {
         💳 {% trans "Finance & Gestionnaire" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuPaiements">
+        <a href="{% url 'type_paiement_list'%}">- {% trans "Configuration des frais" %}</a>
         <a href="{% url 'ConfDePaiment'%}">- {% trans "Configuration des frais" %}</a>
         <a href="{% url 'finance_frais'%}">- {% trans "Frais par classe" %}</a>
         <a href="{% url 'liste_de_paiment'%}">- {% trans "Exonéraition" %}</a>
@@ -459,6 +489,19 @@ body, .main-content, .content, .page-content {
 
       </div>
     {% endif %}
+
+    <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuArchve" aria-expanded="false">
+        📋 Archive <span class="arrow">▾</span>
+      </button>
+      <div class="collapse submenu" id="menuArchve">
+        <a href="">- Resultats annuelles par classes</a>
+        <a href="">- Attestation scolaire</a>
+        <a href="">- Archives des bulletins</a>
+        <a href="">- Archives des transcriptions </a>
+        <a href="">- Listes des eleves Archives </a>
+        <a href="">- Rapport des orientation </a>
+
+      </div>
 
    
        

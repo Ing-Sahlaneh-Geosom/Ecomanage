@@ -152,7 +152,7 @@ class ProfesseurAdmin(admin.ModelAdmin):
 class TypePaimentAdmin(admin.ModelAdmin):
     list_display = ('nom','description','ecole','actif')
     list_filter = ('ecole','actif',)
-    
+
 
 
 @admin.register(TarifPaiement)

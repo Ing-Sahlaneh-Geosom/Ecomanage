@@ -6,7 +6,7 @@
 {% get_current_language as LANGUAGE_CODE %}
 {% if LANGUAGE_CODE == "ar" %}
 <style>
-  body{ direction:rtl; text-align:right; }
+  html, body{ direction:rtl; text-align:right; }
 </style>
 {% endif %}
 
@@ -27,356 +27,469 @@
   .cs-actions{ display:flex; gap:10px; align-items:flex-end; }
   .btn-filter{ width:56px; height:44px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; }
   .cs-print{ margin-top:14px; display:flex; justify-content:flex-end; gap:10px; }
-
   .no-data{ text-align:center; padding:32px 10px 24px; }
   .no-data small{ color:#666; }
 
+  :root{
+    --card-w: 85.6mm;
+    --card-h: 54mm;
+    --edge: rgba(255,255,255,.18);
 
-:root{
-  --card-w: 85.6mm;
-  --card-h: 54mm;
-  --ink: rgba(255,255,255,.96);
-  --ink2: rgba(255,255,255,.84);
-  --edge: rgba(255,255,255,.18);
-}
+    /* recto */
+    --brandW: 48mm;
+    --brandH: 19mm;
 
-/* paire recto/verso */
-.ssx-pair{
-  display:flex;
-  gap:14px;
-  justify-content:center;
-  align-items:flex-start;
-  flex-wrap:wrap;
-  margin:0 0 18px 0;
-}
+    --photoW: 29mm;
+    --photoH: 30mm;
 
-/* carte */
-.ssx-card{
-  width:var(--card-w);
-  height:var(--card-h);
-  border-radius:14px;
-  overflow:hidden;
-  position:relative;
-  border:1px solid var(--edge);
-  box-shadow:0 18px 46px rgba(0,0,0,.28);
-  background:
-    radial-gradient(1200px 360px at 30% 25%, rgba(65,210,255,.26), transparent 55%),
-    radial-gradient(900px 300px at 78% 62%, rgba(255,255,255,.10), transparent 62%),
-    linear-gradient(135deg, #04162e, #083f7d);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, "DejaVu Sans", Arial, sans-serif;
-  color: var(--ink);
-}
-.ssx-card *{ box-sizing:border-box; }
+    /* ✅ limite infos/photo (ligne rouge) */
+    --infoRightGap: 16px;
 
-/* étoiles */
-.ssx-card::before{
-  content:"";
-  position:absolute; inset:0;
-  background-image:
-    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.85) 50%, transparent 51%),
-    radial-gradient(1px 1px at 20% 80%, rgba(255,255,255,.55) 50%, transparent 51%),
-    radial-gradient(1px 1px at 34% 40%, rgba(255,255,255,.70) 50%, transparent 51%),
-    radial-gradient(1px 1px at 56% 16%, rgba(255,255,255,.60) 50%, transparent 51%),
-    radial-gradient(1px 1px at 70% 34%, rgba(255,255,255,.65) 50%, transparent 51%),
-    radial-gradient(1px 1px at 86% 72%, rgba(255,255,255,.55) 50%, transparent 51%),
-    radial-gradient(1px 1px at 92% 22%, rgba(255,255,255,.45) 50%, transparent 51%);
-  opacity:.9;
-  pointer-events:none;
-  z-index:0;
-}
+    /* ✅ position titre = ligne noire */
+    --titleTop: 20px;
 
-/* vagues + glow premium */
-.ssx-wave{
-  position:absolute; inset:-22px -32px;
-  background:
-    linear-gradient(120deg, transparent 34%, rgba(120,240,255,.22) 46%, rgba(255,255,255,.10) 54%, transparent 68%),
-    radial-gradient(1000px 280px at 18% 78%, rgba(120,240,255,.26), transparent 60%),
-    radial-gradient(1000px 280px at 86% 56%, rgba(255,255,255,.14), transparent 62%);
-  opacity:.95;
-  pointer-events:none;
-  z-index:1;
-}
+    /* verso (inchangé) */
+    --qrSize: 22mm;
+    --qrTop: 9mm;
+    --backBottomReserve: 13mm;
+  }
 
-/* light trails (gros rendu premium) */
-.ssx-trails{
-  position:absolute; inset:-18px -28px;
-  background:
-    radial-gradient(900px 140px at 12% 72%, rgba(120,240,255,.30), transparent 62%),
-    radial-gradient(900px 120px at 80% 46%, rgba(255,255,255,.12), transparent 65%),
-    linear-gradient(115deg, transparent 38%, rgba(255,255,255,.08) 48%, rgba(120,240,255,.20) 54%, rgba(255,255,255,.06) 60%, transparent 74%);
-  opacity:.92;
-  mix-blend-mode: screen;
-  pointer-events:none;
-  z-index:2;
-}
+  .ssx-pair{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    margin:0 0 18px 0;
+  }
 
-/* biseau */
-.ssx-bevel{
-  position:absolute; inset:0;
-  border-radius:14px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.22),
-    inset 0 -1px 0 rgba(0,0,0,.20);
-  pointer-events:none;
-  z-index:3;
-}
+  .ssx-card{
+    width:var(--card-w);
+    height:var(--card-h);
+    border-radius:14px;
+    overflow:hidden;
+    position:relative;
+    border:1px solid var(--edge);
+    box-shadow:0 18px 46px rgba(0,0,0,.28);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "DejaVu Sans", Arial, sans-serif;
+    background:
+      radial-gradient(1200px 380px at 30% 25%, rgba(65,210,255,.24), transparent 56%),
+      radial-gradient(1000px 320px at 78% 62%, rgba(255,255,255,.10), transparent 62%),
+      radial-gradient(800px 260px at 40% 110%, rgba(0,255,220,.10), transparent 60%),
+      linear-gradient(135deg, #04162e, #083f7d);
+  }
+  .ssx-card *{ box-sizing:border-box; }
 
-/* bande métal haut */
-.ssx-silver{
-  position:absolute;
-  left:-18px; right:-18px; top:8px;
-  height:12mm;
-  background: linear-gradient(90deg,
-    rgba(255,255,255,.08),
-    rgba(255,255,255,.26),
-    rgba(120,240,255,.18),
-    rgba(255,255,255,.08)
-  );
-  opacity:.82;
-  transform: skewX(-10deg);
-  border-top:1px solid rgba(255,255,255,.14);
-  border-bottom:1px solid rgba(255,255,255,.10);
-  pointer-events:none;
-  z-index:4;
-}
+  .ssx-card::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.85) 50%, transparent 51%),
+      radial-gradient(1px 1px at 14% 70%, rgba(255,255,255,.55) 50%, transparent 51%),
+      radial-gradient(1px 1px at 28% 44%, rgba(255,255,255,.70) 50%, transparent 51%),
+      radial-gradient(1px 1px at 40% 16%, rgba(255,255,255,.60) 50%, transparent 51%),
+      radial-gradient(1px 1px at 58% 30%, rgba(255,255,255,.65) 50%, transparent 51%),
+      radial-gradient(1px 1px at 72% 72%, rgba(255,255,255,.55) 50%, transparent 51%),
+      radial-gradient(1px 1px at 86% 22%, rgba(255,255,255,.45) 50%, transparent 51%),
+      radial-gradient(1px 1px at 92% 52%, rgba(255,255,255,.40) 50%, transparent 51%);
+    opacity:.95;
+    pointer-events:none;
+    z-index:0;
+  }
+  .ssx-card::after{
+    content:"";
+    position:absolute; inset:0;
+    background: radial-gradient(900px 400px at 50% 40%, transparent 35%, rgba(0,0,0,.24) 100%);
+    pointer-events:none;
+    z-index:1;
+  }
 
-.ssx-inner{
-  position:relative;
-  z-index:5;
-  height:100%;
-  padding:10px;
-}
+  .ssx-wave{
+    position:absolute; inset:-22px -32px;
+    background:
+      linear-gradient(120deg, transparent 34%, rgba(120,240,255,.22) 46%, rgba(255,255,255,.10) 54%, transparent 68%),
+      radial-gradient(1000px 280px at 18% 78%, rgba(120,240,255,.26), transparent 60%),
+      radial-gradient(1000px 280px at 86% 56%, rgba(255,255,255,.14), transparent 62%);
+    opacity:.95;
+    pointer-events:none;
+    z-index:2;
+  }
+  .ssx-trails{
+    position:absolute; inset:-18px -28px;
+    background:
+      radial-gradient(900px 140px at 12% 72%, rgba(120,240,255,.30), transparent 62%),
+      radial-gradient(900px 120px at 80% 46%, rgba(255,255,255,.12), transparent 65%),
+      linear-gradient(115deg, transparent 38%, rgba(255,255,255,.08) 48%, rgba(120,240,255,.20) 54%, rgba(255,255,255,.06) 60%, transparent 74%);
+    opacity:.92;
+    mix-blend-mode: screen;
+    pointer-events:none;
+    z-index:3;
+  }
+  .ssx-bevel{
+    position:absolute; inset:0;
+    border-radius:14px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      inset 0 -1px 0 rgba(0,0,0,.20);
+    pointer-events:none;
+    z-index:4;
+  }
 
-/* ===== RECTO ===== */
+  /* ✅ band holo en bas (OK) */
+  .ssx-holoBottom{
+    position:absolute;
+    left:-18px; right:-18px; bottom:6px;
+    height:9mm;
+    background: linear-gradient(90deg,
+      rgba(255,255,255,.06),
+      rgba(0,255,220,.10),
+      rgba(160,120,255,.10),
+      rgba(255,180,80,.08),
+      rgba(255,255,255,.06)
+    );
+    opacity:.78;
+    transform: skewX(-10deg);
+    border-top:1px solid rgba(255,255,255,.10);
+    pointer-events:none;
+    z-index:5;
+  }
 
-/* plaque logo */
-.ssx-brand{
-  position:absolute;
-  left:10px;
-  top:10px;
-  width:46mm;
-  height:20mm;
-  z-index:6;
-}
-.ssx-brand .plate{
-  width:100%;
-  height:100%;
-  border-radius:10px;
-  background: rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.16);
-  box-shadow: 0 10px 22px rgba(0,0,0,.18);
-  padding:4px 6px;
-  display:flex;
-  align-items:center;
-}
-.ssx-brand img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  filter: drop-shadow(0 2px 10px rgba(0,0,0,.35));
-}
+  /* ⚠️ band en haut : on garde globalement, mais on le supprime sur le RECTO (voir plus bas) */
+  .ssx-silver{
+    position:absolute;
+    left:-18px; right:-18px; top:8px;
+    height:12mm;
+    background: linear-gradient(90deg,
+      rgba(255,255,255,.08),
+      rgba(255,255,255,.26),
+      rgba(120,240,255,.18),
+      rgba(255,255,255,.08)
+    );
+    opacity:.82;
+    transform: skewX(-10deg);
+    border-top:1px solid rgba(255,255,255,.14);
+    border-bottom:1px solid rgba(255,255,255,.10);
+    pointer-events:none;
+    z-index:5;
+  }
 
-/* titre capsule */
-.ssx-title{
-  position:absolute;
-  top:12px;
-  left:10px; right:10px;
-  padding-left:48mm;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  z-index:6;
-}
-.ssx-title .pill{
-  padding:6px 12px;
-  border-radius:999px;
-  font-weight:900;
-  font-size:12px;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  color:var(--ink);
-  background: linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.06));
-  border:1px solid rgba(255,255,255,.18);
-  text-shadow:0 2px 10px rgba(0,0,0,.25);
-  white-space:nowrap;
-}
-.ssx-title svg{ width:12px; height:12px; opacity:.9; color:var(--ink); }
+  .ssx-inner{
+    position:relative;
+    z-index:6;
+    height:100%;
+    padding:10px;
+  }
 
-/* photo */
-.ssx-photo{
-  position:absolute;
-  right:12px;
-  top:16mm;
-  width:32mm;
-  height:38mm;
-  border-radius:14px;
-  padding:2.8px;
-  background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.25), rgba(255,255,255,.85));
-  box-shadow:0 12px 28px rgba(0,0,0,.20);
-  z-index:6;
-}
-.ssx-photo .in{
-  width:100%; height:100%;
-  border-radius:12px;
-  overflow:hidden;
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.18);
-}
-.ssx-photo img{ width:100%; height:100%; object-fit:cover; }
+  /* ======================
+     RECTO — CORRECTIONS CAPTURE
+     ====================== */
 
-/* lock photo */
-.ssx-lock{
-  position:absolute;
-  right:6px;
-  top:44mm;
-  width:13mm;
-  height:13mm;
-  border-radius:50%;
-  background: radial-gradient(circle at 30% 30%, rgba(110,230,255,.35), rgba(255,255,255,.10));
-  border:1px solid rgba(255,255,255,.22);
-  box-shadow:0 12px 24px rgba(0,0,0,.18);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  font-size:12px;
-  z-index:7;
+     /* ======================
+   AR : inverser PHOTO / INFOS (sans toucher le design)
+   ====================== */
+.ssx-front--ar .ssx-photo{
+  left:12px;      /* photo à gauche */
+  right:auto;
 }
 
-/* infos bas gauche */
-.ssx-info{
-  position:absolute;
-  left:12px;
-  bottom:10px;
-  width:52mm;
-  color:var(--ink);
-  font-size:9.6px;
-  line-height:1.35;
-  text-shadow:0 2px 10px rgba(0,0,0,.22);
-  z-index:6;
-}
-.ssx-name{
-  font-weight:900;
-  font-size:13px;
-  margin-bottom:4px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.ssx-row{
-  display:grid;
-  grid-template-columns: 22mm 1fr;
-  gap:6px;
-}
-.ssx-lbl{ font-weight:800; opacity:.95; }
-.ssx-val{ opacity:.98; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-/* ===== VERSO ===== */
-/* ✅ QR plus petit + plus haut = place pour texte dessous */
-.ssx-qr{
-  position:absolute;
-  left:50%;
-  top:11mm;
-  transform:translateX(-50%);
-  width:28mm;
-  height:28mm;
-  border-radius:14px;
-  background: rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.18);
-  padding:2.4mm;
-  box-shadow:
-    0 14px 28px rgba(0,0,0,.22),
-    0 0 0 2px rgba(120,240,255,.12),
-    0 0 26px rgba(120,240,255,.22);
-  z-index:6;
-}
-.ssx-qr .in{
-  width:100%; height:100%;
-  border-radius:10px;
-  background:#fff;
-  padding:5px;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
-}
-.ssx-qr img{ width:100%; height:100%; object-fit:contain; }
-
-/* ✅ lock collé au QR (coin bas droit) */
-.ssx-qrLock{
-  position:absolute;
-  left:calc(50% + 9mm);
-  top:calc(11mm + 19mm);
-  width:9mm;
-  height:9mm;
-  border-radius:50%;
-  background: rgba(200,245,255,.95);
-  border:1px solid rgba(0,0,0,.10);
-  box-shadow:0 10px 18px rgba(0,0,0,.18);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:10px;
-  color:#1b2a3a;
-  z-index:7;
+.ssx-front--ar .ssx-info{
+  right:22px;     /* infos à droite */
+  left: calc(12px + var(--photoW) + var(--infoRightGap)); /* démarre après la photo */
 }
 
-/* ✅ texte sous QR (plus de chevauchement) */
-.ssx-backText{
-  position:absolute;
-  left:10px; right:10px;
-  top:39mm;              /* <-- clé */
-  text-align:center;
-  z-index:6;
-  text-shadow:0 2px 10px rgba(0,0,0,.22);
-}
-.ssx-backTitle{
-  font-weight:900;
-  font-size:11px;
-  letter-spacing:.8px;
-  text-transform:uppercase;
-  color:var(--ink);
-}
-.ssx-backSub{
-  margin-top:2px;
-  font-size:9px;
-  color:rgba(255,255,255,.92);
-}
-.ssx-backContact{
-  margin-top:4px;
-  font-size:8.7px;
-  color:rgba(255,255,255,.90);
-  white-space:nowrap;
-}
 
-/* directeur bas droite */
-.ssx-director{
-  position:absolute;
-  right:10px;
-  bottom:8px;
-  color:rgba(255,255,255,.86);
-  font-size:8.4px;
-  z-index:6;
-}
+  /* ✅ enlever le bg derrière logo et titre = supprimer le band du haut sur recto */
+  .ssx-front .ssx-silver{ display:none !important; }
 
-/* RTL : layout fixe, texte RTL propre */
-html[dir="rtl"] .ssx-card{ direction:ltr; }
-html[dir="rtl"] .rtl{
-  direction:rtl;
-  text-align:right;
-  font-family:"DejaVu Sans", Tahoma, Arial, sans-serif;
-}
-html[dir="rtl"] .ssx-row{ grid-template-columns: 1fr 22mm; }
-html[dir="rtl"] .ssx-lbl{ text-align:right; }
+  /* ✅ Logo sans bg, et poussé vers la gauche */
+  .ssx-front .ssx-brand{
+    position:absolute;
+    left:4px;
+    top:9px;
+    width:var(--brandW);
+    height:var(--brandH);
+    z-index:9;
+  }
+  .ssx-front .ssx-brand .plate{
+    background: transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+    padding:0 !important;
+    backdrop-filter:none !important;
+    width:100%; height:100%;
+    display:flex; align-items:center;
+  }
+  .ssx-front .ssx-brand img{
+    width:100%; height:100%;
+    object-fit:contain;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.55)) saturate(1.18) brightness(1.10);
+  }
 
+  /* ✅ TITRE : sans BG, placé sur la ligne noire, complet */
+  .ssx-front .ssx-title{
+    position:absolute;
+    top: var(--titleTop);               /* ✅ ligne noire */
+    left: calc(4px + var(--brandW) + 12px);
+    right:12px;
+    z-index:9;
+    height: 18px;
+    display:flex;
+    align-items:center;                /* ✅ texte “sur” la ligne */
+  }
+  .ssx-front .ssx-title .pill{
+    width:100%;
+    display:block;
+    background:transparent !important; /* ❌ pas de bg */
+    border:0 !important;
+    box-shadow:none !important;
+    border-radius:0 !important;
+    padding:0 !important;
 
+    color:#0b1020 !important;          /* noir */
+    font-weight:1000;
+    font-size:13px;                    /* plus visible */
+    letter-spacing:1.1px;
+    text-transform:uppercase;
 
+    text-align:right;                  /* comme ta capture (à droite) */
+    white-space:nowrap;
+    overflow:visible;
+    text-overflow:clip;
 
-  /* =========================
-     PRINT
-     ========================= */
+    /* lisible sans bg */
+    text-shadow:
+      0 1px 0 rgba(255,255,255,.70),
+      0 3px 10px rgba(0,0,0,.18);
+  }
+
+  /* Puce (OK) */
+  .ssx-front .ssx-chip{
+    position:absolute;
+    left:14px;
+    top:29mm;
+    width:16mm;
+    height:12mm;
+    border-radius:3mm;
+    background: linear-gradient(135deg, #d7b46a, #f5e7b0 35%, #b5893f);
+    box-shadow: 0 14px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.30);
+    border:1px solid rgba(255,255,255,.18);
+    z-index:8;
+    overflow:hidden;
+  }
+  .ssx-front .ssx-chip::after{
+    content:"";
+    position:absolute; inset:-40%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+    transform: rotate(25deg);
+    opacity:.55;
+  }
+  .ssx-front .ssx-chip span{
+    position:absolute; left:2.5mm; right:2.5mm;
+    height:.6mm; background: rgba(0,0,0,.18);
+    border-radius:99px;
+  }
+  .ssx-front .ssx-chip span:nth-child(1){ top:3.2mm; }
+  .ssx-front .ssx-chip span:nth-child(2){ top:5.7mm; }
+  .ssx-front .ssx-chip span:nth-child(3){ top:8.2mm; }
+
+  /* Photo (OK) */
+  .ssx-front .ssx-photo{
+    position:absolute;
+    right:12px;
+    top:18mm;
+    width:var(--photoW);
+    height:var(--photoH);
+    border-radius:14px;
+    padding:2.6px;
+    background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(120,200,255,.22), rgba(255,255,255,.85));
+    box-shadow:0 14px 28px rgba(0,0,0,.20);
+    z-index:8;
+  }
+  .ssx-front .ssx-photo .in{
+    width:100%; height:100%;
+    border-radius:12px;
+    overflow:hidden;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.22);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ssx-front .ssx-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .ssx-front .ssx-ph-empty{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(300px 220px at 40% 35%, rgba(255,255,255,.10), rgba(0,0,0,.22));
+  }
+  .ssx-front .ssx-ph-empty svg{ width:56%; height:auto; opacity:.95; filter: drop-shadow(0 10px 18px rgba(0,0,0,.25)); }
+
+  /* ✅ INFOS : stop à la limite rouge + bg = comme le fond (donc transparent) */
+  .ssx-front .ssx-info{
+    position:absolute;
+    left:22px;
+    right: calc(12px + var(--photoW) + var(--infoRightGap)); /* ✅ limite */
+    bottom:21px;
+    z-index:9;
+
+    background: transparent !important; /* ✅ même fond que la carte */
+    border:0 !important;
+    box-shadow:none !important;
+    backdrop-filter:none !important;
+    padding:0 !important;
+
+    color:#0b1020 !important;
+    font-size:9.6px;
+    line-height:1.35;
+
+    text-shadow:
+      0 1px 0 rgba(255,255,255,.75),
+      0 3px 10px rgba(0,0,0,.16);
+  }
+  .ssx-front .ssx-name{
+    font-weight:100;
+    font-size:13px;
+    margin-bottom:4px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    color:white !important;
+  }
+  .ssx-front .ssx-row{
+    display:grid;
+    grid-template-columns: 19mm 1fr;
+    gap:6px;
+  }
+  .ssx-front .ssx-lbl,
+  .ssx-front .ssx-val{
+    color:#0b1020 !important;
+    font-weight:500;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .rtl{ direction:rtl; text-align:right; font-family:"DejaVu Sans", Tahoma, Arial, sans-serif; }
+
+  /* ======================
+     VERSO (inchangé)
+     ====================== */
+  .ssx-qr{
+    position:absolute;
+    left:50%;
+    top:var(--qrTop);
+    transform:translateX(-50%);
+    width:var(--qrSize);
+    height:var(--qrSize);
+    border-radius:14px;
+    background: rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.18);
+    padding:2mm;
+    box-shadow: 0 14px 28px rgba(0,0,0,.22), 0 0 20px rgba(120,240,255,.16);
+    z-index:8;
+  }
+  .ssx-qr .in{
+    width:100%; height:100%;
+    border-radius:10px;
+    background:#fff;
+    padding:4px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ssx-qr img{ width:100%; height:100%; object-fit:contain; display:block; }
+
+  .ssx-qr-empty{
+    width:100%; height:100%;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:3px;
+    color:#111;
+  }
+  .ssx-qr-empty .ic{ font-size:14px; font-weight:900; }
+  .ssx-qr-empty .tx{ font-size:8px; font-weight:900; letter-spacing:.4px; }
+
+  .ssx-backText{
+    position:absolute;
+    left:10px; right:10px;
+    top:calc(var(--qrTop) + var(--qrSize) + 6mm);
+    bottom: var(--backBottomReserve);
+    text-align:center;
+    z-index:8;
+    background:none !important;
+    border:0 !important;
+    padding:0 !important;
+    backdrop-filter:none !important;
+    text-shadow:0 2px 12px rgba(0,0,0,.35);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:3px;
+  }
+  .ssx-backTitle{
+    font-weight:950;
+    font-size:10.8px;
+    letter-spacing:.85px;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.96);
+  }
+  .ssx-backSub{ font-size:8.9px; color:rgba(255,255,255,.94); }
+  .ssx-backContact{ font-size:8.6px; color:rgba(255,255,255,.92); line-height:1.2; white-space:normal; overflow:visible; }
+
+  .ssx-backBottom{
+    position:absolute;
+    left:10px; right:10px;
+    bottom:7px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:10px;
+    z-index:9;
+  }
+  .ssx-sign{ min-width:30mm; }
+  .ssx-signLine{
+    height:1.4px;
+    width:30mm;
+    background: rgba(255,255,255,.58);
+    border-radius:99px;
+    box-shadow: 0 10px 18px rgba(0,0,0,.30);
+    margin-bottom:3px;
+  }
+  .ssx-signLabel{ font-size:8.2px; color:rgba(255,255,255,.92); text-shadow:0 2px 10px rgba(0,0,0,.28); }
+
+  .ssx-barcode{
+    height:6.2mm;
+    flex:1 1 auto;
+    display:flex;
+    gap:1.1px;
+    justify-content:flex-end;
+    align-items:stretch;
+    opacity:.92;
+    filter: drop-shadow(0 10px 14px rgba(0,0,0,.35));
+  }
+  .ssx-barcode span{ display:block; width:1.6px; background: rgba(255,255,255,.92); }
+  .ssx-barcode span:nth-child(3n){ width:.75px; opacity:.72; }
+  .ssx-barcode span:nth-child(4n){ width:2.4px; opacity:.95; }
+  .ssx-barcode span:nth-child(5n){ width:1.1px; opacity:.85; }
+
+  .ssx-microIcons{
+    position:absolute;
+    left:30%;
+    transform:translateX(-50%);
+    bottom:1.5mm;
+    display:flex;
+    gap:4px;
+    opacity:.40;
+    z-index:8;
+  }
+  .ssx-microIcons i{
+    width:3.2mm; height:3.2mm;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.08);
+    display:inline-block;
+  }
+
   @media print{
     body *{ visibility:hidden !important; }
     #printArea, #printArea *{ visibility:visible !important; }
-
     #printArea{
       position:absolute; left:0; top:0;
       width:100%;
@@ -384,17 +497,12 @@ html[dir="rtl"] .ssx-lbl{ text-align:right; }
       padding:0 !important;
       margin:0 !important;
     }
-
-    /* 1 paire par ligne (A4) */
-    .id-pair{ page-break-inside:avoid; break-inside:avoid; }
-
-    /* éviter que l’imprimante change les couleurs */
-    .id-card{
+    .ssx-pair{ page-break-inside:avoid; break-inside:avoid; }
+    .ssx-card{
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
       box-shadow:none !important;
     }
-
     @page{ margin:10mm; }
   }
 </style>
@@ -402,10 +510,9 @@ html[dir="rtl"] .ssx-lbl{ text-align:right; }
 <div class="cs-page">
   <div class="cs-wrap">
 
-    <div class="cs-top-title">{% trans "Cartes scolaires" %}</div>
+    <div style="margin-left: 5rem;" class="cs-top-title">{% trans "Cartes scolaires" %}</div>
 
     <form method="get" class="cs-row" id="filterForm">
-      <!-- NIVEAU -->
       <div class="cs-field">
         <label>{% trans "Niveaux" %} <span class="text-danger">*</span></label>
         <select id="niveau" name="niveau" class="form-select" required>
@@ -418,7 +525,6 @@ html[dir="rtl"] .ssx-lbl{ text-align:right; }
         </select>
       </div>
 
-      <!-- CLASSE -->
       <div class="cs-field">
         <label>{% trans "Liste des classes" %} <span class="text-danger">*</span></label>
         <select id="classe" name="classe" class="form-select" required {% if not selected_niveau %}disabled{% endif %}>
@@ -431,7 +537,6 @@ html[dir="rtl"] .ssx-lbl{ text-align:right; }
         </select>
       </div>
 
-      <!-- ÉLÈVE -->
       <div class="cs-field">
         <label>{% trans "Élève" %}</label>
         <select id="eleve" name="eleve" class="form-select" {% if not selected_niveau %}disabled{% endif %}>
@@ -444,7 +549,7 @@ html[dir="rtl"] .ssx-lbl{ text-align:right; }
 
       <div class="cs-actions">
         <button type="submit" class="btn btn-success btn-filter" title="{% trans 'Filtrer' %}">
-          <i class="bi bi-sliders"></i>
+          {% trans 'Filtrer' %}
         </button>
       </div>
     </form>
@@ -455,125 +560,124 @@ html[dir="rtl"] .ssx-lbl{ text-align:right; }
       </button>
     </div>
 
-    <!-- =========================
-         ZONE IMPRIMABLE
-         ========================= -->
     <div id="printArea" class="cards-area">
       {% for e in eleves %}
-     
 
- 
+      <div class="ssx-pair">
 
+        <!-- RECTO -->
+        <div class="ssx-card ssx-front{% if LANGUAGE_CODE == 'ar' %} ssx-front--ar{% endif %}">
 
+          <div class="ssx-wave"></div>
+          <div class="ssx-trails"></div>
+          <div class="ssx-bevel"></div>
+          <div class="ssx-silver"></div>   {# ✅ masqué via CSS sur recto #}
+          <div class="ssx-holoBottom"></div>
 
-<div class="ssx-pair">
+          <div class="ssx-inner">
 
-  <!-- =============== RECTO =============== -->
-  <div class="ssx-card">
-    <div class="ssx-wave"></div>
-    <div class="ssx-trails"></div>
-    <div class="ssx-bevel"></div>
-    <div class="ssx-silver"></div>
+            <div class="ssx-brand">
+              <div class="plate">
+                <img src="{% static 'img/smartschool_logo_transparent.png' %}" alt="SmartSchool System">
+              </div>
+            </div>
 
-    <div class="ssx-inner">
+            <div class="ssx-title">
+              <span class="pill">{% trans "Carte Scolaire" %}</span>
+            </div>
 
-      <div class="ssx-brand">
-        <div class="plate">
-          <img src="{% static 'img/IMG-20260210-WA0001.jpg' %}" alt="Logo">
+            
+
+            <div class="ssx-photo">
+              <div class="in">
+                {% if e.photo %}
+                  <img src="{{ e.photo.url }}" alt="{% trans 'Photo' %}">
+                {% else %}
+                  <div class="ssx-ph-empty" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M12 12c2.76 0 5-2.24 5-5S14.76 2 12 2 7 4.24 7 7s2.24 5 5 5Z" fill="rgba(255,255,255,.92)"/>
+                      <path d="M4 22c0-4.42 3.58-8 8-8s8 3.58 8 8" fill="rgba(255,255,255,.70)"/>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="ssx-info {% if LANGUAGE_CODE == 'ar' %}rtl{% endif %}">
+              <div class="ssx-name">{{ e.nom }}</div>
+
+              <div class="ssx-row">
+                <div class="ssx-lbl">{% trans "Matricule" %}:</div>
+                <div class="ssx-val">{{ e.identifiant }}</div>
+              </div>
+
+              <div class="ssx-row">
+                <div class="ssx-lbl">{% trans "Classe" %}:</div>
+                <div class="ssx-val">{{ e.classe.nom }}</div>
+              </div>
+
+              <div class="ssx-row">
+                <div class="ssx-lbl">{% trans "Né(e) le" %}:</div>
+                <div class="ssx-val">{{ e.date_naissance|date:"d/m/Y" }}</div>
+              </div>
+
+              <div class="ssx-row">
+                <div class="ssx-lbl">{% trans "Année scolaire" %}:</div>
+                <div class="ssx-val">{{ e.annee_scolaire }}</div>
+              </div>
+            </div>
+
+          </div>
         </div>
+
+        <!-- VERSO (inchangé) -->
+        <div class="ssx-card">
+          <div class="ssx-wave"></div>
+          <div class="ssx-trails"></div>
+          <div class="ssx-bevel"></div>
+          <div class="ssx-silver"></div>
+          <div class="ssx-holoBottom"></div>
+
+          <div class="ssx-inner">
+
+            <div class="ssx-qr">
+              <div class="in">
+                {% if e.qr_code %}
+                  <img src="{{ e.qr_code.url }}" alt="{% trans 'QR Code' %}">
+                {% else %}
+                  <div class="ssx-qr-empty">
+                    <div class="ic">QR</div>
+                    <div class="tx">{% trans "Indisponible" %}</div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="ssx-backText {% if LANGUAGE_CODE == 'ar' %}rtl{% endif %}">
+              <div class="ssx-backTitle">{% trans "Scannez ce QR code" %}</div>
+              <div class="ssx-backSub">{% trans "Vérifiez l'authenticité sur" %} <b>www.smartschool.geosomtech.fr</b></div>
+              <div class="ssx-backContact">
+                <b>{% trans "Tél." %}</b> {{ e.ecole.telephone }}
+                &nbsp; • &nbsp;
+                <b>{% trans "Email" %}</b> {{ e.ecole.email }}
+              </div>
+            </div>
+
+            <div class="ssx-backBottom">
+              <div class="ssx-sign">
+                <div class="ssx-signLine"></div>
+                <div class="ssx-signLabel">{% trans "Le Directeur" %}</div>
+              </div>
+
+                
+            </div>
+
+           
+
+          </div>
+        </div>
+
       </div>
-
-      <div class="ssx-title">
-        <span class="pill">{% trans "Carte scolaire" %}</span>
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M2 8.5C7.5 3.5 16.5 3.5 22 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <path d="M5 12C8.5 8.8 15.5 8.8 19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-          <path d="M8.2 15.2C10.1 13.7 13.9 13.7 15.8 15.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".85"/>
-          <circle cx="12" cy="18" r="1.6" fill="currentColor"/>
-        </svg>
-      </div>
-
-      <div class="ssx-photo">
-        <div class="in">
-          {% if e.photo %}
-            <img src="{{ e.photo.url }}" alt="Photo">
-          {% else %}
-            <img src="{% static 'img/user-placeholder.png' %}" alt="Photo">
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="ssx-lock">🔒</div>
-
-      <div class="ssx-info rtl">
-        <div class="ssx-name">{{ e.nom|default:"-" }}</div>
-
-        <div class="ssx-row">
-          <div class="ssx-lbl">{% trans "Matricule" %}:</div>
-          <div class="ssx-val">{{ e.identifiant|default:"-" }}</div>
-        </div>
-
-        <div class="ssx-row">
-          <div class="ssx-lbl">{% trans "Classe" %}:</div>
-          <div class="ssx-val">{{ e.classe.nom|default:"-" }}</div>
-        </div>
-
-        <div class="ssx-row">
-          <div class="ssx-lbl">{% trans "Né(e) le" %}:</div>
-          <div class="ssx-val">{{ e.date_naissancce|default:"-" }}</div>
-        </div>
-
-        <div class="ssx-row">
-          <div class="ssx-lbl">{% trans "Année scolaire" %}:</div>
-          <div class="ssx-val">{{ e.annee_scolaire|default:"-" }}</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- =============== VERSO =============== -->
-  <div class="ssx-card">
-    <div class="ssx-wave"></div>
-    <div class="ssx-trails"></div>
-    <div class="ssx-bevel"></div>
-    <div class="ssx-silver"></div>
-
-    <div class="ssx-inner">
-
-      <div class="ssx-qr">
-        <div class="in">
-          {% if e.qr_code %}
-            <img src="{{ e.qr_code.url }}" alt="QR">
-          {% else %}
-            <img src="{% static 'img/qr-placeholder.png' %}" alt="QR">
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="ssx-qrLock">🔒</div>
-
-      <div class="ssx-backText rtl">
-        <div class="ssx-backTitle">{% trans "Scannez ce QR code" %}</div>
-        <div class="ssx-backSub">{% trans "Vérifiez l'authenticité sur" %} <b>www.smartschool.edu</b></div>
-        <div class="ssx-backContact">
-          <b>{% trans "Tél." %}</b> {{ e.ecole.telephone|default:"-" }}
-          &nbsp; • &nbsp;
-          <b>{% trans "Email" %}</b> {{ e.ecole.email|default:"-" }}
-        </div>
-      </div>
-
-      <div class="ssx-director rtl">{% trans "Le Directeur" %}</div>
-
-    </div>
-  </div>
-
-</div>
-
-
-
-
-
 
       {% empty %}
         <div class="no-data">

@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Types de paiement" %}{% endblock %}
+
+{% block main %}
+<div class="container py-3" style="background:#fff;color:#111;">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="m-0">{% trans "Types de paiement" %}</h3>
+    <button type="button" class="btn btn-dark btn-sm" id="btnOpenCreate">
+      {% trans "Ajouter" %}
+    </button>
+  </div>
+
+  <div id="toast" class="toastx" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="table-responsive">
+    <table class="table table-sm align-middle" style="background:#fff;color:#111;">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{% trans "Nom" %}</th>
+          <th>{% trans "Description" %}</th>
+          <th>{% trans "Actif" %}</th>
+          <th class="text-end">{% trans "Action" %}</th>
+        </tr>
+      </thead>
+
+      <tbody id="tpTbody">
+        {% for item in items %}
+          {% include "_row.html" with item=item %}
+        {% empty %}
+          <tr id="emptyRow">
+            <td colspan="5">{% trans "Aucun résultat" %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+    <div class="d-flex justify-content-center gap-2 mt-3">
+      {% if page_obj.has_previous %}
+        <a class="btn btn-outline-dark btn-sm" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+      {% endif %}
+      <span class="btn btn-light btn-sm" style="border:1px solid #ddd;">
+        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+      </span>
+      {% if page_obj.has_next %}
+        <a class="btn btn-outline-dark btn-sm" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+<!-- ✅ MODAL (CUSTOM) -->
+<div class="modalx" id="tpModal" aria-hidden="true">
+  <div class="modalx__overlay" data-close="1"></div>
+
+  <div class="modalx__panel" role="dialog" aria-modal="true" aria-labelledby="tpModalTitle">
+    <div class="modalx__header">
+      <h4 id="tpModalTitle" class="modalx__title">{% trans "Ajouter" %}</h4>
+      <button class="modalx__close" type="button" data-close="1" aria-label="Close">×</button>
+    </div>
+
+    <div class="modalx__body" id="tpModalBody">
+      <!-- form partial injected here -->
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ========= Custom Modal (no bootstrap) ========= */
+  .modalx{ position:fixed; inset:0; display:none; z-index:9999; }
+  .modalx[aria-hidden="false"]{ display:block; }
+  .modalx__overlay{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+  .modalx__panel{
+    position:relative;
+    max-width:720px;
+    width:calc(100% - 24px);
+    margin:60px auto;
+    background:#fff;
+    color:#111;
+    border-radius:14px;
+    box-shadow:0 18px 40px rgba(0,0,0,.22);
+    overflow:hidden;
+  }
+  .modalx__header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; border-bottom:1px solid #eee;
+  }
+  .modalx__title{ margin:0; font-size:18px; font-weight:700; }
+  .modalx__close{
+    border:0; background:transparent; font-size:26px; line-height:1;
+    cursor:pointer; color:#111;
+  }
+  .modalx__body{ padding:16px; }
+
+  /* ========= Form style (white bg / dark text) ========= */
+  .fx{ display:flex; flex-direction:column; gap:10px; }
+  .fx label{ font-weight:600; font-size:13px; color:#111; }
+  .fx input[type="text"], .fx textarea{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid #d7d7d7;
+    border-radius:10px;
+    outline:none;
+    background:#fff;
+    color:#111;
+  }
+  .fx input[type="text"]:focus, .fx textarea:focus{
+    border-color:#111;
+  }
+  .fx .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .fx .checkline{ display:flex; align-items:center; gap:8px; }
+  .fx .checkline input{ width:18px; height:18px; }
+
+  .fx .actions{
+    display:flex; justify-content:flex-end; gap:10px; margin-top:6px;
+  }
+  .btnx{
+    border:1px solid #111; background:#111; color:#fff;
+    padding:10px 14px; border-radius:10px; cursor:pointer;
+    font-weight:700; font-size:14px;
+  }
+  .btnx--ghost{ background:#fff; color:#111; }
+  .errbox{
+    border:1px solid #ffb4b4; background:#fff5f5; color:#8a0b0b;
+    padding:10px 12px; border-radius:10px; font-size:13px;
+  }
+  .field-error{ color:#b10000; font-size:12px; margin-top:4px; }
+
+  /* ========= Toast ========= */
+  .toastx{
+    position:fixed; right:16px; top:16px;
+    min-width:220px;
+    background:#111; color:#fff;
+    padding:10px 12px;
+    border-radius:10px;
+    display:none;
+    z-index:10000;
+  }
+  .toastx.show{ display:block; }
+</style>
+
+<script>
+  // ========= CSRF helper (cookie) =========
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // ========= Modal open/close =========
+  const modal = document.getElementById('tpModal');
+  const modalBody = document.getElementById('tpModalBody');
+  const modalTitle = document.getElementById('tpModalTitle');
+
+  function openModal() {
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modal.setAttribute('aria-hidden', 'true');
+    modalBody.innerHTML = '';
+    document.body.style.overflow = '';
+  }
+  modal.addEventListener('click', (e) => {
+    if (e.target && e.target.dataset && e.target.dataset.close === '1') closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeModal();
+  });
+
+  // ========= Toast =========
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // ========= URLs =========
+  const URL_FORM_CREATE = "{% url 'app_name:type_paiement_form_create' %}";
+  const URL_CREATE = "{% url 'app_name:type_paiement_create' %}";
+  const URL_FORM_UPDATE = (id) => `{% url 'app_name:type_paiement_form_update' 99999 %}`.replace('99999', id);
+  const URL_UPDATE = (id) => `{% url 'app_name:type_paiement_update' 99999 %}`.replace('99999', id);
+  const URL_DELETE = (id) => `{% url 'app_name:type_paiement_delete' 99999 %}`.replace('99999', id);
+
+  // ========= Load form partial into modal =========
+  async function loadForm(url, titleText) {
+    modalTitle.textContent = titleText;
+    openModal();
+    modalBody.innerHTML = '<div style="padding:8px;color:#111;">Loading...</div>';
+
+    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }});
+    const data = await res.json();
+    if (!data.ok) {
+      modalBody.innerHTML = '<div class="errbox">Erreur de chargement.</div>';
+      return;
+    }
+    modalBody.innerHTML = data.html;
+
+    // attach submit handler
+    const form = modalBody.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await submitForm(form);
+      });
+    }
+  }
+
+  // ========= Submit form (create/update) =========
+  async function submitForm(form) {
+    const action = form.getAttribute('action');
+    const method = (form.getAttribute('method') || 'post').toUpperCase();
+    const formData = new FormData(form);
+
+    const res = await fetch(action, {
+      method,
+      headers: {
+        'X-CSRFToken': csrftoken,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    // invalid form -> server returns html with errors
+    if (!res.ok || !data.ok) {
+      if (data.html) {
+        modalBody.innerHTML = data.html;
+        const f2 = modalBody.querySelector('form');
+        if (f2) f2.addEventListener('submit', async (e) => { e.preventDefault(); await submitForm(f2); });
+      } else {
+        modalBody.innerHTML = '<div class="errbox">Erreur. Vérifie les champs.</div>';
+      }
+      return;
+    }
+
+    // success: update table row or prepend new one
+    const tbody = document.getElementById('tpTbody');
+    const emptyRow = document.getElementById('emptyRow');
+    if (emptyRow) emptyRow.remove();
+
+    const tmp = document.createElement('tbody');
+    tmp.innerHTML = data.row_html;
+    const newRow = tmp.querySelector('tr');
+
+    const existing = document.getElementById(`tpRow-${data.id}`);
+    if (existing && newRow) {
+      existing.replaceWith(newRow);
+    } else if (newRow) {
+      tbody.prepend(newRow);
+    }
+
+    closeModal();
+    showToast(data.message || 'OK');
+  }
+
+  // ========= Bind create button =========
+  document.getElementById('btnOpenCreate').addEventListener('click', () => {
+    loadForm(URL_FORM_CREATE, "{% trans 'Ajouter' %}");
+  });
+
+  // ========= Delegated actions: edit/delete =========
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-tp-action]');
+    if (!btn) return;
+
+    const action = btn.dataset.tpAction;
+    const id = btn.dataset.tpId;
+
+    if (action === 'edit') {
+      loadForm(URL_FORM_UPDATE(id), "{% trans 'Modifier' %}");
+      return;
+    }
+
+    if (action === 'delete') {
+      if (!confirm("{% trans 'Voulez-vous vraiment supprimer ?' %}")) return;
+
+      const res = await fetch(URL_DELETE(id), {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        showToast("Erreur suppression");
+        return;
+      }
+
+      const row = document.getElementById(`tpRow-${id}`);
+      if (row) row.remove();
+
+      // if table becomes empty
+      const tbody = document.getElementById('tpTbody');
+      if (tbody.querySelectorAll('tr').length === 0) {
+        tbody.innerHTML = `
+          <tr id="emptyRow">
+            <td colspan="5">{% trans "Aucun résultat" %}</td>
+          </tr>`;
+      }
+
+      showToast(data.message || "Supprimé");
+    }
+  });
+</script>
+{% endblock %}

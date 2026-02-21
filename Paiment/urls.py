@@ -5,6 +5,16 @@ from Paiment.views import PaimentListView , PaimentCreateView , PaimentDeleteVie
 urlpatterns = [
     path('ListeDePaiment/', PaimentListView.as_view(), name='liste_de_paiment'),
     path('ConfDePaiment/', ConfigPaiementView.as_view() , name='ConfDePaiment' ),
+     path("types-paiement/", views.TypePaiementListView.as_view(), name="type_paiement_list"),
+
+    # Modals (partials)
+    path("types-paiement/form/", views.type_paiement_form_partial, name="type_paiement_form_create"),
+    path("types-paiement/form/<int:pk>/", views.type_paiement_form_partial, name="type_paiement_form_update"),
+
+    # AJAX CRUD
+    path("types-paiement/create/", views.type_paiement_create, name="type_paiement_create"),
+    path("types-paiement/<int:pk>/update/", views.type_paiement_update, name="type_paiement_update"),
+    path("types-paiement/<int:pk>/delete/", views.type_paiement_delete, name="type_paiement_delete"),
     path('CreationDePaiment/', PaimentCreateView.as_view(), name='creation_de_paiment'),
     path("finance/frais/", FraisNiveauView.as_view(), name="finance_frais"),
     path("finance/paiement-frais/", PaiementFraisView.as_view(), name="paiement_frais"),
