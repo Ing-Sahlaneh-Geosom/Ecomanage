@@ -11,17 +11,10 @@
     {% endif %}
   </td>
   <td class="text-end">
-    <button type="button"
-            class="btn btn-outline-dark btn-sm"
-            data-tp-action="edit"
-            data-tp-id="{{ item.pk }}">
+    <button type="button" class="btn btn-outline-dark btn-sm" data-tp-action="edit" data-tp-id="{{ item.pk }}">
       {% trans "Modifier" %}
     </button>
-
-    <button type="button"
-            class="btn btn-outline-danger btn-sm"
-            data-tp-action="delete"
-            data-tp-id="{{ item.pk }}">
+    <button type="button" class="btn btn-outline-danger btn-sm" data-tp-action="delete" data-tp-id="{{ item.pk }}">
       {% trans "Supprimer" %}
     </button>
   </td>

@@ -542,8 +542,12 @@ from django import forms
 from Ecole_admin.models import Devoir, Classe, Niveau, Matier, Proffeseur, PeriodeScolaire
 from Ecole_admin.utils.periode import is_periode_allowed_for_actions
 
+from django import forms
+from django.utils.translation import gettext_lazy as _
+
 class DevoirForm(forms.ModelForm):
     classes = forms.ModelMultipleChoiceField(
+        label=_("Classes"),  # ✅ label traduisible
         queryset=Classe.objects.none(),
         widget=forms.SelectMultiple(attrs={"class": "form-select", "size": "8"}),
         required=True,
@@ -552,6 +556,18 @@ class DevoirForm(forms.ModelForm):
     class Meta:
         model = Devoir
         fields = ["nom", "niveau", "classes", "professeur", "matiere", "periode", "points", "coefficient"]
+
+        # ✅ labels traduisibles (c’est ça qui manquait)
+        labels = {
+            "nom": _("Nom"),
+            "niveau": _("Niveau"),
+            "professeur": _("Professeur"),
+            "matiere": _("Matière"),
+            "periode": _("Période"),
+            "points": _("Points"),
+            "coefficient": _("Coefficient"),
+        }
+
         widgets = {
             "nom": forms.TextInput(attrs={"class": "form-control"}),
             "niveau": forms.Select(attrs={"class": "form-select"}),
@@ -566,17 +582,14 @@ class DevoirForm(forms.ModelForm):
         ecole = kwargs.pop("ecole", None)
         annee_scolaire = kwargs.pop("annee_scolaire", None)
 
-        # ✅ 1) super() d'abord sinon self.fields n'existe pas
         super().__init__(*args, **kwargs)
 
-        # ✅ 2) Querysets de base
         if ecole:
             self.fields["niveau"].queryset = Niveau.objects.filter(ecole=ecole, actif=True)
             self.fields["classes"].queryset = Classe.objects.filter(ecole=ecole, actif=True)
             self.fields["matiere"].queryset = Matier.objects.filter(ecole=ecole) if hasattr(Matier, "ecole") else Matier.objects.all()
             self.fields["professeur"].queryset = Proffeseur.objects.filter(ecole=ecole, actif=True)
 
-        # ✅ 3) Filtrer les périodes autorisées (ACTIVE + utilisable)
         if ecole and annee_scolaire:
             qs = PeriodeScolaire.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire).order_by("debut")
             allowed_ids = [p.id for p in qs if is_periode_allowed_for_actions(ecole, annee_scolaire, p)]
@@ -584,7 +597,6 @@ class DevoirForm(forms.ModelForm):
         else:
             self.fields["periode"].queryset = PeriodeScolaire.objects.none()
 
-        # ✅ 4) UX: si niveau choisi, filtrer classes (GET/POST)
         niveau_val = self.data.get("niveau") or (self.initial.get("niveau") if self.initial else None)
         if niveau_val and ecole:
             try:
@@ -594,44 +606,110 @@ class DevoirForm(forms.ModelForm):
                 pass
 
 
+from django import forms
+from django.utils.translation import gettext_lazy as _
 
 class NotesFilterForm(forms.Form):
-    classe = forms.ModelChoiceField(queryset=Classe.objects.none(), required=False, widget=forms.Select(attrs={"class": "form-select"}))
-    matiere = forms.ModelChoiceField(queryset=Matier.objects.none(), required=False, widget=forms.Select(attrs={"class": "form-select"}))
-    devoir = forms.ModelChoiceField(queryset=Devoir.objects.none(), required=False, widget=forms.Select(attrs={"class": "form-select"}))
-    periode = forms.ModelChoiceField(queryset=PeriodeScolaire.objects.none(), required=False, widget=forms.Select(attrs={"class": "form-select"}))
-    q = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Recherche élève..."}))
+    classe = forms.ModelChoiceField(
+        label=_("Classe"),
+        queryset=Classe.objects.none(),
+        required=False,
+        empty_label=_("Sélectionner..."),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    matiere = forms.ModelChoiceField(
+        label=_("Matière"),
+        queryset=Matier.objects.none(),
+        required=False,
+        empty_label=_("Sélectionner..."),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    devoir = forms.ModelChoiceField(
+        label=_("Devoir"),
+        queryset=Devoir.objects.none(),
+        required=False,
+        empty_label=_("Sélectionner..."),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    periode = forms.ModelChoiceField(
+        label=_("Période"),
+        queryset=PeriodeScolaire.objects.none(),
+        required=False,
+        empty_label=_("Sélectionner..."),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    q = forms.CharField(
+        label=_("Élève"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": _("Recherche élève..."),
+            }
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         ecole = kwargs.pop("ecole", None)
         annee_scolaire = kwargs.pop("annee_scolaire", None)
         super().__init__(*args, **kwargs)
+
         if ecole:
             self.fields["classe"].queryset = Classe.objects.filter(ecole=ecole, actif=True)
             self.fields["matiere"].queryset = Matier.objects.filter(ecole=ecole) if hasattr(Matier, "ecole") else Matier.objects.all()
+
         if ecole and annee_scolaire:
             self.fields["devoir"].queryset = Devoir.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire)
             self.fields["periode"].queryset = PeriodeScolaire.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire)
 
+from django import forms
+from django.utils.translation import gettext_lazy as _
 
 class NoteSaisieSetupForm(forms.Form):
-    devoir = forms.ModelChoiceField(queryset=Devoir.objects.none(), widget=forms.Select(attrs={"class": "form-select"}))
-    classe = forms.ModelChoiceField(queryset=Classe.objects.none(), widget=forms.Select(attrs={"class": "form-select"}))
+    devoir = forms.ModelChoiceField(
+        label=_("Devoir"),
+        queryset=Devoir.objects.none(),
+        required=True,
+        empty_label=_("Sélectionner..."),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    classe = forms.ModelChoiceField(
+        label=_("Classe"),
+        queryset=Classe.objects.none(),
+        required=True,
+        empty_label=_("Sélectionner..."),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
 
     def __init__(self, *args, **kwargs):
         ecole = kwargs.pop("ecole", None)
         annee_scolaire = kwargs.pop("annee_scolaire", None)
         super().__init__(*args, **kwargs)
+
         if ecole and annee_scolaire:
             self.fields["devoir"].queryset = Devoir.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire)
+
         if ecole:
             self.fields["classe"].queryset = Classe.objects.filter(ecole=ecole, actif=True)
 
+
+from django import forms
+from django.utils.translation import gettext_lazy as _
 
 class DispenseMatiereForm(forms.ModelForm):
     class Meta:
         model = DispenseMatiere
         fields = ["eleve", "matiere", "periode", "valeur", "motif"]
+
+    # ✅ labels traduisibles
+        labels = {
+            "eleve": _("Élève"),
+            "matiere": _("Matière"),
+            "periode": _("Période"),
+            "valeur": _("Valeur"),
+            "motif": _("Motif"),
+        }
+
         widgets = {
             "eleve": forms.Select(attrs={"class": "form-select"}),
             "matiere": forms.Select(attrs={"class": "form-select"}),
@@ -644,8 +722,16 @@ class DispenseMatiereForm(forms.ModelForm):
         ecole = kwargs.pop("ecole", None)
         annee_scolaire = kwargs.pop("annee_scolaire", None)
         super().__init__(*args, **kwargs)
+
+        # ✅ remplace "---------" par "Sélectionner..." (traduisible)
+        self.fields["eleve"].empty_label = _("Sélectionner...")
+        self.fields["matiere"].empty_label = _("Sélectionner...")
+        self.fields["periode"].empty_label = _("Sélectionner...")
+
         if ecole:
-            self.fields["eleve"].queryset = Eleve.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire).select_related("classe")
+            self.fields["eleve"].queryset = (
+                Eleve.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire).select_related("classe")
+            )
             self.fields["matiere"].queryset = Matier.objects.filter(ecole=ecole) if hasattr(Matier, "ecole") else Matier.objects.all()
             self.fields["periode"].queryset = PeriodeScolaire.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire)
 
@@ -676,7 +762,7 @@ class AppreciationPeriodeForm(forms.ModelForm):
         model = AppreciationPeriode
         fields = ["nom", "note_min", "note_max", "actif"]
         widgets = {
-            "nom": forms.TextInput(attrs={"class": "form-control", "placeholder": "Nom"}),
+            "nom": forms.TextInput(attrs={"class": "form-control", "placeholder": _("Nom")}),
             "note_min": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "note_max": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "actif": forms.CheckboxInput(attrs={"class": "form-check-input"}),

@@ -763,17 +763,22 @@ def note_saisie(request, devoir_id, classe_id):
     })
 
 
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.utils.translation import gettext as _
+from django.db import transaction
+
+import csv
+from io import TextIOWrapper
+from decimal import Decimal
+import openpyxl
+
 
 @login_required
 def note_import(request):
     if not (_is_admin_or_secretaire(request.user) or _is_prof(request.user)):
-        return HttpResponse("Accès refusé", status=403)
-
-    import csv
-    from io import TextIOWrapper
-    from decimal import Decimal
-    import openpyxl
-    from django.db import transaction
+        return HttpResponse(_("Accès refusé"), status=403)
 
     ecole, annee = _ctx_school(request)
 
@@ -787,7 +792,6 @@ def note_import(request):
 
     devoirs = Devoir.objects.filter(ecole=ecole, annee_scolaire=annee).order_by("-date_creation")
 
-    # résultats affichés dans template
     ctx = {"devoirs": devoirs, "result": None}
 
     if request.method != "POST":
@@ -799,13 +803,13 @@ def note_import(request):
     if not devoir_id or not fichier:
         ctx["result"] = {
             "ok": 0, "ko": 0, "rows": 0,
-            "errors": ["Sélectionner un devoir ET un fichier (CSV ou XLSX). Vérifie aussi enctype=multipart/form-data."]
+            "errors": [
+                _("Sélectionner un devoir ET un fichier (CSV ou XLSX). Vérifie aussi enctype=multipart/form-data.")
+            ],
         }
         return render(request, "note_import.html", ctx)
 
     devoir = get_object_or_404(Devoir, pk=devoir_id, ecole=ecole, annee_scolaire=annee)
-
-    # si devoir.periode est vide, on met trimestre=1
     tri = periode_to_trimestre(getattr(devoir, "periode", None))
 
     filename = (fichier.name or "").lower()
@@ -818,8 +822,12 @@ def note_import(request):
             x = x[:-2]
         return x
 
+    def add_err(msg: str):
+        if len(errors) < 15:
+            errors.append(msg)
+
     def handle_row(ident, note_s, coef_s):
-        nonlocal ok, ko, rows, errors
+        nonlocal ok, ko, rows
         rows += 1
 
         ident = norm_ident(ident)
@@ -828,24 +836,21 @@ def note_import(request):
 
         if not ident or not note_s:
             ko += 1
-            if len(errors) < 15:
-                errors.append(f"Ligne {rows}: identifiant ou note vide.")
+            add_err(_("Ligne %(row)s: identifiant ou note vide.") % {"row": rows})
             return
 
-        # ✅ NE PAS filtrer sur annee_scolaire ici (tu peux avoir des élèves d’une autre année en DB)
+        # ✅ ne pas filtrer par année ici
         eleve = Eleve.objects.filter(ecole=ecole, identifiant=ident).first()
         if not eleve:
             ko += 1
-            if len(errors) < 15:
-                errors.append(f"Ligne {rows}: élève introuvable (identifiant={ident}).")
+            add_err(_("Ligne %(row)s: élève introuvable (identifiant=%(ident)s).") % {"row": rows, "ident": ident})
             return
 
         try:
             note_val = Decimal(note_s.replace(",", "."))
         except Exception:
             ko += 1
-            if len(errors) < 15:
-                errors.append(f"Ligne {rows}: note invalide ({note_s}).")
+            add_err(_("Ligne %(row)s: note invalide (%(note)s).") % {"row": rows, "note": note_s})
             return
 
         try:
@@ -864,13 +869,14 @@ def note_import(request):
                 "note": note_val,
                 "coefficient": coef_val,
                 "trimestre": tri,
-            }
+            },
         )
         ok += 1
 
     try:
         with transaction.atomic():
-            # XLSX
+
+            # ✅ XLSX
             if filename.endswith(".xlsx"):
                 fichier.seek(0)
                 wb = openpyxl.load_workbook(fichier, data_only=True)
@@ -878,10 +884,9 @@ def note_import(request):
                 all_rows = list(ws.iter_rows(values_only=True))
 
                 if not all_rows:
-                    ctx["result"] = {"ok": 0, "ko": 0, "rows": 0, "errors": ["Fichier Excel vide."]}
+                    ctx["result"] = {"ok": 0, "ko": 0, "rows": 0, "errors": [_("Fichier Excel vide.")]}
                     return render(request, "note_import.html", ctx)
 
-                # détecter header ou pas
                 start_index = 0
                 h = [str(x).strip().lower() for x in (all_rows[0] or [])]
                 if any(k in h for k in ["identifiant", "note", "coefficient"]):
@@ -893,17 +898,15 @@ def note_import(request):
                     coef_s = r[2] if len(r) > 2 else ""
                     handle_row(ident, note_s, coef_s)
 
-            # CSV
+            # ✅ CSV
             else:
                 wrapper = TextIOWrapper(fichier.file, encoding="utf-8")
                 reader = csv.DictReader(wrapper)
 
-                # si colonnes pas bonnes → aucune ligne utile
                 if not reader.fieldnames:
-                    ctx["result"] = {"ok": 0, "ko": 0, "rows": 0, "errors": ["CSV invalide ou vide."]}
+                    ctx["result"] = {"ok": 0, "ko": 0, "rows": 0, "errors": [_("CSV invalide ou vide.")]}
                     return render(request, "note_import.html", ctx)
 
-                # on accepte aussi majuscules/minuscules
                 for row in reader:
                     ident = row.get("identifiant") or row.get("Identifiant") or row.get("IDENTIFIANT")
                     note_s = row.get("note") or row.get("Note") or row.get("NOTE")
@@ -911,27 +914,30 @@ def note_import(request):
                     handle_row(ident, note_s, coef_s)
 
     except Exception as ex:
-        ctx["result"] = {"ok": ok, "ko": ko, "rows": rows, "errors": [f"Erreur import: {ex}"] + errors}
+        ctx["result"] = {
+            "ok": ok,
+            "ko": ko,
+            "rows": rows,
+            "errors": [(_("Erreur import: %(err)s") % {"err": str(ex)})] + errors,
+        }
         return render(request, "note_import.html", ctx)
 
     ctx["result"] = {"ok": ok, "ko": ko, "rows": rows, "errors": errors}
     return render(request, "note_import.html", ctx)
 
 
-
 @login_required
 def note_import_template_xlsx(request):
     from openpyxl import Workbook
-    from django.http import HttpResponse
 
     wb = Workbook()
     ws = wb.active
     ws.title = "Import_Notes"
 
-    # Header EXACT attendu
+    # ✅ Header EXACT attendu (NE PAS traduire)
     ws.append(["identifiant", "note", "coefficient"])
 
-    # Exemple
+    # ✅ Exemple (données seulement)
     ws.append(["2026010700", 15, 1])
     ws.append(["2026010701", 13, 2])
 
@@ -946,8 +952,6 @@ def note_import_template_xlsx(request):
     response["Content-Disposition"] = 'attachment; filename="modele_import_notes.xlsx"'
     wb.save(response)
     return response
-
-
 
 # ==========================
 # DISPENSES

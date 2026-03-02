@@ -1253,3 +1253,267 @@ msgstr "الإعفاءات"
 
 msgid "Bulletins"
 msgstr "كشوف الدرجات"
+
+msgid "Types de paiement"
+msgstr "أنواع الدفع"
+
+msgid "Voulez-vous vraiment supprimer ?"
+msgstr "هل تريد فعلاً الحذف؟"
+
+msgid "Créer"
+msgstr "إنشاء"
+
+msgid "Prof"
+msgstr "الأستاذ"
+
+msgid "Coef"
+msgstr "المعامل"
+
+msgid "Aucun devoir"
+msgstr "لا يوجد واجب"
+
+msgid "Rechercher..."
+msgstr "بحث..."
+
+msgid "Points"
+msgstr "النقاط"
+
+msgid "Coefficient"
+msgstr "المعامل"
+
+msgid "Classes concernées"
+msgstr "الأقسام المعنية"
+
+msgid "Créer un devoir"
+msgstr "إنشاء واجب"
+
+msgid "Professeur"
+msgstr "الأستاذ"
+
+msgid "Réinitialiser"
+msgstr "إعادة ضبط"
+
+msgid "Devoir"
+msgstr "الواجب"
+
+msgid "Note"
+msgstr "الدرجة"
+
+
+msgid "Saisie des notes"
+msgstr "إدخال الدرجات"
+
+msgid "Continuer"
+msgstr "متابعة"
+
+msgid "Résultat import :"
+msgstr "نتيجة الاستيراد:"
+
+
+
+msgid "erreurs"
+msgstr "أخطاء"
+
+msgid "lignes lues:"
+msgstr "الأسطر المقروءة:"
+
+msgid "Exemples erreurs :"
+msgstr "أمثلة على الأخطاء:"
+
+msgid "Importation des notes (CSV)"
+msgstr "استيراد الدرجات (CSV)"
+
+msgid "Règles importantes :"
+msgstr "قواعد مهمة:"
+
+msgid "Ne modifie pas les noms des colonnes"
+msgstr "لا تقم بتعديل أسماء الأعمدة"
+
+msgid "Une ligne = une note pour un élève"
+msgstr "كل سطر = درجة واحدة لتلميذ"
+
+msgid "L’identifiant doit exister dans le système"
+msgstr "يجب أن يكون المعرّف موجودًا في النظام"
+
+msgid "La note peut être 15 ou 15.5"
+msgstr "يمكن أن تكون الدرجة 15 أو 15.5"
+
+msgid "Format CSV:"
+msgstr "صيغة CSV:"
+
+msgid "Télécharger modèle CSV"
+msgstr "تحميل نموذج CSV"
+
+msgid "Fichier CSV"
+msgstr "ملف CSV"
+
+msgid "Importer"
+msgstr "استيراد"
+
+msgid "Accès refusé"
+msgstr "تم رفض الوصول"
+
+msgid "Sélectionner un devoir ET un fichier (CSV ou XLSX). Vérifie aussi enctype=multipart/form-data."
+msgstr "اختر واجبًا وملفًا (CSV أو XLSX). وتأكد أيضًا من enctype=multipart/form-data."
+
+msgid "Ligne %(row)s: identifiant ou note vide."
+msgstr "السطر %(row)s: المعرّف أو الدرجة فارغة."
+
+msgid "Ligne %(row)s: élève introuvable (identifiant=%(ident)s)."
+msgstr "السطر %(row)s: التلميذ غير موجود (المعرّف=%(ident)s)."
+
+msgid "Ligne %(row)s: note invalide (%(note)s)."
+msgstr "السطر %(row)s: درجة غير صحيحة (%(note)s)."
+
+msgid "Fichier Excel vide."
+msgstr "ملف Excel فارغ."
+
+msgid "CSV invalide ou vide."
+msgstr "ملف CSV غير صالح أو فارغ."
+
+msgid "Erreur import: %(err)s"
+msgstr "خطأ في الاستيراد: %(err)s"
+
+msgid "Valeur"
+msgstr "القيمة"
+
+msgid "Ajouter une dispense"
+msgstr "إضافة إعفاء"
+
+msgid "Aucune dispense"
+msgstr "لا يوجد إعفاء"
+
+msgid "Disp"
+msgstr "معفى"
+
+msgid "Bulletin de"
+msgstr "كشف نقاط"
+
+msgid "Né(e)"
+msgstr "تاريخ الميلاد"
+
+msgid "Professeur Principal"
+msgstr "الأستاذ الرئيسي"
+
+
+msgid "Le"
+msgstr "بتاريخ"
+
+msgid "photo"
+msgstr "الصورة"
+
+msgid "NB Note"
+msgstr "عدد النقط"
+
+msgid "Rang"
+msgstr "الرتبة"
+
+msgid "Moyennes"
+msgstr "المعدلات"
+
+msgid "Appréciation"
+msgstr "الملاحظة"
+
+msgid "Appréciation globale"
+msgstr "ملاحظة عامة"
+
+msgid "Absences & Conduite"
+msgstr "الغياب والسلوك"
+
+msgid "APPRÉCIATION DU CONSEIL DE CLASSE"
+msgstr "ملاحظة مجلس القسم"
+
+msgid "SIGNATURE & CACHET"
+msgstr "التوقيع والختم"
+
+msgid "le(a) Principal(e)"
+msgstr "المدير(ة)"
+
+msgid "Choisis une"
+msgstr "اختر"
+
+msgid "classe"
+msgstr "قسم"
+
+msgid "et une"
+msgstr "و"
+
+msgid "période"
+msgstr "فترة"
+
+msgid "puis filtre."
+msgstr "ثم قم بالتصفية."
+
+msgid "--"
+msgstr "--"
+
+msgid "Moyenne Générale"
+msgstr "المعدل العام"
+
+msgid "CONFIGURATION DES APPRÉCIATIONS"
+msgstr "إعدادات التقديرات"
+
+msgid "Appréciations des périodes"
+msgstr "تقديرات الفترات"
+
+msgid "Appréciations annuelles"
+msgstr "التقديرات السنوية"
+
+msgid "Appréciations absences"
+msgstr "تقديرات الغياب"
+
+msgid "Prolonger les periode"
+msgstr "تمديد الفترات"
+
+msgid "Configuration de moyen"
+msgstr "إعدادات المعدل"
+
+msgid "Décisions de promotion"
+msgstr "قرارات الترقية"
+
+msgid "Décision d'absence"
+msgstr "قرارات الغياب"
+
+msgid "Clôture des périodes"
+msgstr "إغلاق الفترات"
+
+
+msgid "à partir de marques"
+msgstr "من علامة"
+
+msgid "Pour les marques"
+msgstr "إلى علامة"
+
+
+msgid "Aucun élément."
+msgstr "لا توجد عناصر."
+
+msgid "Nom*"
+msgstr "الاسم*"
+
+msgid "Ajouter Appréciation des trimestres"
+msgstr "إضافة تقدير للفترات"
+
+msgid "Modifier Appréciation des trimestres"
+msgstr "تعديل تقدير الفترات"
+
+msgid "Ajouter l'appréciation des absences"
+msgstr "إضافة تقدير الغياب"
+
+msgid "Modifier l'appréciation des absences"
+msgstr "تعديل تقدير الغياب"
+
+msgid "Ajouter l'appréciation annuelle"
+msgstr "إضافة التقدير السنوي"
+
+msgid "Modifier l'appréciation annuelle"
+msgstr "تعديل التقدير السنوي"
+
+msgid "Supprimer ?"
+msgstr "هل تريد الحذف؟"
+
+msgid "De"
+msgstr "من"
+
+msgid "à"
+msgstr "إلى"

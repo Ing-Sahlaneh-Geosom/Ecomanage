@@ -414,117 +414,157 @@ def export_paiement_csv(request):
 
 
 
-
-# app/views.py
-from django.http import JsonResponse, HttpResponseBadRequest
+# PaiemtAdmin/views.py
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.urls import reverse
-from django.views.decorators.http import require_POST
+from django.views import View
 from django.views.generic import ListView
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
 
 from Ecole_admin.models import TypePaiement
 from Ecole_admin.form import TypePaiementForm
 
+# ✅ IMPORTANT : tu utilises déjà ces mixins
+from Ecole_admin.utils.mixins import ActiveYearMixin, EcoleAssignMixin
 
-class TypePaiementListView(ListView):
+
+def _json_error(message: str, status: int = 400, html: str | None = None):
+    payload = {"ok": False, "error": message}
+    if html is not None:
+        payload["html"] = html
+    return JsonResponse(payload, status=status)
+
+
+class TypePaiementListView(LoginRequiredMixin, ActiveYearMixin, EcoleAssignMixin, ListView):
     model = TypePaiement
-    template_name = "type_paiemen_list.html"
+    template_name = "list.html"
     context_object_name = "items"
     paginate_by = 20
 
     def get_queryset(self):
-        qs = super().get_queryset().select_related("ecole")
-        # ✅ Filtrage si tu veux par école (si tu as request.user.ecole par ex)
-        # if hasattr(self.request.user, "ecole") and self.request.user.ecole_id:
-        #     qs = qs.filter(ecole=self.request.user.ecole)
-        return qs.order_by("-id")
+        qs = super().get_queryset().select_related("ecole").order_by("-id")
+
+        # ✅ Filtrage école (très important)
+        # On essaye plusieurs façons, sans casser le serveur.
+        ecole = getattr(self.request.user, "ecole", None)
+        if ecole is None and hasattr(self.request.user, "profile"):
+            ecole = getattr(self.request.user.profile, "ecole", None)
+
+        # Si EcoleAssignMixin a déjà une logique, laisse-la faire,
+        # mais au minimum on filtre si on trouve l'école.
+        if ecole is not None:
+            qs = qs.filter(ecole=ecole)
+
+        return qs
 
 
-@login_required
-def type_paiement_form_partial(request, pk=None):
+class TypePaiementFormPartialView(LoginRequiredMixin, ActiveYearMixin, EcoleAssignMixin, View):
     """
-    ✅ Retourne le HTML du formulaire (pour modal) via GET
+    ✅ GET => renvoie le HTML du form dans JSON
     """
-    obj = None
-    if pk is not None:
-        obj = get_object_or_404(TypePaiement, pk=pk)
+    def get(self, request, pk=None):
+        try:
+            obj = None
+            if pk is not None:
+                obj = get_object_or_404(TypePaiement, pk=pk)
 
-    form = TypePaiementForm(instance=obj)
-    html = render_to_string(
-        "type_paiement/_form.html",
-        {"form": form, "object": obj},
-        request=request
-    )
-    return JsonResponse({"ok": True, "html": html})
+            form = TypePaiementForm(instance=obj)
+            html = render_to_string(
+                "_form.html",
+                {"form": form, "object": obj},
+                request=request
+            )
+            return JsonResponse({"ok": True, "html": html})
+
+        except Exception as e:
+            # ✅ au lieu de 500 HTML, on renvoie JSON
+            return _json_error(f"Erreur serveur (form): {str(e)}", status=500)
 
 
-@login_required
-@require_POST
-def type_paiement_create(request):
+class TypePaiementCreateAjaxView(LoginRequiredMixin, ActiveYearMixin, EcoleAssignMixin, View):
     """
-    ✅ Crée via AJAX POST (JSON)
+    ✅ POST create via AJAX
     """
-    form = TypePaiementForm(request.POST)
-    if form.is_valid():
-        obj = form.save(commit=False)
-        # ⚠️ IMPORTANT: tu dois définir l'école ici (car ecole n'est pas dans le form)
-        # Adapte selon ton projet (ex: request.user.ecole)
-        if hasattr(request.user, "ecole") and request.user.ecole_id:
-            obj.ecole = request.user.ecole
-        else:
-            return JsonResponse({"ok": False, "error": "École introuvable pour cet utilisateur."}, status=400)
+    def post(self, request):
+        try:
+            form = TypePaiementForm(request.POST)
+            if not form.is_valid():
+                html = render_to_string("_form.html", {"form": form, "object": None}, request=request)
+                return _json_error("Formulaire invalide", status=400, html=html)
 
-        obj.save()
+            obj = form.save(commit=False)
 
-        row_html = render_to_string(
-            "_row.html",
-            {"item": obj},
-            request=request
-        )
-        return JsonResponse({
-            "ok": True,
-            "id": obj.pk,
-            "row_html": row_html,
-            "message": "Type de paiement ajouté."
-        })
+            # ✅ IMPORTANT: assigner l'école via mixin/logique user
+            ecole = getattr(request.user, "ecole", None)
+            if ecole is None and hasattr(request.user, "profile"):
+                ecole = getattr(request.user.profile, "ecole", None)
 
-    html = render_to_string("_form.html", {"form": form, "object": None}, request=request)
-    return JsonResponse({"ok": False, "html": html}, status=400)
+            if ecole is None:
+                html = render_to_string("type_paiement/_form.html", {"form": form, "object": None}, request=request)
+                return _json_error("École introuvable pour cet utilisateur.", status=400, html=html)
+
+            obj.ecole = ecole
+            obj.save()
+
+            row_html = render_to_string("_row.html", {"item": obj}, request=request)
+            return JsonResponse({"ok": True, "id": obj.pk, "row_html": row_html, "message": "Ajout effectué."})
+
+        except Exception as e:
+            return _json_error(f"Erreur serveur (create): {str(e)}", status=500)
 
 
-@login_required
-@require_POST
-def type_paiement_update(request, pk):
+class TypePaiementUpdateAjaxView(LoginRequiredMixin, ActiveYearMixin, EcoleAssignMixin, View):
     """
-    ✅ Update via AJAX POST (JSON)
+    ✅ POST update via AJAX
     """
-    obj = get_object_or_404(TypePaiement, pk=pk)
+    def post(self, request, pk):
+        try:
+            obj = get_object_or_404(TypePaiement, pk=pk)
 
-    form = TypePaiementForm(request.POST, instance=obj)
-    if form.is_valid():
-        obj = form.save()
+            # ✅ Sécurité école (évite modifier autre école)
+            ecole = getattr(request.user, "ecole", None)
+            if ecole is None and hasattr(request.user, "profile"):
+                ecole = getattr(request.user.profile, "ecole", None)
 
-        row_html = render_to_string("_row.html", {"item": obj}, request=request)
-        return JsonResponse({
-            "ok": True,
-            "id": obj.pk,
-            "row_html": row_html,
-            "message": "Type de paiement modifié."
-        })
+            if ecole is not None and obj.ecole_id != ecole.id:
+                return _json_error("Accès refusé (école).", status=403)
 
-    html = render_to_string("_form.html", {"form": form, "object": obj}, request=request)
-    return JsonResponse({"ok": False, "html": html}, status=400)
+            form = TypePaiementForm(request.POST, instance=obj)
+            if not form.is_valid():
+                html = render_to_string("_form.html", {"form": form, "object": obj}, request=request)
+                return _json_error("Formulaire invalide", status=400, html=html)
+
+            obj = form.save()
+            row_html = render_to_string("_row.html", {"item": obj}, request=request)
+            return JsonResponse({"ok": True, "id": obj.pk, "row_html": row_html, "message": "Modification effectuée."})
+
+        except Exception as e:
+            return _json_error(f"Erreur serveur (update): {str(e)}", status=500)
 
 
-@login_required
-@require_POST
-def type_paiement_delete(request, pk):
-    obj = get_object_or_404(TypePaiement, pk=pk)
-    obj.delete()
-    return JsonResponse({"ok": True, "id": pk, "message": "Type de paiement supprimé."})
+class TypePaiementDeleteAjaxView(LoginRequiredMixin, ActiveYearMixin, EcoleAssignMixin, View):
+    """
+    ✅ POST delete via AJAX
+    """
+    def post(self, request, pk):
+        try:
+            obj = get_object_or_404(TypePaiement, pk=pk)
 
+            ecole = getattr(request.user, "ecole", None)
+            if ecole is None and hasattr(request.user, "profile"):
+                ecole = getattr(request.user.profile, "ecole", None)
+
+            if ecole is not None and obj.ecole_id != ecole.id:
+                return _json_error("Accès refusé (école).", status=403)
+
+            obj.delete()
+            return JsonResponse({"ok": True, "id": pk, "message": "Suppression effectuée."})
+
+        except Exception as e:
+            return _json_error(f"Erreur serveur (delete): {str(e)}", status=500)
 
 
 

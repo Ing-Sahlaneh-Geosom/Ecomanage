@@ -1,7 +1,6 @@
 {% load i18n %}
-<form class="fx"
-      method="post"
-      action="{% if object %}{% url 'app_name:type_paiement_update' object.pk %}{% else %}{% url 'app_name:type_paiement_create' %}{% endif %}">
+<form class="fx" method="post"
+      action="{% if object %}{% url 'type_paiement_update' object.pk %}{% else %}{% url 'type_paiement_create' %}{% endif %}">
   {% csrf_token %}
 
   {% if form.non_field_errors %}
@@ -11,17 +10,13 @@
   <div>
     <label for="{{ form.nom.id_for_label }}">{% trans "Nom" %}</label>
     {{ form.nom }}
-    {% if form.nom.errors %}
-      <div class="field-error">{{ form.nom.errors|striptags }}</div>
-    {% endif %}
+    {% if form.nom.errors %}<div class="field-error">{{ form.nom.errors|striptags }}</div>{% endif %}
   </div>
 
   <div>
     <label for="{{ form.description.id_for_label }}">{% trans "Description" %}</label>
     {{ form.description }}
-    {% if form.description.errors %}
-      <div class="field-error">{{ form.description.errors|striptags }}</div>
-    {% endif %}
+    {% if form.description.errors %}<div class="field-error">{{ form.description.errors|striptags }}</div>{% endif %}
   </div>
 
   <div class="checkline">

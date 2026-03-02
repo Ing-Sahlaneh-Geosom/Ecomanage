@@ -1,21 +1,109 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n l10n %}
 
 {% block main %}
+
 <style>
-  /* ✅ Fix centrer les modals même avec sidebar/RTL/custom CSS */
-  .ss-modal .modal-dialog{
-    position: relative !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    float: none !important;
-    left: auto !important;
-    right: auto !important;
-  }
-  .ss-modal.modal.show .modal-dialog{
-    margin-top: 1.75rem !important;
-    margin-bottom: 1.75rem !important;
-  }
+/* === Modal style (identique à appréciation période) === */
+.ss-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+}
+.ss-modal.is-open { display: block; }
+
+.ss-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+}
+
+.ss-modal__panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.25);
+}
+
+.ss-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+.ss-modal__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.ss-modal__close {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.1);
+  background: #fff;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.ss-modal__body { padding: 16px 18px; }
+
+.ss-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid rgba(0,0,0,.08);
+}
+
+.ss-field { margin-bottom: 14px; }
+
+.ss-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.ss-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .ss-grid { grid-template-columns: 1fr; }
+}
+
+.ss-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.ss-check__label { margin: 0; }
+
+.ss-btn {
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ss-btn--light { background: #f6f7f8; }
+.ss-btn--dark  { background: #111; color: #fff; border-color: #111; }
+
+body.ss-modal-open { overflow: hidden; }
 </style>
 
 <div class="container py-3">
@@ -27,7 +115,8 @@
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">{% trans "Appréciations annuelles" %}</h4>
 
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+        {# ✅ on garde ton style bouton (bootstrap) mais on change juste l'action #}
+        <button class="btn btn-primary" type="button" data-open-modal="addModal">
           <span class="me-1">+</span>{% trans "Ajouter" %}
         </button>
       </div>
@@ -57,22 +146,20 @@
                 <td>{{ it.note_max }}</td>
 
                 <td class="text-end">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#editModal{{ it.id }}"
-                    aria-label="{% trans 'Modifier l’appréciation annuelle' %}">
+                  {# ✅ edit: sans bootstrap modal #}
+                  <button type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          data-open-modal="editModal{{ it.id }}"
+                          aria-label="{% trans 'Modifier l’appréciation annuelle' %}">
                     ✏️
                   </button>
 
                   <form method="post" action="{% url 'annuelle_delete' it.id %}" class="d-inline">
                     {% csrf_token %}
-                    <button
-                      type="submit"
-                      class="btn btn-sm btn-outline-danger"
-                      onclick="return confirm('{% trans 'Supprimer ?' %}')"
-                      aria-label="{% trans 'Supprimer ?' %}">
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('{% trans 'Supprimer ?' %}')"
+                            aria-label="{% trans 'Supprimer ?' %}">
                       🗑️
                     </button>
                   </form>
@@ -91,96 +178,167 @@
   </div>
 </div>
 
-{# ✅ MODALS EDIT (hors du tableau) #}
+{# ======================= EDIT MODALS (custom) ======================= #}
 {% for it in items %}
-  <div class="modal fade ss-modal" id="editModal{{ it.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
+<div class="ss-modal" id="editModal{{ it.id }}" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="ss-modal__backdrop" data-close-modal="editModal{{ it.id }}"></div>
 
-        <div class="modal-header">
-          <h5 class="modal-title">{% trans "Modifier l'appréciation annuelle" %}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Fermer' %}"></button>
+  <div class="ss-modal__panel" role="document">
+    <div class="ss-modal__header">
+      <h5 class="ss-modal__title text-dark">{% trans "Modifier l'appréciation annuelle" %}</h5>
+
+      <button type="button"
+              class="ss-modal__close"
+              aria-label="{% trans 'Fermer' %}"
+              data-close-modal="editModal{{ it.id }}">×</button>
+    </div>
+
+    <form method="post" action="{% url 'annuelle_update' it.id %}">
+      {% csrf_token %}
+
+      <div class="ss-modal__body">
+        <div class="ss-field">
+          <label class="ss-label">{% trans "Nom*" %}</label>
+          <input class="form-control" name="nom" value="{{ it.nom }}" required>
         </div>
 
-        <form method="post" action="{% url 'annuelle_update' it.id %}">
-          {% csrf_token %}
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">{% trans "Nom*" %}</label>
-              <input class="form-control" name="nom" value="{{ it.nom }}" required>
-            </div>
-
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">{% trans "à partir de marques" %}</label>
-                <input class="form-control" type="number" step="0.01" name="note_min" value="{{ it.note_min }}">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">{% trans "Pour les marques" %}</label>
-                <input class="form-control" type="number" step="0.01" name="note_max" value="{{ it.note_max }}">
-              </div>
-            </div>
-
-            <div class="form-check mt-3">
-              <input class="form-check-input" type="checkbox" name="actif" {% if it.actif %}checked{% endif %}>
-              <label class="form-check-label">{% trans "Est active" %}</label>
-            </div>
+        <div class="ss-grid">
+          <div class="ss-field">
+            <label class="ss-label">{% trans "à partir de marques" %}</label>
+            {# ✅ FIX number value #}
+            <input class="form-control"
+                   type="number"
+                   step="0.01"
+                   name="note_min"
+                   value="{{ it.note_min|unlocalize }}">
           </div>
 
-          <div class="modal-footer">
-            <button class="btn btn-light" type="button" data-bs-dismiss="modal">{% trans "Fermer" %}</button>
-            <button class="btn btn-dark" type="submit">{% trans "Sauvegarder" %}</button>
+          <div class="ss-field">
+            <label class="ss-label">{% trans "Pour les marques" %}</label>
+            {# ✅ FIX number value #}
+            <input class="form-control"
+                   type="number"
+                   step="0.01"
+                   name="note_max"
+                   value="{{ it.note_max|unlocalize }}">
           </div>
-        </form>
+        </div>
 
-      </div>
-    </div>
-  </div>
-{% endfor %}
-
-{# ✅ MODAL ADD #}
-<div class="modal fade ss-modal" id="addModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">{% trans "Ajouter l'appréciation annuelle" %}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Fermer' %}"></button>
+        <div class="ss-check">
+          <input class="form-check-input" type="checkbox" name="actif" {% if it.actif %}checked{% endif %}>
+          <label class="ss-check__label">{% trans "Est active" %}</label>
+        </div>
       </div>
 
-      <form method="post" action="{% url 'annuelle_create' %}">
-        {% csrf_token %}
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">{% trans "Nom*" %}</label>
-            {{ form.nom }}
-          </div>
-
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">{% trans "à partir de marques" %}</label>
-              {{ form.note_min }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{% trans "Pour les marques" %}</label>
-              {{ form.note_max }}
-            </div>
-          </div>
-
-          <div class="form-check mt-3">
-            {{ form.actif }}
-            <label class="form-check-label">{% trans "Est active" %}</label>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn btn-light" type="button" data-bs-dismiss="modal">{% trans "Fermer" %}</button>
-          <button class="btn btn-dark" type="submit">{% trans "Sauvegarder" %}</button>
-        </div>
-      </form>
-
-    </div>
+      <div class="ss-modal__footer">
+        <button class="ss-btn ss-btn--light" type="button" data-close-modal="editModal{{ it.id }}">
+          {% trans "Fermer" %}
+        </button>
+        <button class="ss-btn ss-btn--dark" type="submit">
+          {% trans "Sauvegarder" %}
+        </button>
+      </div>
+    </form>
   </div>
 </div>
+{% endfor %}
+
+{# ======================= ADD MODAL (custom) ======================= #}
+<div class="ss-modal" id="addModal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="ss-modal__backdrop" data-close-modal="addModal"></div>
+
+  <div class="ss-modal__panel" role="document">
+    <div class="ss-modal__header">
+      <h5 class="ss-modal__title text-dark">{% trans "Ajouter l'appréciation annuelle" %}</h5>
+
+      <button type="button"
+              class="ss-modal__close"
+              aria-label="{% trans 'Fermer' %}"
+              data-close-modal="addModal">×</button>
+    </div>
+
+    <form method="post" action="{% url 'annuelle_create' %}">
+      {% csrf_token %}
+
+      <div class="ss-modal__body">
+        <div class="ss-field">
+          <label class="ss-label">{% trans "Nom*" %}</label>
+          {{ form.nom }}
+        </div>
+
+        <div class="ss-grid">
+          <div class="ss-field">
+            <label class="ss-label">{% trans "à partir de marques" %}</label>
+            {{ form.note_min }}
+          </div>
+
+          <div class="ss-field">
+            <label class="ss-label">{% trans "Pour les marques" %}</label>
+            {{ form.note_max }}
+          </div>
+        </div>
+
+        <div class="ss-check">
+          {{ form.actif }}
+          <label class="ss-check__label">{% trans "Est active" %}</label>
+        </div>
+      </div>
+
+      <div class="ss-modal__footer">
+        <button class="ss-btn ss-btn--light" type="button" data-close-modal="addModal">
+          {% trans "Fermer" %}
+        </button>
+        <button class="ss-btn ss-btn--dark" type="submit">
+          {% trans "Sauvegarder" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('ss-modal-open');
+
+    const focusable = modal.querySelector('input, select, textarea, button');
+    if (focusable) focusable.focus();
+  }
+
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('ss-modal-open');
+  }
+
+  document.addEventListener('click', function (e) {
+    const openBtn = e.target.closest('[data-open-modal]');
+    if (openBtn) {
+      e.preventDefault();
+      openModal(openBtn.getAttribute('data-open-modal'));
+      return;
+    }
+
+    const closeBtn = e.target.closest('[data-close-modal]');
+    if (closeBtn) {
+      e.preventDefault();
+      closeModal(closeBtn.getAttribute('data-close-modal'));
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      const opened = document.querySelector('.ss-modal.is-open');
+      if (opened) closeModal(opened.id);
+    }
+  });
+})();
+</script>
 
 {% endblock %}

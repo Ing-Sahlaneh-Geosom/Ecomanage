@@ -436,7 +436,7 @@ body, .main-content, .content, .page-content {
         💳 {% trans "Finance & Gestionnaire" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu show" id="menuPaiements">
-        <a class="{% if current == 'type_paiement_list' %}active{% endif %}" href="{% url 'type_paiement_list'%}">- {% trans "Configuration des frais" %}</a>
+        <a class="{% if current == 'type_paiement_list' %}active{% endif %}" href="{% url 'type_paiement_list'%}">- {% trans "Types de paiement" %}</a>
         <a class="{% if current == 'ConfDePaiment' %}active{% endif %}" href="{% url 'ConfDePaiment'%}">- {% trans "Configuration des frais" %}</a>
         <a class="{% if current == 'finance_frais' %}active{% endif %}" href="{% url 'finance_frais'%}">- {% trans "Frais par classe" %}</a>
         <a class="{% if current == 'liste_de_paiment' %}active{% endif %}" href="{% url 'liste_de_paiment'%}">- {% trans "Exonéraition" %}</a>
@@ -450,7 +450,7 @@ body, .main-content, .content, .page-content {
         💳 {% trans "Finance & Gestionnaire" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuPaiements">
-        <a href="{% url 'type_paiement_list'%}">- {% trans "Configuration des frais" %}</a>
+        <a href="{% url 'type_paiement_list'%}">- {% trans "Types de paiement" %}</a>
         <a href="{% url 'ConfDePaiment'%}">- {% trans "Configuration des frais" %}</a>
         <a href="{% url 'finance_frais'%}">- {% trans "Frais par classe" %}</a>
         <a href="{% url 'liste_de_paiment'%}">- {% trans "Exonéraition" %}</a>
