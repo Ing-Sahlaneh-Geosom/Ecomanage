@@ -898,11 +898,12 @@ class ConfigMoyenne(models.Model):
     Seulement: niveau + moyenne_de + moyenne_a + status (choix).
     """
     STATUS_CHOICES = (
-        ("admis", "Admis"),
-        ("redouble", "Redouble"),
-        ("autorise", "Autorisé(e)"),
-        ("exclu", "Exclu"),
+        ("admis", _("Admis")),
+        ("redouble", _("Redouble")),
+        ("autorise", _("Autorisé(e)")),
+        ("exclu", _("Exclu")),
     )
+    
 
     niveau = models.ForeignKey("Niveau", on_delete=models.PROTECT)
     moyenne_de = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0)])
@@ -997,10 +998,10 @@ class DecisionAbsence(models.Model):
     Tu peux ajouter A/E si tu veux.
     """
     STATUT_CHOICES = (
-        ("R", "Redouble"),
-        ("F", "Admis"),
-        ("A", "Autorisé(e)"),
-        ("E", "Exclu(e)"),
+        ("R", _("Redouble")),
+        ("F", _("Admis")),
+        ("A", _("Autorisé(e)")),
+        ("E", _("Exclu(e)")),
     )
 
     max_abs = models.PositiveIntegerField(validators=[MinValueValidator(0)])
@@ -1176,64 +1177,121 @@ class Degradation(models.Model):
 
 
 
-
-from django.db import models , transaction
+from django.db import models, transaction
 from django.utils import timezone
 from django.db.models import Max
+from django.utils.translation import gettext_lazy as _
+
 
 class Employe(models.Model):
     SEXE = (
-        ("M", "Masculin"),
-        ("F", "Féminin"),
+        ("M", _("Masculin")),
+        ("F", _("Féminin")),
     )
 
     FONCTIONS = (
-        ("gardien", "Gardien"),
-        ("surveillant", "Surveillant"),
-        ("entretien", "Agent d’entretien"),
-        ("concierge", "Concierge"),
-        ("chauffeur", "Chauffeur"),
-        ("cuisinier", "Cuisinier"),
-        ("cantine", "Cantinier / Cantine"),
-        ("administratif", "Agent administratif"),
-        ("comptable", "Comptable"),
-        ("bibliothecaire", "Bibliothécaire"),
-        ("it", "Technicien informatique"),
-        ("electricien", "Électricien"),
-        ("plombier", "Plombier"),
-        ("autre", "Autre"),
+        ("gardien", _("Gardien")),
+        ("surveillant", _("Surveillant")),
+        ("entretien", _("Agent d’entretien")),
+        ("concierge", _("Concierge")),
+        ("chauffeur", _("Chauffeur")),
+        ("cuisinier", _("Cuisinier")),
+        ("cantine", _("Cantinier / Cantine")),
+        ("administratif", _("Agent administratif")),
+        ("comptable", _("Comptable")),
+        ("bibliothecaire", _("Bibliothécaire")),
+        ("it", _("Technicien informatique")),
+        ("electricien", _("Électricien")),
+        ("plombier", _("Plombier")),
+        ("autre", _("Autre")),
     )
 
     STATUT = (
-        ("active", "Active"),
-        ("inactive", "Inactive"),
+        ("active", _("Active")),
+        ("inactive", _("Inactive")),
     )
 
-    ecole = models.ForeignKey("Ecole", on_delete=models.CASCADE, related_name="employes")
+    ecole = models.ForeignKey(
+        "Ecole",
+        on_delete=models.CASCADE,
+        related_name="employes",
+        verbose_name=_("École"),
+    )
 
-    # champs nécessaires
-    nom_complet = models.CharField(max_length=150)
+    nom_complet = models.CharField(
+        max_length=150,
+        verbose_name=_("Nom complet"),
+    )
+
     matricule = models.CharField(
         max_length=30,
         blank=True,
-        editable=False
+        editable=False,
+        verbose_name=_("Matricule"),
     )
-    sexe = models.CharField(max_length=1, choices=SEXE, default="M")
 
-    telephone = models.CharField(max_length=50, blank=True, default="")
-    email = models.EmailField(blank=True, default="")
+    sexe = models.CharField(
+        max_length=1,
+        choices=SEXE,
+        default="M",
+        verbose_name=_("Sexe"),
+    )
 
-    fonction = models.CharField(max_length=30, choices=FONCTIONS)
-    autre_fonction = models.CharField(max_length=120, blank=True, default="")
+    telephone = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        verbose_name=_("Téléphone"),
+    )
 
-    statut = models.CharField(max_length=10, choices=STATUT, default="active")
+    email = models.EmailField(
+        blank=True,
+        default="",
+        verbose_name=_("Email"),
+    )
 
-    # optionnels (si tu veux)
-    bureau = models.CharField(max_length=120, blank=True, default="")
-    date_embauche = models.DateField(null=True, blank=True)
-    working_hours = models.PositiveIntegerField(default=8)
+    fonction = models.CharField(
+        max_length=30,
+        choices=FONCTIONS,
+        verbose_name=_("Fonction"),
+    )
 
-    date_creation = models.DateTimeField(default=timezone.now)
+    autre_fonction = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        verbose_name=_("Autre fonction"),
+    )
+
+    statut = models.CharField(
+        max_length=10,
+        choices=STATUT,
+        default="active",
+        verbose_name=_("Statut"),
+    )
+
+    bureau = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        verbose_name=_("Bureau"),
+    )
+
+    date_embauche = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=_("Date d'embauche"),
+    )
+
+    working_hours = models.PositiveIntegerField(
+        default=8,
+        verbose_name=_("Heures de travail"),
+    )
+
+    date_creation = models.DateTimeField(
+        default=timezone.now,
+        verbose_name=_("Date de création"),
+    )
 
     class Meta:
         constraints = [
@@ -1243,41 +1301,42 @@ class Employe(models.Model):
             )
         ]
         ordering = ["-date_creation"]
+        verbose_name = _("Employé")
+        verbose_name_plural = _("Employés")
 
     def __str__(self):
-        return f"{self.nom_complet} ({self.get_fonction_display()})"
+        return f"{self.nom_complet} ({self.matricule})"
 
+    # ✅ AJOUT: génération matricule auto (EMP001-<ecole_id>)
     def _next_matricule(self) -> str:
-        """
-        Génère EMP001-<ecole_id>
-        """
         suffix = f"-{self.ecole_id}"
 
         last = (
             Employe.objects
-            .filter(ecole=self.ecole, matricule__endswith=suffix)
+            .filter(ecole_id=self.ecole_id, matricule__endswith=suffix)
             .aggregate(m=Max("matricule"))["m"]
         )
 
         if not last:
             return f"EMP001{suffix}"
-            num = int(last.replace("EMP", "").replace(suffix, ""))
-            return f"EMP{num + 1:03d}{suffix}"
 
+        # last = "EMP012-2" => num = 12
+        num_str = last.replace("EMP", "").replace(suffix, "")
+        num = int(num_str)
+        return f"EMP{num + 1:03d}{suffix}"
+
+    # ✅ AJOUT: matricule créé une seule fois (à la création)
     def save(self, *args, **kwargs):
-        if not self.matricule and self.ecole_id:
+        # Si création (pas de pk encore) ET matricule vide ET ecole connue
+        if not self.pk and not self.matricule and self.ecole_id:
             with transaction.atomic():
+                # génère le matricule
                 self.matricule = self._next_matricule()
-                super().save(*args, **kwargs)
-                return
+                # sécurité: si jamais matricule vide (ne doit jamais arriver)
+                if not self.matricule:
+                    self.matricule = f"EMP001-{self.ecole_id}"
+
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.nom_complet} ({self.matricule})"
-    
-
-
-
 
 # models.py
 class EmployeAbsence(models.Model):

@@ -1,55 +1,32 @@
 {% extends "base.html" %}
-{% block title %} Employés {% endblock %}
+{% load i18n %}
+
+{% block title %}{% trans "Employés" %}{% endblock %}
 {% block main %}
 
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+
 <style>
-  /* ===== Page style (simple, compatible main-content dark) ===== */
-  /* =========================
-   FIX VISIBILITÉ LIGNES TABLE (DARK MODE)
-   ========================= */
-
-/* Forcer fond sombre pour TOUTES les lignes */
-.emp-card table tbody tr {
-  background: transparent !important;
-}
-
-/* Zebra dark (optionnel mais recommandé) */
-.emp-card table tbody tr:nth-child(odd) {
-  background: rgba(255,255,255,0.04) !important;
-}
-
-.emp-card table tbody tr:nth-child(even) {
-  background: rgba(255,255,255,0.08) !important;
-}
-
-/* Texte toujours visible */
-.emp-card table tbody td {
-  color: #e5e7eb !important;
-}
-
-/* Hover propre */
-.emp-card table tbody tr:hover {
-  background: rgba(15,107,77,0.25) !important;
-}
-
+  /* ===== Page white theme (lisible) ===== */
   .emp-wrap{ max-width:1200px; margin:0 auto; }
   .emp-top{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
-  .emp-top h5{ margin:0; color:#e5e7eb; font-weight:700; }
+  .emp-top h5{ margin:0; color:#111827; font-weight:700; }
 
   .emp-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
   .emp-search{
     display:flex; align-items:center; gap:10px;
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.14);
+    background:#ffffff;
+    border:1px solid #e5e7eb;
     padding:10px 14px;
     border-radius:999px;
     min-width:320px;
   }
   .emp-search input{
     border:0; outline:0; background:transparent; width:100%;
-    color:#e5e7eb;
+    color:#111827;
   }
-  .emp-search input::placeholder{ color:rgba(229,231,235,.7); }
+  .emp-search input::placeholder{ color:#6b7280; }
 
   .emp-btn{
     border:0; cursor:pointer;
@@ -61,48 +38,81 @@
 
   .emp-card{
     margin-top:14px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.12);
+    background:#ffffff;
+    border:1px solid #e5e7eb;
     border-radius:14px;
     overflow:hidden;
   }
+
   table{ width:100%; border-collapse:collapse; }
-  th,td{ padding:14px 12px; border-bottom:1px solid rgba(255,255,255,.10); text-align:left; }
-  th{ color:rgba(229,231,235,.8); font-weight:700; background:rgba(255,255,255,.05); }
-  td{ color:#e5e7eb; }
-  .t-muted{ color:rgba(229,231,235,.7); font-size:12px; }
+  th,td{ padding:14px 12px; border-bottom:1px solid #e5e7eb; text-align:left; }
+  th{
+    color:#374151;
+    font-weight:800;
+    background:#f9fafb;
+  }
+  td{ color:#111827; }
+
+  .t-muted{ color:#6b7280; font-size:12px; }
+
+  /* Zebra propre */
+  .emp-card table tbody tr{ background:#ffffff; }
+  .emp-card table tbody tr:nth-child(odd){ background:#ffffff; }
+  .emp-card table tbody tr:nth-child(even){ background:#fcfcfd; }
+  .emp-card table tbody tr:hover{ background:#f3f4f6; }
+
+  /* ===== Badge (fix underline rouge) ===== */
   .badge{
-    display:inline-block;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
     padding:6px 10px;
     border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background:rgba(255,255,255,.06);
-    font-weight:700;
+    border:1px solid #e5e7eb;
+    background:#f9fafb;
+    font-weight:800;
     font-size:12px;
+    line-height:1;
+    white-space:nowrap;
+
+    /* ✅ enlève tout soulignement/decoration héritée */
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    -webkit-text-decoration-line: none !important;
+    text-underline-offset: 0 !important;
+    border-bottom: 0 !important;
+    outline: 0 !important;
   }
-  .badge.ok{ background:rgba(16,185,129,.14); border-color:rgba(16,185,129,.25); }
-  .badge.no{ background:rgba(244,63,94,.14); border-color:rgba(244,63,94,.25); }
+
+  .badge.ok{ background:#ecfdf5; border-color:#a7f3d0; color:#065f46; }
+  .badge.no{ background:#fff1f2; border-color:#fecdd3; color:#9f1239; }
+
+  /* Si jamais un span/a à l'intérieur hérite underline */
+  .badge *{
+    text-decoration: none !important;
+    border-bottom: 0 !important;
+  }
 
   .act-btn{
     border:0; background:transparent; cursor:pointer;
     font-weight:700;
     padding:6px 8px;
   }
-  .act-btn.edit{ color:#60a5fa; }
-  .act-btn.del{ color:#fb7185; }
+  .act-btn.edit{ color:#2563eb; }
+  .act-btn.del{ color:#e11d48; }
 
   @media (max-width: 720px){
-    th:nth-child(2), td:nth-child(2){ display:none; } /* hide matricule */
+    th:nth-child(2), td:nth-child(2){ display:none; }
     .emp-search{ min-width:100%; }
   }
 
-  /* =========================
-     ✅ Modal CSS EXACT
-     ========================= */
+  /* ===== Modal (garde ton fix z-index) ===== */
   .m-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.45);
     display:none; align-items:center; justify-content:center;
-    padding:16px; z-index:9999;
+    padding:16px;
+    z-index: 999999;
+    isolation:isolate;
   }
   .m-overlay.show{ display:flex; }
 
@@ -121,7 +131,7 @@
     border-bottom:1px solid #e7e7e7;
     display:flex; align-items:center; justify-content:space-between;
   }
-  .m-head h5{ margin:0; font-weight:600; font-size:18px; }
+  .m-head h5{ margin:0; font-weight:700; font-size:18px; color:#111827; }
   .m-close{
     width:34px; height:34px; border-radius:8px;
     border:1px solid #ddd; background:#fff;
@@ -138,18 +148,20 @@
   .m-col-3{ grid-column: 1 / -1; }
 
   .m-field label{
-    display:block; font-size:12px; color:#555; margin:0 0 6px;
+    display:block; font-size:12px; color:#374151; margin:0 0 6px;
+    font-weight:700;
   }
-  .req{ color:#d11; font-weight:700; }
+  .req{ color:#d11; font-weight:800; }
 
   .m-input, .m-select{
     width:100%;
-    border:1px solid #d9d9d9;
-    border-radius:4px;
+    border:1px solid #d1d5db;
+    border-radius:6px;
     padding:10px 10px;
     outline:none;
     font-size:13px;
     background:#fff;
+    color:#111827;
   }
 
   .m-foot{
@@ -159,12 +171,12 @@
     background:#fafafa;
   }
   .m-btn{
-    border:1px solid #d0d0d0;
+    border:1px solid #d1d5db;
     background:#fff;
     padding:8px 14px;
-    border-radius:6px;
+    border-radius:8px;
     cursor:pointer;
-    font-weight:600;
+    font-weight:800;
   }
   .m-btn.primary{
     background:#0f6b4d;
@@ -176,11 +188,12 @@
     display:none;
     margin:0 0 12px;
     padding:10px 12px;
-    border-radius:6px;
+    border-radius:8px;
     border:1px solid #ddd;
     background:#f6f6f6;
     font-size:13px;
-    white-space:pre-line; /* ✅ pour afficher \n */
+    white-space:pre-line;
+    color:#111827;
   }
   .m-msg.show{ display:block; }
   .m-msg.err{ border-color:#f0b4b4; background:#fff1f1; }
@@ -194,18 +207,30 @@
     .m-col-2, .m-col-3{ grid-column:auto; }
     .m-box{ border-radius:8px; }
   }
+
+  /* ===== RTL ===== */
+  .rtl{ direction: rtl; }
+  .rtl th, .rtl td{ text-align: right; }
+  .rtl .emp-top{ flex-direction: row-reverse; }
+  .rtl .emp-actions{ flex-direction: row-reverse; }
+  .rtl .emp-search{ flex-direction: row-reverse; }
+  .rtl .m-head{ flex-direction: row-reverse; }
+  .rtl .m-foot{ justify-content: flex-start; }
 </style>
 
-<div class="emp-wrap">
+<div>
   <div class="emp-top">
-    <h5>Inscription des employés</h5>
+    <h5>{% trans "Inscription des employés" %}</h5>
 
     <div class="emp-actions">
       <form class="emp-search" method="get">
         <span style="color:#e5e7eb">🔎</span>
-        <input name="q" value="{{ q|default:'' }}" placeholder="Rechercher ici (nom, matricule)">
+        <input
+          name="q"
+          value="{{ q|default:'' }}"
+          placeholder="{% trans "Rechercher ici (nom, matricule)" %}">
       </form>
-      <button class="emp-btn" id="btnOpenModal" type="button">+ Ajouter</button>
+      <button class="emp-btn" id="btnOpenModal" type="button">{% trans "+ Ajouter" %}</button>
     </div>
   </div>
 
@@ -213,11 +238,11 @@
     <table>
       <thead>
         <tr>
-          <th>Nom</th>
-          <th>Matricule</th>
-          <th>Fonction</th>
-          <th>Statut</th>
-          <th style="width:110px">Actions</th>
+          <th>{% trans "Nom" %}</th>
+          <th>{% trans "Matricule" %}</th>
+          <th>{% trans "Fonction" %}</th>
+          <th>{% trans "Statut" %}</th>
+          <th style="width:110px">{% trans "Actions" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -231,7 +256,7 @@
             </td>
             <td style="font-weight:700">{{ it.matricule }}</td>
             <td>
-              <span class="badge">
+              <span class="badge text-dark">
                 {% if it.fonction == "autre" and it.autre_fonction %}
                   {{ it.autre_fonction }}
                 {% else %}
@@ -241,18 +266,20 @@
             </td>
             <td>
               {% if it.statut == "active" %}
-                <span class="badge ok">● Active</span>
+                <span class="badge ok">● {% trans "Active" %}</span>
               {% else %}
-                <span class="badge no">● Inactive</span>
+                <span class="badge no">● {% trans "Inactive" %}</span>
               {% endif %}
             </td>
             <td>
-              <button class="act-btn edit btnEdit" type="button" title="Modifier">✎</button>
-              <button class="act-btn del btnDelete" type="button" title="Supprimer">🗑</button>
+              <button class="act-btn edit btnEdit" type="button" title="{% trans "Modifier" %}">✎</button>
+              <button class="act-btn del btnDelete" type="button" title="{% trans "Supprimer" %}">🗑</button>
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="5" class="t-muted" style="padding:16px">Aucun employé.</td></tr>
+          <tr>
+            <td colspan="5" class="t-muted" style="padding:16px">{% trans "Aucun employé." %}</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
@@ -264,7 +291,7 @@
   <div class="m-box" role="dialog" aria-modal="true">
     <div class="m-head">
       <div style="width:34px"></div>
-      <h5 class="text-center w-100" style="margin-left:-34px" id="modalTitle">Ajouter un employé</h5>
+      <h5 class="text-center w-100" style="margin-left:-34px" id="modalTitle">{% trans "Ajouter un employé" %}</h5>
       <button class="m-close" id="btnCloseModal" type="button">×</button>
     </div>
 
@@ -275,34 +302,32 @@
 
       <div class="m-grid">
         <div class="m-field">
-          <label>Nom de l'employé<span class="req">*</span></label>
-          <input class="m-input" id="nom_complet" placeholder="Nom complet">
+          <label>{% trans "Nom de l'employé" %}<span class="req">*</span></label>
+          <input class="m-input" id="nom_complet" placeholder="{% trans "Nom complet" %}">
         </div>
 
-       
-
         <div class="m-field">
-          <label>Sexe<span class="req">*</span></label>
+          <label>{% trans "Sexe" %}<span class="req">*</span></label>
           <select class="m-select" id="sexe">
-            <option value="M">M</option>
-            <option value="F">F</option>
+            <option value="M">{% trans "M" %}</option>
+            <option value="F">{% trans "F" %}</option>
           </select>
         </div>
 
         <div class="m-field">
-          <label>Téléphone</label>
-          <input class="m-input" id="telephone" placeholder="Téléphone">
+          <label>{% trans "Téléphone" %}</label>
+          <input class="m-input" id="telephone" placeholder="{% trans "Téléphone" %}">
         </div>
 
         <div class="m-field">
-          <label>E-mail</label>
-          <input class="m-input" id="email" placeholder="Email">
+          <label>{% trans "E-mail" %}</label>
+          <input class="m-input" id="email" placeholder="{% trans "Email" %}">
         </div>
 
         <div class="m-field">
-          <label>Fonction<span class="req">*</span></label>
+          <label>{% trans "Fonction" %}<span class="req">*</span></label>
           <select class="m-select" id="fonction">
-            <option value="">Select...</option>
+            <option value="">{% trans "Select..." %}</option>
             {% for v, t in form.fields.fonction.choices %}
               {% if v %}<option value="{{ v }}">{{ t }}</option>{% endif %}
             {% endfor %}
@@ -310,38 +335,38 @@
         </div>
 
         <div class="m-field m-col-2" id="otherWrap" style="display:none;">
-          <label>Préciser (Autre)<span class="req">*</span></label>
-          <input class="m-input" id="autre_fonction" placeholder="Ex: Agent de sécurité nuit">
+          <label>{% trans "Préciser (Autre)" %}<span class="req">*</span></label>
+          <input class="m-input" id="autre_fonction" placeholder="{% trans "Ex: Agent de sécurité nuit" %}">
         </div>
 
         <div class="m-field">
-          <label>Statut<span class="req">*</span></label>
+          <label>{% trans "Statut" %}<span class="req">*</span></label>
           <select class="m-select" id="statut">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="active">{% trans "Active" %}</option>
+            <option value="inactive">{% trans "Inactive" %}</option>
           </select>
         </div>
 
         <div class="m-field">
-          <label>Bureau</label>
-          <input class="m-input" id="bureau" placeholder="Bureau (optionnel)">
+          <label>{% trans "Bureau" %}</label>
+          <input class="m-input" id="bureau" placeholder="{% trans "Bureau (optionnel)" %}">
         </div>
 
         <div class="m-field">
-          <label>Date d'embauche</label>
+          <label>{% trans "Date d'embauche" %}</label>
           <input class="m-input" type="date" id="date_embauche">
         </div>
 
         <div class="m-field">
-          <label>Working Hours<span class="req">*</span></label>
+          <label>{% trans "Working Hours" %}<span class="req">*</span></label>
           <input class="m-input" type="number" min="1" max="24" id="working_hours" value="8">
         </div>
       </div>
     </div>
 
     <div class="m-foot">
-      <button class="m-btn" type="button" id="btnCancel">Fermer</button>
-      <button class="m-btn primary" type="button" id="btnSave">Sauvegarder</button>
+      <button class="m-btn" type="button" id="btnCancel">{% trans "Fermer" %}</button>
+      <button class="m-btn primary" type="button" id="btnSave">{% trans "Sauvegarder" %}</button>
     </div>
   </div>
 </div>
@@ -352,6 +377,26 @@
   const URL_GET    = (id) => "{% url 'employe_get' 0 %}".replace("/0/", `/${id}/`);
   const URL_UPDATE = (id) => "{% url 'employe_update' 0 %}".replace("/0/", `/${id}/`);
   const URL_DELETE = (id) => "{% url 'employe_delete' 0 %}".replace("/0/", `/${id}/`);
+
+  // ✅ Texts trans (pour JS)
+
+    const T = {
+  deleteConfirm: "{% trans 'Supprimer cet employé ?' %}",
+  serverNonJson: "{% trans 'Erreur serveur (non-JSON). Regarde console.' %}",
+  serverNonJsonAlert: "{% trans 'Erreur serveur (non-JSON). Regarde console.' %}",
+  loadError: "{% trans 'Erreur chargement.' %}",
+  deleteError: "{% trans 'Erreur suppression' %}",
+  requiredName: "{% trans 'Nom obligatoire.' %}",
+  requiredFunction: "{% trans 'Fonction obligatoire.' %}",
+  requiredOther: "{% trans 'Précise la fonction si tu choisis \"Autre\".' %}",
+  saveError: "{% trans 'Erreur sauvegarde.' %}",
+  savedOk: "{% trans 'Employé enregistré.' %}",
+  addTitle: "{% trans 'Ajouter un employé' %}",
+
+  // ✅ on évite l'apostrophe (l'employé) pour ne pas casser {% trans '...' %}
+  updateTitle: "{% trans 'Mettre à jour l employé' %}"
+};
+
 
   // CSRF cookie
   function getCookie(name) {
@@ -395,7 +440,7 @@
 
   document.getElementById("btnOpenModal").addEventListener("click", () => {
     resetForm();
-    document.getElementById("modalTitle").textContent = "Ajouter un employé";
+    document.getElementById("modalTitle").textContent = T.addTitle;
     openModal();
   });
   document.getElementById("btnCloseModal").addEventListener("click", closeModal);
@@ -414,7 +459,6 @@
   function resetForm(){
     document.getElementById("e_id").value = "";
     document.getElementById("nom_complet").value = "";
-   
     document.getElementById("sexe").value = "M";
     document.getElementById("telephone").value = "";
     document.getElementById("email").value = "";
@@ -434,20 +478,19 @@
       const tr = e.target.closest("tr");
       const id = tr.getAttribute("data-id");
       resetForm();
-      document.getElementById("modalTitle").textContent = "Mettre à jour l'employé";
+      document.getElementById("modalTitle").textContent = T.updateTitle;
       openModal();
 
       const res = await fetch(URL_GET(id), { headers: { "X-Requested-With":"XMLHttpRequest" } });
       const data = await res.json().catch(()=>({}));
       if(!res.ok || !data.ok){
-        showMsg(data.message || "Erreur chargement.", "err");
+        showMsg(data.message || T.loadError, "err");
         return;
       }
       const d = data.data;
 
       document.getElementById("e_id").value = d.id;
       document.getElementById("nom_complet").value = d.nom_complet || "";
-      
       document.getElementById("sexe").value = d.sexe || "M";
       document.getElementById("telephone").value = d.telephone || "";
       document.getElementById("email").value = d.email || "";
@@ -467,7 +510,7 @@
     btn.addEventListener("click", async (e) => {
       const tr = e.target.closest("tr");
       const id = tr.getAttribute("data-id");
-      if(!confirm("Supprimer cet employé ?")) return;
+      if(!confirm(T.deleteConfirm)) return;
 
       const res = await fetch(URL_DELETE(id), {
         method: "POST",
@@ -478,13 +521,13 @@
       if(!contentType.includes("application/json")){
         const text = await res.text();
         console.log("Réponse serveur:", text);
-        alert("Erreur serveur (non-JSON). Regarde console.");
+        alert(T.serverNonJsonAlert);
         return;
       }
 
       const data = await res.json().catch(()=>({}));
       if(!res.ok || !data.ok){
-        alert(data.message || "Erreur suppression");
+        alert(data.message || T.deleteError);
         return;
       }
       tr.remove();
@@ -502,18 +545,17 @@
     const autre = (document.getElementById("autre_fonction").value || "").trim();
 
     if(!document.getElementById("nom_complet").value.trim()){
-      showMsg("Nom obligatoire.", "err"); return;
+      showMsg(T.requiredName, "err"); return;
     }
-    
+
     if(!fonction){
-      showMsg("Fonction obligatoire.", "err"); return;
+      showMsg(T.requiredFunction, "err"); return;
     }
     if(fonction === "autre" && !autre){
-      showMsg("Précise la fonction si tu choisis 'Autre'.", "err"); return;
+      showMsg(T.requiredOther, "err"); return;
     }
 
     payload.append("nom_complet", document.getElementById("nom_complet").value);
-    
     payload.append("sexe", document.getElementById("sexe").value);
     payload.append("telephone", document.getElementById("telephone").value);
     payload.append("email", document.getElementById("email").value);
@@ -535,7 +577,7 @@
     const contentType = res.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
       const text = await res.text();
-      showMsg("Erreur serveur (non-JSON). Regarde console.", "err");
+      showMsg(T.serverNonJson, "err");
       console.log("Réponse serveur:", text);
       return;
     }
@@ -548,14 +590,14 @@
         for(const k in data.errors){
           txt += `• ${k}: ${data.errors[k].join(" ")}\n`;
         }
-        showMsg(txt || "Erreur sauvegarde.", "err");
+        showMsg(txt || T.saveError, "err");
       } else {
-        showMsg(data.message || "Erreur sauvegarde.", "err");
+        showMsg(data.message || T.saveError, "err");
       }
       return;
     }
 
-    showMsg(data.message || "Employé enregistré.", "ok");
+    showMsg(data.message || T.savedOk, "ok");
     setTimeout(() => window.location.reload(), 600);
   });
 </script>

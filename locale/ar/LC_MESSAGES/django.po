@@ -1517,3 +1517,204 @@ msgstr "من"
 
 msgid "à"
 msgstr "إلى"
+
+msgid "Règles: période clôturée ou fin dépassée (fin effective) => désactivée automatiquement et inutilisable pour devoir/saisie."
+msgstr "القواعد: الفترة المغلقة أو التي تم تجاوز نهايتها (النهاية الفعلية) يتم تعطيلها تلقائيًا ولا يمكن استخدامها للواجبات أو الإدخال."
+
+msgid "Les périodes restent visibles dans les filtres bulletin."
+msgstr "تبقى الفترات ظاهرة في فلاتر كشف النقاط."
+
+msgid "Fin effective"
+msgstr "النهاية الفعلية"
+
+msgid "Prolongation des périodes"
+msgstr "تمديد الفترات"
+
+msgid "Année scolaire *"
+msgstr "السنة الدراسية *"
+
+
+msgid "Prolonger (jours)"
+msgstr "تمديد (أيام)"
+
+
+
+msgid "Clôturée"
+msgstr "مغلقة"
+
+msgid "Terminée"
+msgstr "منتهية"
+
+msgid "Moyen de"
+msgstr "المعدل من"
+
+msgid "Moyen à"
+msgstr "المعدل إلى"
+
+msgid "Modifier une configuration de moyen"
+msgstr "تعديل إعدادات المعدل"
+
+msgid "Ajouter une configuration de moyen"
+msgstr "إضافة إعدادات المعدل"
+
+msgid "Niveau*"
+msgstr "المستوى*"
+
+msgid "Moyen de*"
+msgstr "المعدل من*"
+
+msgid "Moyen à*"
+msgstr "المعدل إلى*"
+
+msgid "Status*"
+msgstr "الحالة*"
+
+
+
+msgid "Autorisé(e)"
+msgstr "مسموح له/لها"
+
+msgid "Exclu"
+msgstr "مفصول"
+
+msgid "Créer une décision"
+msgstr "إنشاء قرار"
+
+msgid "Modifier une décision"
+msgstr "تعديل قرار"
+
+msgid "Décision *"
+msgstr "القرار *"
+
+
+msgid "Exclu(e)"
+msgstr "مفصول"
+
+msgid "Max Abs *"
+msgstr "أقصى عدد غياب *"
+
+msgid "Create Absence Decision"
+msgstr "إنشاء قرار غياب"
+
+msgid "Ajouter une clôture de période"
+msgstr "إضافة إغلاق فترة"
+
+msgid "Période scolaire *"
+msgstr "الفترة الدراسية *"
+
+msgid "Description *"
+msgstr "الوصف *"
+
+
+msgid "Précise la fonction si tu choisis 'Autre'."
+msgstr "حدد الوظيفة إذا اخترت \"أخرى\"."
+
+msgid "Préciser (Autre)"
+msgstr "حدد (أخرى)"
+
+msgid "Ex: Agent de sécurité nuit"
+msgstr "مثال: حارس أمن ليلي"
+
+msgid "Bureau"
+msgstr "المكتب"
+
+msgid "Bureau (optionnel)"
+msgstr "المكتب (اختياري)"
+
+msgid "Inscription des employés"
+msgstr "تسجيل الموظفين"
+
+msgid "Rechercher ici (nom, matricule)"
+msgstr "ابحث هنا (الاسم، الرقم الوظيفي)"
+
+msgid "+ Ajouter"
+msgstr "+ إضافة"
+
+msgid "Fonction"
+msgstr "الوظيفة"
+
+msgid "Aucun employé."
+msgstr "لا يوجد موظفون."
+
+msgid "Ajouter un employé"
+msgstr "إضافة موظف"
+
+msgid "Mettre à jour l employé"
+msgstr "تحديث الموظف"
+
+msgid "Nom de l'employé"
+msgstr "اسم الموظف"
+
+msgid "Working Hours"
+msgstr "ساعات العمل"
+
+
+msgid "Gardien"
+msgstr "حارس"
+
+msgid "Surveillant"
+msgstr "مراقب"
+
+msgid "Agent d’entretien"
+msgstr "عامل صيانة"
+
+msgid "Concierge"
+msgstr "بواب"
+
+msgid "Chauffeur"
+msgstr "سائق"
+
+msgid "Cuisinier"
+msgstr "طباخ"
+
+msgid "Cantinier / Cantine"
+msgstr "مسؤول المقصف"
+
+msgid "Agent administratif"
+msgstr "موظف إداري"
+
+msgid "Comptable"
+msgstr "محاسب"
+
+msgid "Bibliothécaire"
+msgstr "أمين مكتبة"
+
+msgid "Technicien informatique"
+msgstr "فني معلوماتية"
+
+msgid "Électricien"
+msgstr "كهربائي"
+
+msgid "Plombier"
+msgstr "سباك"
+
+msgid "Autre"
+msgstr "أخرى"
+
+msgid "Inactive"
+msgstr "غير نشط"
+
+msgid "M"
+msgstr "ذكر"
+
+msgid "F"
+msgstr "أنثى"
+
+msgid "Supprimer cet employé ?"
+msgstr "هل تريد حذف هذا الموظف؟"
+
+msgid "Suivi mensuel des absences des enseignants"
+msgstr "المتابعة الشهرية لغيابات الأساتذة"
+
+msgid "Heures"
+msgstr "الساعات"
+
+msgid "Justifiée"
+msgstr "مبررة"
+
+msgid "Mois"
+msgstr "الشهر"
+
+msgid "Saisie des absences des enseignants (EDT)"
+msgstr "إدخال غيابات الأساتذة (EDT)"
+

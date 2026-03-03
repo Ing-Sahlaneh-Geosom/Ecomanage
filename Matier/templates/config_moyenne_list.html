@@ -1,19 +1,130 @@
 {% extends "base.html" %}
+{% load i18n l10n %}
+
 {% block main %}
+
+<style>
+/* === Modal style (identique à appréciation période/annuelle) === */
+.ss-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+}
+.ss-modal.is-open { display: block; }
+
+.ss-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+}
+
+.ss-modal__panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.25);
+}
+
+.ss-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+.ss-modal__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.ss-modal__close {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.1);
+  background: #fff;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.ss-modal__body { padding: 16px 18px; }
+
+.ss-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid rgba(0,0,0,.08);
+}
+
+.ss-field { margin-bottom: 14px; }
+
+.ss-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.ss-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .ss-grid { grid-template-columns: 1fr; }
+}
+
+.ss-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.ss-check__label { margin: 0; }
+
+.ss-btn {
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ss-btn--light { background: #f6f7f8; }
+.ss-btn--dark  { background: #111; color: #fff; border-color: #111; }
+
+body.ss-modal-open { overflow: hidden; }
+</style>
+
 <div class="container py-3">
-  <h5 class="mb-3 text-dark">CONFIGURATION DES APPRÉCIATIONS</h5>
+  <h5 class="mb-3 text-dark">{% trans "CONFIGURATION DES APPRÉCIATIONS" %}</h5>
   {% include "_tabs.html" %}
 
   <div class="card shadow-sm">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Configuration de moyen</h4>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Ajouter</button>
+        <h4 class="mb-0">{% trans "Configuration de moyen" %}</h4>
+
+        {# bouton gardé bootstrap style, mais ouverture modal custom #}
+        <button class="btn btn-primary" type="button" data-open-modal="addModal">
+          + {% trans "Ajouter" %}
+        </button>
       </div>
 
       <div class="d-flex justify-content-end mb-3">
         <form method="get" class="d-flex" style="max-width:320px;">
-          <input class="form-control" name="q" value="{{ q }}" placeholder="Rechercher ici">
+          <input class="form-control" name="q" value="{{ q }}" placeholder="{% trans 'Rechercher ici' %}">
         </form>
       </div>
 
@@ -21,11 +132,11 @@
         <table class="table align-middle">
           <thead class="table-light">
             <tr>
-              <th>Niveau</th>
-              <th>Moyen de</th>
-              <th>Moyen à</th>
-              <th>Status</th>
-              <th class="text-end">Actions</th>
+              <th>{% trans "Niveau" %}</th>
+              <th>{% trans "Moyen de" %}</th>
+              <th>{% trans "Moyen à" %}</th>
+              <th>{% trans "Status" %}</th>
+              <th class="text-end">{% trans "Actions" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -36,66 +147,87 @@
                 <td>{{ it.moyenne_a }}</td>
                 <td>{{ it.get_status_display }}</td>
                 <td class="text-end">
-                  <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ it.id }}">✏️</button>
+                  <button type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          data-open-modal="editModal{{ it.id }}">✏️</button>
+
                   <form method="post" action="{% url 'moyenne_delete' it.id %}" class="d-inline">
                     {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ?')">🗑️</button>
+                    <button class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('{% trans "Supprimer ?" %}')">🗑️</button>
                   </form>
                 </td>
               </tr>
 
-              <div class="modal fade" id="editModal{{ it.id }}" tabindex="-1">
-                <div style="z-index: 1000;" class="modal-dialog modal-lg modal-dialog-centered">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">Modifier une configuration de moyen</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <form method="post" action="{% url 'moyenne_update' it.id %}">
-                      {% csrf_token %}
-                      <div class="modal-body">
-                        <div class="mb-3">
-                          <label class="form-label">Niveau*</label>
-                          <select name="niveau" class="form-select" required>
-                            {% for n in form.fields.niveau.queryset %}
-                              <option value="{{ n.id }}" {% if n.id == it.niveau.id %}selected{% endif %}>{{ n.nom }}</option>
+              {# =================== EDIT MODAL (custom) =================== #}
+              <div class="ss-modal" id="editModal{{ it.id }}" aria-hidden="true" role="dialog" aria-modal="true">
+                <div class="ss-modal__backdrop" data-close-modal="editModal{{ it.id }}"></div>
+
+                <div class="ss-modal__panel" role="document">
+                  <div class="ss-modal__header">
+                    <h5 class="ss-modal__title text-dark">{% trans "Modifier une configuration de moyen" %}</h5>
+                    <button type="button" class="ss-modal__close" aria-label="{% trans 'Fermer' %}"
+                            data-close-modal="editModal{{ it.id }}">×</button>
+                  </div>
+
+                  <form method="post" action="{% url 'moyenne_update' it.id %}">
+                    {% csrf_token %}
+
+                    <div class="ss-modal__body">
+                      <div class="ss-field">
+                        <label class="ss-label">{% trans "Niveau*" %}</label>
+
+                        {# on garde select bootstrap class form-select pour ne pas changer le style global #}
+                        <select name="niveau" class="form-select" required>
+                          {% for n in form.fields.niveau.queryset %}
+                            <option value="{{ n.id }}" {% if n.id == it.niveau.id %}selected{% endif %}>{{ n.nom }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+
+                      <div class="ss-grid">
+                        <div class="ss-field">
+                          <label class="ss-label">{% trans "Moyen de*" %}</label>
+                          <input class="form-control" type="number" step="0.01" name="moyenne_de"
+                                 value="{{ it.moyenne_de|unlocalize }}">
+                        </div>
+
+                        <div class="ss-field">
+                          <label class="ss-label">{% trans "Moyen à*" %}</label>
+                          <input class="form-control" type="number" step="0.01" name="moyenne_a"
+                                 value="{{ it.moyenne_a|unlocalize }}">
+                        </div>
+
+                        <div class="ss-field">
+                          <label class="ss-label">{% trans "Status*" %}</label>
+                          <select name="status" class="form-select" required>
+                            {% for val, lab in it.STATUS_CHOICES %}
+                              <option value="{{ val }}" {% if val == it.status %}selected{% endif %}>{{ lab }}</option>
                             {% endfor %}
                           </select>
                         </div>
-                        <div class="row g-3">
-                          <div class="col-md-4">
-                            <label class="form-label">Moyen de*</label>
-                            <input class="form-control" type="number" step="0.01" name="moyenne_de" value="{{ it.moyenne_de }}">
-                          </div>
-                          <div class="col-md-4">
-                            <label class="form-label">Moyen à*</label>
-                            <input class="form-control" type="number" step="0.01" name="moyenne_a" value="{{ it.moyenne_a }}">
-                          </div>
-                          <div class="col-md-4">
-                            <label class="form-label">Status*</label>
-                            <select name="status" class="form-select" required>
-                              {% for val, lab in it.STATUS_CHOICES %}
-                                <option value="{{ val }}" {% if val == it.status %}selected{% endif %}>{{ lab }}</option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                        </div>
-                        <div class="form-check mt-3">
-                          <input class="form-check-input" type="checkbox" name="actif" {% if it.actif %}checked{% endif %}>
-                          <label class="form-check-label">Actif</label>
-                        </div>
                       </div>
-                      <div class="modal-footer">
-                        <button class="btn btn-light" type="button" data-bs-dismiss="modal">Fermer</button>
-                        <button class="btn btn-dark" type="submit">Sauvegarder</button>
+
+                      <div class="ss-check">
+                        <input class="form-check-input" type="checkbox" name="actif" {% if it.actif %}checked{% endif %}>
+                        <label class="ss-check__label">{% trans "Actif" %}</label>
                       </div>
-                    </form>
-                  </div>
+                    </div>
+
+                    <div class="ss-modal__footer">
+                      <button class="ss-btn ss-btn--light" type="button" data-close-modal="editModal{{ it.id }}">
+                        {% trans "Fermer" %}
+                      </button>
+                      <button class="ss-btn ss-btn--dark" type="submit">
+                        {% trans "Sauvegarder" %}
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
 
             {% empty %}
-              <tr><td colspan="5" class="text-muted">Aucun élément.</td></tr>
+              <tr><td colspan="5" class="text-muted">{% trans "Aucun élément." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -104,30 +236,101 @@
   </div>
 </div>
 
-<div class="modal fade" id="addModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Ajouter une configuration de moyen</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="post" action="{% url 'moyenne_create' %}">
-        {% csrf_token %}
-        <div class="modal-body">
-          <div class="mb-3"><label class="form-label">Niveau*</label>{{ form.niveau }}</div>
-          <div class="row g-3">
-            <div class="col-md-4"><label class="form-label">Moyen de*</label>{{ form.moyenne_de }}</div>
-            <div class="col-md-4"><label class="form-label">Moyen à*</label>{{ form.moyenne_a }}</div>
-            <div class="col-md-4"><label class="form-label">Status*</label>{{ form.status }}</div>
-          </div>
-          <div class="form-check mt-3">{{ form.actif }} <label class="form-check-label">Actif</label></div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-light" type="button" data-bs-dismiss="modal">Fermer</button>
-          <button class="btn btn-dark" type="submit">Sauvegarder</button>
-        </div>
-      </form>
+{# =================== ADD MODAL (custom) =================== #}
+<div class="ss-modal" id="addModal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="ss-modal__backdrop" data-close-modal="addModal"></div>
+
+  <div class="ss-modal__panel" role="document">
+    <div class="ss-modal__header">
+      <h5 class="ss-modal__title text-dark">{% trans "Ajouter une configuration de moyen" %}</h5>
+      <button type="button" class="ss-modal__close" aria-label="{% trans 'Fermer' %}"
+              data-close-modal="addModal">×</button>
     </div>
+
+    <form method="post" action="{% url 'moyenne_create' %}">
+      {% csrf_token %}
+
+      <div class="ss-modal__body">
+        <div class="ss-field">
+          <label class="ss-label">{% trans "Niveau*" %}</label>
+          {{ form.niveau }}
+        </div>
+
+        <div class="ss-grid">
+          <div class="ss-field">
+            <label class="ss-label">{% trans "Moyen de*" %}</label>
+            {{ form.moyenne_de }}
+          </div>
+          <div class="ss-field">
+            <label class="ss-label">{% trans "Moyen à*" %}</label>
+            {{ form.moyenne_a }}
+          </div>
+          <div class="ss-field">
+            <label class="ss-label">{% trans "Status*" %}</label>
+            {{ form.status }}
+          </div>
+        </div>
+
+        <div class="ss-check">
+          {{ form.actif }}
+          <label class="ss-check__label">{% trans "Actif" %}</label>
+        </div>
+      </div>
+
+      <div class="ss-modal__footer">
+        <button class="ss-btn ss-btn--light" type="button" data-close-modal="addModal">
+          {% trans "Fermer" %}
+        </button>
+        <button class="ss-btn ss-btn--dark" type="submit">
+          {% trans "Sauvegarder" %}
+        </button>
+      </div>
+    </form>
   </div>
 </div>
+
+<script>
+(function () {
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('ss-modal-open');
+
+    const focusable = modal.querySelector('input, select, textarea, button');
+    if (focusable) focusable.focus();
+  }
+
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('ss-modal-open');
+  }
+
+  document.addEventListener('click', function (e) {
+    const openBtn = e.target.closest('[data-open-modal]');
+    if (openBtn) {
+      e.preventDefault();
+      openModal(openBtn.getAttribute('data-open-modal'));
+      return;
+    }
+    const closeBtn = e.target.closest('[data-close-modal]');
+    if (closeBtn) {
+      e.preventDefault();
+      closeModal(closeBtn.getAttribute('data-close-modal'));
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      const opened = document.querySelector('.ss-modal.is-open');
+      if (opened) closeModal(opened.id);
+    }
+  });
+})();
+</script>
+
 {% endblock %}
