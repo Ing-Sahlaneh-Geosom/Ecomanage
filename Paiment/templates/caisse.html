@@ -1,29 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Caisse{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Caisse" %}{% endblock %}
 {% block main %}
 <div class="container-fluid px-4 py-3">
 
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 class="fw-bold m-0">CAISSE</h6>
-    <div class="text-muted small">Finance/Gestionnaire &nbsp;›&nbsp; Caisse</div>
+    <h6 class="fw-bold m-0 text-dark">{% trans "CAISSE" %}</h6>
+    <div class="text-muted small text-dark">{% trans "Finance/Gestionnaire" %} &nbsp;›&nbsp; {% trans "Caisse" %}</div>
   </div>
 
   {% if messages %}
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} py-2 mb-3">{{ message }}</div>
+      <div class="alert alert-{{ message.tags }} py-2 mb-3 text-danger">{{ message }}</div>
     {% endfor %}
   {% endif %}
 
   <div class="card shadow-sm mb-3">
-    <div class="card-header bg-white fw-semibold">Sélection</div>
+    <div class="card-header bg-white fw-semibold">{% trans "Sélection" %}</div>
     <div class="card-body">
 
       <form method="GET" class="row g-3 align-items-end">
 
         <div class="col-md-4">
-          <label class="form-label fw-bold">Niveau</label>
+          <label class="form-label fw-bold">{% trans "Niveau" %}</label>
           <select class="form-select" id="niveauSelect" name="niveau">
-            <option value="">Sélectionner...</option>
+            <option value="">{% trans "Sélectionner..." %}</option>
             {% for n in niveaux %}
               <option value="{{ n.id }}" {% if niveau_id|stringformat:"s" == n.id|stringformat:"s" %}selected{% endif %}>{{ n.nom }}</option>
             {% endfor %}
@@ -31,21 +32,21 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label fw-bold">Classe</label>
+          <label class="form-label fw-bold">{% trans "Classe" %}</label>
           <select class="form-select" id="classeSelect" name="classe">
-            <option value="">Sélectionner...</option>
+            <option value="">{% trans "Sélectionner..." %}</option>
           </select>
         </div>
 
         <div class="col-md-4">
-          <label class="form-label fw-bold">Élève</label>
+          <label class="form-label fw-bold">{% trans "Élève" %}</label>
           <select class="form-select" id="eleveSelect" name="eleve">
-            <option value="">Sélectionner...</option>
+            <option value="">{% trans "Sélectionner..." %}</option>
           </select>
         </div>
 
         <div class="col-12">
-          <button class="btn btn-success w-100 fw-bold">Filtrer</button>
+          <button class="btn btn-success w-100 fw-bold" type="submit">{% trans "Filtrer" %}</button>
         </div>
       </form>
 
@@ -59,7 +60,7 @@
         <div class="fw-bold">{{ eleve.nom }}</div>
         <div class="text-muted small">{{ eleve.classe.niveau }} - {{ eleve.classe.nom }}</div>
       </div>
-      <div class="text-muted small">Prépare le paiement puis valide</div>
+      <div class="text-muted small">{% trans "Prépare le paiement puis valide" %}</div>
     </div>
 
     <div class="card-body">
@@ -70,23 +71,22 @@
 
         <div class="row g-3 mb-3">
           <div class="col-md-3">
-            <label class="form-label fw-bold">Mode paiement</label>
+            <label class="form-label fw-bold">{% trans "Mode paiement" %}</label>
             <select class="form-select" name="mode">
-              <option value="especes">Espèces</option>
-              <option value="mobile">Mobile money</option>
-              <option value="virement">Virement</option>
-              <option value="cheque">Chèque</option>
+              <option value="especes">{% trans "Espèces" %}</option>
+              <option value="mobile">{% trans "Mobile money" %}</option>
+              <option value="virement">{% trans "Virement" %}</option>
+              <option value="cheque">{% trans "Chèque" %}</option>
             </select>
           </div>
 
           <div class="col-md-3">
-            <label class="form-label fw-bold">Référence</label>
-            <input class="form-control" value="Générée automatiquement" disabled>
+            <label class="form-label fw-bold">{% trans "Référence" %}</label>
+            <input class="form-control" value="{% trans 'Générée automatiquement' %}" disabled>
           </div>
 
-
           <div class="col-md-2">
-            <label class="form-label fw-bold">Devise</label>
+            <label class="form-label fw-bold">{% trans "Devise" %}</label>
             <select class="form-select" name="devise">
               <option value="DJF">DJF</option>
               <option value="USD">USD</option>
@@ -95,8 +95,8 @@
           </div>
 
           <div class="col-md-4">
-            <label class="form-label fw-bold">Note</label>
-            <input class="form-control" name="note" placeholder="Optionnel">
+            <label class="form-label fw-bold">{% trans "Note" %}</label>
+            <input class="form-control" name="note" placeholder="{% trans 'Optionnel' %}">
           </div>
         </div>
 
@@ -104,11 +104,11 @@
           <table class="table align-middle">
             <thead class="table-light">
               <tr>
-                <th>Type frais</th>
-                <th>Facturé</th>
-                <th>Payé</th>
-                <th>Restant</th>
-                <th style="width:180px;">Montant à payer</th>
+                <th>{% trans "Type frais" %}</th>
+                <th>{% trans "Facturé" %}</th>
+                <th>{% trans "Payé" %}</th>
+                <th>{% trans "Restant" %}</th>
+                <th style="width:180px;">{% trans "Montant à payer" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -121,25 +121,25 @@
                   {{ f.restant }} {{ f.devise }}
                 </td>
                 <td>
-                <input type="number"
-                      step="0.01"
-                      min="0"
-                      class="form-control"
-                      name="pay_amount_{{ f.id }}"
-                      placeholder="0"
-                      {% if f.restant <= 0 %}disabled{% endif %}
-                      {% if f.restant > 0 %}max="{{ f.restant }}"{% endif %}>
-                {% if f.restant <= 0 %}
-                  <div class="text-muted small mt-1">Déjà soldé</div>
-                {% else %}
-                  <div class="text-muted small mt-1">Max: {{ f.restant }} {{ f.devise }}</div>
-                {% endif %}
-              </td>
+                  <input type="number"
+                        step="0.01"
+                        min="0"
+                        class="form-control"
+                        name="pay_amount_{{ f.id }}"
+                        placeholder="{% trans '0' %}"
+                        {% if f.restant <= 0 %}disabled{% endif %}
+                        {% if f.restant > 0 %}max="{{ f.restant }}"{% endif %}>
+                  {% if f.restant <= 0 %}
+                    <div class="text-muted small mt-1">{% trans "Déjà soldé" %}</div>
+                  {% else %}
+                    <div class="text-muted small mt-1">{% trans "Max:" %} {{ f.restant }} {{ f.devise }}</div>
+                  {% endif %}
+                </td>
 
               </tr>
               {% empty %}
               <tr>
-                <td colspan="5" class="text-center text-muted py-4">Aucun frais généré pour cet élève.</td>
+                <td colspan="5" class="text-center text-muted py-4">{% trans "Aucun frais généré pour cet élève." %}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -147,7 +147,7 @@
         </div>
 
         <div class="d-flex justify-content-end">
-          <button class="btn btn-dark px-4">Valider Paiement & Générer Reçu</button>
+          <button class="btn btn-dark px-4" type="submit">{% trans "Valider Paiement & Générer Reçu" %}</button>
         </div>
 
       </form>
@@ -169,27 +169,26 @@
   const clsCurrent   = "{{ classe_id|default:''|escapejs }}";
   const eleveCurrent = "{{ eleve_id|default:''|escapejs }}";
 
-  function setLoading(selectEl, label="Chargement..."){
+  function setLoading(selectEl, label){
     selectEl.innerHTML = `<option value="">${label}</option>`;
   }
 
   async function loadClasses(niveauId){
-    classeSelect.innerHTML = '<option value="">Sélectionner...</option>';
-    eleveSelect.innerHTML  = '<option value="">Sélectionner...</option>';
+    classeSelect.innerHTML = `<option value="">{% trans "Sélectionner..." %}</option>`;
+    eleveSelect.innerHTML  = `<option value="">{% trans "Sélectionner..." %}</option>`;
     if(!niveauId) return;
 
-    setLoading(classeSelect);
+    setLoading(classeSelect, "{% trans 'Chargement...' %}");
 
     const url = `${URL_CLASSES}?niveau_id=${encodeURIComponent(niveauId)}`;
     const res = await fetch(url, { cache: "no-store" });
 
     if(!res.ok){
       console.error("Erreur classes:", res.status, await res.text());
-      classeSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      classeSelect.innerHTML = `<option value="">{% trans "Erreur de chargement" %}</option>`;
       return;
     }
 
-    // ✅ classes renvoie HTML <option>
     classeSelect.innerHTML = await res.text();
 
     if(clsCurrent) classeSelect.value = clsCurrent;
@@ -200,21 +199,20 @@
   }
 
   async function loadEleves(classeId){
-    eleveSelect.innerHTML = '<option value="">Sélectionner...</option>';
+    eleveSelect.innerHTML = `<option value="">{% trans "Sélectionner..." %}</option>`;
     if(!classeId) return;
 
-    setLoading(eleveSelect);
+    setLoading(eleveSelect, "{% trans 'Chargement...' %}");
 
     const url = `${URL_ELEVES}?classe_id=${encodeURIComponent(classeId)}`;
     const res = await fetch(url, { cache: "no-store" });
 
     if(!res.ok){
       console.error("Erreur eleves:", res.status, await res.text());
-      eleveSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      eleveSelect.innerHTML = `<option value="">{% trans "Erreur de chargement" %}</option>`;
       return;
     }
 
-    // ✅ eleves renvoie HTML <option>
     eleveSelect.innerHTML = await res.text();
 
     if(eleveCurrent) eleveSelect.value = eleveCurrent;
@@ -228,7 +226,6 @@
     await loadEleves(classeSelect.value);
   });
 
-  // init
   if(niveauSelect.value){
     loadClasses(niveauSelect.value);
   }

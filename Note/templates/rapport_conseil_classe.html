@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block main %}
 
 <style>
@@ -97,40 +98,34 @@
   }
 
  @media print{
-  /* cacher UI */
   .filters-card, .classes-footer, .btn, .nav, .navbar{ display:none !important; }
 
-  /* enlever le scroll */
   .table-wrap{
     max-height:none !important;
     overflow:visible !important;
     border:none !important;
   }
 
-  /* IMPORTANT : table doit prendre toute la page */
-  table.report{
-    width:100% !important;
-  }
+  table.report{ width:100% !important; }
 
-  /* page en paysage pour ne pas couper les colonnes (Rang, etc.) */
   @page{
     size: A4 landscape;
     margin: 10mm;
   }
 
-  /* réduire un peu si beaucoup de matières */
   .report-card{
     border:none !important;
     box-shadow:none !important;
-    zoom: 0.85;  /* tu peux mettre 0.8 si beaucoup de matières */
+    zoom: 0.85;
   }
 }
-
 </style>
 
 <div class="page-title">
-  <h4 class="mb-0">RAPPORT GÉNÉRAL D'EXAMEN DE CLASSE</h4>
-  <div class="text-muted">Report &nbsp;›&nbsp; Rapport général d'examen de classe</div>
+  <h4 class="mb-0 text-dark">{% trans "RAPPORT GÉNÉRAL D'EXAMEN DE CLASSE" %}</h4>
+  <div class="text-muted">
+    {% trans "Report" %} &nbsp;›&nbsp; {% trans "Rapport général d'examen de classe" %}
+  </div>
 </div>
 
 <div class="filters-card">
@@ -138,7 +133,7 @@
     <div class="row g-3 align-items-end">
 
       <div class="col-12 col-md-3">
-        <label class="form-label">Année scolaire*</label>
+        <label class="form-label">{% trans "Année scolaire*" %}</label>
         <select class="form-select" name="annee" onchange="document.getElementById('filterForm').submit()">
           {% for a in annees %}
             <option value="{{ a.id }}" {% if annee_id == a.id|stringformat:"s" %}selected{% endif %}>{{ a.nom }}</option>
@@ -147,9 +142,9 @@
       </div>
 
       <div class="col-12 col-md-3">
-        <label class="form-label">Niveaux*</label>
+        <label class="form-label">{% trans "Niveaux*" %}</label>
         <select class="form-select" name="niveau" onchange="document.getElementById('filterForm').submit()">
-          <option value="all" {% if niveau_id == "all" %}selected{% endif %}>All</option>
+          <option value="all" {% if niveau_id == "all" %}selected{% endif %}>{% trans "All" %}</option>
           {% for n in niveaux %}
             <option value="{{ n.id }}" {% if niveau_id == n.id|stringformat:"s" %}selected{% endif %}>{{ n.nom }}</option>
           {% endfor %}
@@ -157,9 +152,9 @@
       </div>
 
       <div class="col-12 col-md-3">
-        <label class="form-label">La liste des classes*</label>
+        <label class="form-label">{% trans "La liste des classes*" %}</label>
         <select class="form-select" name="classe">
-          <option value="">-- choisir --</option>
+          <option value="">{% trans "-- choisir --" %}</option>
           {% for c in classes %}
             <option value="{{ c.id }}" {% if classe_id == c.id|stringformat:"s" %}selected{% endif %}>
               {{ c.nom }} - {{ c.niveau.nom }}
@@ -169,9 +164,9 @@
       </div>
 
       <div class="col-12 col-md-3">
-        <label class="form-label">Période*</label>
+        <label class="form-label">{% trans "Période*" %}</label>
         <select class="form-select" name="periode">
-          <option value="">-- choisir --</option>
+          <option value="">{% trans "-- choisir --" %}</option>
           {% for p in periodes %}
             <option value="{{ p.id }}" {% if periode_id == p.id|stringformat:"s" %}selected{% endif %}>{{ p.nom }}</option>
           {% endfor %}
@@ -181,20 +176,20 @@
     </div>
 
     <div class="filters-actions">
-      <button class="btn btn-success px-4" type="submit">Filtrer</button>
+      <button class="btn btn-success px-4" type="submit">{% trans "Filtrer" %}</button>
 
       <a class="btn btn-outline-success px-4"
          href="?annee={{ annee_id }}&niveau={{ niveau_id }}&classe={{ classe_id }}&periode={{ periode_id }}&export=excel">
-         Excel
+         {% trans "Excel" %}
       </a>
 
-      <button class="btn btn-primary px-4" type="button" onclick="window.print()">Imprimer</button>
+      <button class="btn btn-primary px-4" type="button" onclick="window.print()">{% trans "Imprimer" %}</button>
     </div>
   </form>
 
   {% if niveau_id == "all" %}
     <div class="text-muted mt-3" style="font-weight:700;">
-      Niveau = <strong>All</strong> → sélectionne une classe ci-dessous.
+      {% trans "Niveau" %} = <strong>{% trans "All" %}</strong> → {% trans "sélectionne une classe ci-dessous." %}
     </div>
     <div class="classes-footer">
       {% for c in classes_footer %}
@@ -212,34 +207,37 @@
 
     <div class="report-head">
       <div>
-        <h5>Classe : {{ selected_classe.nom }} ({{ selected_classe.niveau.nom }})</h5>
-        <div class="meta">Période : {{ selected_periode.nom }} — Année : {{ annee.nom }}</div>
+        <h5>
+          {% trans "Classe :" %} {{ selected_classe.nom }} ({{ selected_classe.niveau.nom }})
+        </h5>
+        <div class="meta">
+          {% trans "Période :" %} {{ selected_periode.nom }} — {% trans "Année :" %} {{ annee.nom }}
+        </div>
       </div>
-      <div class="meta">Le : {{ today }}</div>
+      <div class="meta">{% trans "Le :" %} {{ today }}</div>
     </div>
 
     <div class="table-wrap">
       <table class="report">
         <thead>
           <tr>
-            <th>N°</th>
-            <th>Nom</th>
-            <th>Classe</th>
-            <th>Date naissance</th>
-            <th>Sexe</th>
-            <th>Statut</th>
+            <th>{% trans "N°" %}</th>
+            <th>{% trans "Nom" %}</th>
+            <th>{% trans "Classe" %}</th>
+            <th>{% trans "Date naissance" %}</th>
+            <th>{% trans "Sexe" %}</th>
+            <th>{% trans "Statut" %}</th>
 
-            {# ✅ matières dynamiques de la classe #}
             {% for m in rapport.subjects %}
               <th>{{ m.nom|upper }}</th>
             {% endfor %}
 
-            <th>Total</th>
-            <th>Nb matières</th>
-            <th>Moyenne</th>
-            <th>Absences (h)</th>
-            <th>Appréciation</th>
-            <th>Rang</th>
+            <th>{% trans "Total" %}</th>
+            <th>{% trans "Nb matières" %}</th>
+            <th>{% trans "Moyenne" %}</th>
+            <th>{% trans "Absences (h)" %}</th>
+            <th>{% trans "Appréciation" %}</th>
+            <th>{% trans "Rang" %}</th>
           </tr>
         </thead>
 
@@ -251,15 +249,13 @@
             <td>{{ r.eleve.classe.nom }}</td>
 
             <td>{{ r.eleve.date_naissancce }}</td>
-            
+
             <td>{{ r.sexe }}</td>
             <td><span class="badge-active">{{ r.status }}</span></td>
 
-
-            {# notes par matière (liste alignée sur subjects) #}
             {% for v in r.notes_list %}
               <td style="text-align:center; font-weight:800;">
-                {% if v %}{{ v }}{% else %}-{% endif %}
+                {% if v %}{{ v }}{% else %}{% trans "-" %}{% endif %}
               </td>
             {% endfor %}
 
@@ -277,7 +273,7 @@
 
   {% else %}
     <div class="alert alert-info mb-0">
-      Choisis une <strong>classe</strong> et une <strong>période</strong>, puis clique <strong>Filtrer</strong>.
+      {% blocktrans %}Choisis une <strong>classe</strong> et une <strong>période</strong>, puis clique <strong>Filtrer</strong>.{% endblocktrans %}
     </div>
   {% endif %}
 </div>

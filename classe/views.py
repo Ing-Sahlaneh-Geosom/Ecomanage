@@ -8,7 +8,7 @@ from Ecole_admin.models import Classe , Specialite , Niveau
 from Ecole_admin.utils.mixins import EcoleAssignMixin
 from Ecole_admin.utils.utils import get_annee_active
 from classe.form import ClasseForm
-
+from django.utils.translation import gettext_lazy as _
 
 
 class ClasseCreateView(EcoleAssignMixin, CreateView):
@@ -26,8 +26,8 @@ class ClasseCreateView(EcoleAssignMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['submit_text'] = "Ajouter"
-        context['Title'] = "Ajouter une classe"
+        context['submit_text'] = _("Ajouter")
+        context['Title'] = _("Ajouter une classe")
         return context
 
     def get_queryset(self):
@@ -50,8 +50,8 @@ class SpecialiteCreateView(EcoleAssignMixin,CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['submit_text'] = "Ajouter"
-        context['Title'] = "Ajouter une Specialite"
+        context['submit_text'] = _("Ajouter")
+        context['Title'] = _("Ajouter une Specialite")
         return context
 
     def form_valid(self, form):
@@ -67,8 +67,8 @@ class NiveauCreateView(EcoleAssignMixin,CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['submit_text'] = "Ajouter"
-        context['Title'] = "Ajouter une Niveau"
+        context['submit_text'] = _("Ajouter")
+        context['Title'] = _("Ajouter une Niveau")
         return context
 
     def form_valid(self, form):

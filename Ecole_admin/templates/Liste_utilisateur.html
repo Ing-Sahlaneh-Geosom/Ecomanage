@@ -1,113 +1,385 @@
-{% extends 'base.html'%}
-{% block Title%} Liste des eleves {% endblock %}
+{% extends 'base.html' %}
+{% load i18n %}
+{% block Title %}{% trans "Liste des utilisateurs" %}{% endblock %}
+
 {% block main %}
-<div class="container py-4">
-  <a href="{% url 'AjouteUtilisateur' %}" class="btn btn-outline-primary mb-3">Ajouter un utilisateur</a>
-  <h1>Liste des utilisateurs </h1>
-    <form action="" method="get" class="row g-2 md-3">
-    <div class="col-md-3">
-      <input type="text" name="nom_complet" id="nom_complet" value="{{ request.GET.nom_complet }}" class="form-conrol bg-light" placeholder="Nom d'utilisateur ">
-    </div>
-    <div class="col-md-3">
-         <select name="role" id="role" class="form-control">
-             <option value="">__Role__</option>
-             <option value="admin">Admin</option>
-             <option value="secretaire">Secretaire</option>
-         </select>
-    </div>
-    <div class="col-md-3">
-         <select name="sexe" id="sexe" class="form-control">
-             <option value="">__Sexe__</option>
-             <option value="F">Feminin</option>
-             <option value="M">Musculin</option>
-         </select>
-    </div>
-    <div class="col-md-3">
-      <button type="submit" class="btn btn-primary w-100">Recherche</button>
-    </div>
-  </form>
- <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="table-primary text-end">
-        <tr>
+<style>
+  .users-page{
+    background:#f6f7fb;
+    min-height: calc(100vh - 60px);
+  }
 
-            <th>N°</th>
-            <th>username</th>
-            <th>Nom complet</th>
-            <th>sexe</th>
-            <th>Date de Naissance</th>
-            <th>Pays</th>
-            <th>Ville</th>
-            <th>Adresse</th>
-            <th>Numero de telephone</th>
-            <th>email</th>
-            <th>Role</th>
-            <th>Detaille</th>
-            <th>Modifier</th>
-            <th>Supprimer</th>
-           
-        </tr>
-        </thead>
-        <tr>
-         {% for user in utilisateurs %}
-           <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
-          <td>{{ user.username }}</td>
-          <td>{{ user.nom_complet }}</td>
-          <td>{{ user.sexe}}</td>
-          <td>{{ user.date_naissancce}}</td>
-          <td>{{ user.Pays}}</td>
-          <td>{{ user.Ville }}</td>
-          <td>{{ user.Adresse }}</td>
-          <td>{{ user.num_tel}}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.role }}</td>
-          <td><a class="btn btn-primary" href="">Detaille</a></td>
-          <td><a class="btn btn-success" href="{% url 'ModifierDesUtilisateur' user.id %}">Modifier</a></td>
-          <td><a class="btn btn-danger" href="">Supprimer</a></td>
-        </tr>
-        {% empty %}
-            <tr><td colspan="5">Aucune Note trouve.</td></tr>
-        {% endfor %}
-    </table>
+  .users-toolbar{
+    background:#fff;
+    border:1px solid #e9ecef;
+    border-radius:18px;
+    padding:18px 20px;
+    box-shadow:0 4px 18px rgba(15,23,42,.05);
+    margin-bottom:18px;
+  }
 
-  </div>
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
+  .users-toolbar-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+
+  .users-title-wrap h2{
+    margin:0;
+    font-size:1.6rem;
+    font-weight:700;
+    color:#1e3a8a;
+  }
+
+  .users-title-wrap .sub{
+    color:#6b7280;
+    font-size:.95rem;
+    margin-top:4px;
+  }
+
+  .users-add-btn{
+    border-radius:14px;
+    padding:10px 16px;
+    font-weight:600;
+  }
+
+  .users-filter-card{
+    background:#fff;
+    border:1px solid #e9ecef;
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 4px 18px rgba(15,23,42,.05);
+    margin-bottom:18px;
+  }
+
+  .users-filter-card .form-label{
+    font-weight:600;
+    color:#374151;
+    margin-bottom:6px;
+  }
+
+  .users-filter-card .form-control,
+  .users-filter-card .form-select{
+    border-radius:12px;
+    min-height:44px;
+    border:1px solid #dbe2ea;
+  }
+
+  .users-table-card{
+    background:#fff;
+    border:1px solid #e9ecef;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 4px 18px rgba(15,23,42,.05);
+  }
+
+  .users-table-header{
+    padding:16px 18px;
+    border-bottom:1px solid #edf2f7;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .users-table-header .count{
+    font-weight:700;
+    color:#0f172a;
+  }
+
+  .users-table-header .small-note{
+    color:#6b7280;
+    font-size:.92rem;
+  }
+
+  .users-table{
+    margin-bottom:0;
+  }
+
+  .users-table thead th{
+    background:#f8fafc;
+    color:#475569;
+    font-weight:700;
+    border-bottom:1px solid #e5e7eb;
+    white-space:nowrap;
+  }
+
+  .users-table td,
+  .users-table th{
+    vertical-align:middle;
+  }
+
+  .users-table tbody tr:hover{
+    background:#f8fbff;
+  }
+
+  .user-name{
+    font-weight:700;
+    color:#0f172a;
+  }
+
+  .user-username{
+    color:#2563eb;
+    font-weight:600;
+  }
+
+  .badge-role{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#eef2ff;
+    color:#3730a3;
+    font-size:.82rem;
+    font-weight:700;
+    text-transform:capitalize;
+  }
+
+  .badge-sexe{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#f3f4f6;
+    color:#374151;
+    font-size:.82rem;
+    font-weight:700;
+  }
+
+  .action-group{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .action-group .btn{
+    border-radius:10px;
+    padding:6px 12px;
+    font-size:.88rem;
+    font-weight:600;
+  }
+
+  .empty-box{
+    padding:36px 18px;
+    text-align:center;
+    color:#6b7280;
+  }
+
+  .users-pagination-wrap{
+    padding:18px;
+    border-top:1px solid #edf2f7;
+  }
+
+  .pagination{
+    margin-bottom:0;
+  }
+
+  .page-link{
+    border-radius:10px !important;
+    margin:0 3px;
+    color:#1d4ed8;
+    border:1px solid #dbe2ea;
+  }
+
+  .page-item.active .page-link{
+    background:#1d4ed8;
+    border-color:#1d4ed8;
+  }
+
+  @media (max-width: 991px){
+    .users-table{
+      min-width:1200px;
+    }
+  }
+</style>
+
+<div class="users-page py-4">
+  <div class="container-fluid px-3 px-md-4">
+
+    <div class="users-toolbar">
+      <div class="users-toolbar-top">
+        <div class="users-title-wrap">
+          <h2>{% trans "Utilisateurs" %}</h2>
+          <div class="sub">
+            {% trans "Gestion et consultation de la liste des utilisateurs" %}
+          </div>
+        </div>
+
+        <a href="{% url 'AjouteUtilisateur' %}" class="btn btn-primary users-add-btn">
+          + {% trans "Ajouter un utilisateur" %}
+        </a>
+      </div>
+    </div>
+
+    <div class="users-filter-card">
+      <form action="" method="get" class="row g-3">
+        <div class="col-md-4">
+          <label for="nom_complet" class="form-label">{% trans "Nom d'utilisateur" %}</label>
+          <input
+            type="text"
+            name="nom_complet"
+            id="nom_complet"
+            value="{{ request.GET.nom_complet }}"
+            class="form-control"
+            placeholder="{% trans 'Rechercher par nom d’utilisateur' %}"
+          >
+        </div>
+
+        <div class="col-md-3">
+          <label for="role" class="form-label">{% trans "Rôle" %}</label>
+          <select name="role" id="role" class="form-select">
+            <option value="">{% trans "Tous les rôles" %}</option>
+            <option value="admin" {% if request.GET.role == "admin" %}selected{% endif %}>{% trans "Admin" %}</option>
+            <option value="secretaire" {% if request.GET.role == "secretaire" %}selected{% endif %}>{% trans "Secrétaire" %}</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label for="sexe" class="form-label">{% trans "Sexe" %}</label>
+          <select name="sexe" id="sexe" class="form-select">
+            <option value="">{% trans "Tous" %}</option>
+            <option value="F" {% if request.GET.sexe == "F" %}selected{% endif %}>{% trans "Féminin" %}</option>
+            <option value="M" {% if request.GET.sexe == "M" %}selected{% endif %}>{% trans "Masculin" %}</option>
+          </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+          <label class="form-label d-none d-md-block">&nbsp;</label>
+          <button type="submit" class="btn btn-primary">
+            {% trans "Rechercher" %}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="users-table-card">
+      <div class="users-table-header">
+        <div class="count">
+          {% trans "Liste des utilisateurs" %}
+        </div>
+        <div class="small-note">
+          {% trans "Résultats affichés selon les filtres sélectionnés" %}
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table users-table align-middle">
+          <thead>
+            <tr>
+              <th>{% trans "N°" %}</th>
+              <th>{% trans "Nom d'utilisateur" %}</th>
+              <th>{% trans "Nom complet" %}</th>
+              <th>{% trans "Sexe" %}</th>
+              <th>{% trans "Date de naissance" %}</th>
+              <th>{% trans "Pays" %}</th>
+              <th>{% trans "Ville" %}</th>
+              <th>{% trans "Adresse" %}</th>
+              <th>{% trans "Numéro de téléphone" %}</th>
+              <th>{% trans "Email" %}</th>
+              <th>{% trans "Rôle" %}</th>
+              <th>{% trans "Actions" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in utilisateurs %}
+            <tr>
+              <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+              <td>
+                <div class="user-username">{{ user.username }}</div>
+              </td>
+              <td>
+                <div class="user-name">{{ user.nom_complet|default:"-" }}</div>
+              </td>
+              <td>
+                <span class="badge-sexe">{{ user.sexe|default:"-" }}</span>
+              </td>
+              <td>{{ user.date_naissancce|default:"-" }}</td>
+              <td>{{ user.Pays|default:"-" }}</td>
+              <td>{{ user.Ville|default:"-" }}</td>
+              <td>{{ user.Adresse|default:"-" }}</td>
+              <td>{{ user.num_tel|default:"-" }}</td>
+              <td>{{ user.email|default:"-" }}</td>
+              <td>
+                <span class="badge-role">{{ user.role|default:"-" }}</span>
+              </td>
+              <td>
+                <div class="action-group">
+                  <a class="btn btn-outline-primary btn-sm" href="">
+                    {% trans "Détail" %}
+                  </a>
+                  <a class="btn btn-outline-success btn-sm" href="{% url 'ModifierDesUtilisateur' user.id %}">
+                    {% trans "Modifier" %}
+                  </a>
+                  <a class="btn btn-outline-danger btn-sm" href="{% url 'SupprimerUser' user.id %}">
+                    {% trans "Supprimer" %}
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="12">
+                <div class="empty-box">
+                  {% trans "Aucun utilisateur trouvé." %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="users-pagination-wrap">
+        <nav aria-label="{% trans 'Pagination des utilisateurs' %}">
+          <ul class="pagination justify-content-center flex-wrap">
 
             {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1">&laquo; Première</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
-                </li>
+              <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.nom_complet %}&nom_complet={{ request.GET.nom_complet }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.sexe %}&sexe={{ request.GET.sexe }}{% endif %}">
+                  &laquo; {% trans "Première" %}
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.nom_complet %}&nom_complet={{ request.GET.nom_complet }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.sexe %}&sexe={{ request.GET.sexe }}{% endif %}">
+                  {% trans "Précédent" %}
+                </a>
+              </li>
             {% endif %}
 
             {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
-                    </li>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                    </li>
-                {% endif %}
+              {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <span class="page-link">{{ num }}</span>
+                </li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}{% if request.GET.nom_complet %}&nom_complet={{ request.GET.nom_complet }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.sexe %}&sexe={{ request.GET.sexe }}{% endif %}">
+                    {{ num }}
+                  </a>
+                </li>
+              {% endif %}
             {% endfor %}
 
             {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Dernière &raquo;</a>
-                </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.nom_complet %}&nom_complet={{ request.GET.nom_complet }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.sexe %}&sexe={{ request.GET.sexe }}{% endif %}">
+                  {% trans "Suivant" %}
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.nom_complet %}&nom_complet={{ request.GET.nom_complet }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.sexe %}&sexe={{ request.GET.sexe }}{% endif %}">
+                  {% trans "Dernière" %} &raquo;
+                </a>
+              </li>
             {% endif %}
 
-        </ul>
-    </nav>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
   </div>
-
-
-
+</div>
 {% endblock %}

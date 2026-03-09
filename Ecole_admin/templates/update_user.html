@@ -1,158 +1,429 @@
-{% extends 'base.html'%}
-{% load static %}
-{% block title%} Utilisateurs form {% endblock %}
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Modifier un utilisateur" %}{% endblock %}
+
 {% block main %}
+<style>
+  .edit-user-page{
+    background:#f5f7fb;
+    min-height:calc(100vh - 60px);
+    padding:32px 0 48px;
+  }
 
+  .edit-user-shell{
+    max-width:1400px;
+    margin:0 auto;
+    padding:0 16px;
+  }
 
+  .edit-user-card{
+    background:#fff;
+    border:1px solid #e8edf3;
+    border-radius:24px;
+    box-shadow:0 10px 30px rgba(15,23,42,.06);
+    padding:28px 24px 30px;
+  }
 
-<div class="containaire">
-    <h2>{{ Title }} </h2>
-    {% if form.errors %}
-        <div class="error-messages bg-danger">
-            <ul>
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
+  .edit-user-header{
+    text-align:center;
+    margin-bottom:26px;
+  }
+
+  .edit-user-title{
+    margin:0;
+    font-size:3rem;
+    line-height:1.1;
+    font-weight:700;
+    color:#24344d;
+  }
+
+  .edit-user-subtitle{
+    margin-top:8px;
+    color:#7a8699;
+    font-size:1rem;
+  }
+
+  .edit-user-grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:24px 28px;
+  }
+
+  .edit-user-field{
+    display:flex;
+    flex-direction:column;
+  }
+
+  .edit-user-label{
+    font-size:1rem;
+    font-weight:700;
+    color:#445268;
+    margin-bottom:10px;
+  }
+
+  .edit-user-input input,
+  .edit-user-input select,
+  .edit-user-input textarea{
+    width:100%;
+    min-height:56px;
+    border:1px solid #d7dee8;
+    border-radius:14px;
+    background:#fff;
+    padding:14px 16px;
+    font-size:1rem;
+    color:#24344d;
+    outline:none;
+    transition:.2s ease;
+    box-shadow:none;
+  }
+
+  .edit-user-input textarea{
+    min-height:120px;
+    resize:vertical;
+  }
+
+  .edit-user-input input:focus,
+  .edit-user-input select:focus,
+  .edit-user-input textarea:focus{
+    border-color:#3b82f6;
+    box-shadow:0 0 0 4px rgba(59,130,246,.10);
+  }
+
+  .edit-user-input .is-invalid,
+  .edit-user-input input.is-invalid,
+  .edit-user-input select.is-invalid,
+  .edit-user-input textarea.is-invalid{
+    border-color:#e11d48 !important;
+    box-shadow:0 0 0 4px rgba(225,29,72,.08) !important;
+  }
+
+  .field-errors{
+    margin-top:8px;
+  }
+
+  .field-errors .error-item{
+    color:#be123c;
+    font-size:.92rem;
+    margin-bottom:4px;
+    font-weight:600;
+  }
+
+  .non-field-errors{
+    background:#fff1f2;
+    border:1px solid #fecdd3;
+    color:#9f1239;
+    border-radius:16px;
+    padding:14px 16px;
+    margin-bottom:20px;
+  }
+
+  .non-field-errors ul{
+    margin:0;
+    padding-left:18px;
+  }
+
+  .edit-user-actions{
+    display:flex;
+    gap:12px;
+    margin-top:28px;
+    flex-wrap:wrap;
+  }
+
+  .edit-user-btn{
+    border:none;
+    border-radius:14px;
+    padding:14px 24px;
+    font-size:1rem;
+    font-weight:700;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:.2s ease;
+  }
+
+  .edit-user-btn-primary{
+    background:#22c55e;
+    color:#fff;
+  }
+
+  .edit-user-btn-primary:hover{
+    background:#16a34a;
+    color:#fff;
+  }
+
+  .edit-user-btn-secondary{
+    background:#2563eb;
+    color:#fff;
+  }
+
+  .edit-user-btn-secondary:hover{
+    background:#1d4ed8;
+    color:#fff;
+  }
+
+  @media (max-width: 1100px){
+    .edit-user-grid{
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px){
+    .edit-user-title{
+      font-size:2rem;
+    }
+
+    .edit-user-grid{
+      grid-template-columns:1fr;
+      gap:18px;
+    }
+
+    .edit-user-card{
+      padding:22px 16px 24px;
+    }
+  }
+</style>
+
+<div class="edit-user-page">
+  <div class="edit-user-shell">
+    <div class="edit-user-card">
+
+      <div class="edit-user-header">
+        <h1 class="edit-user-title">
+          {% if Title %}
+            {{ Title }}
+          {% else %}
+            {% trans "Modifier un utilisateur" %}
+          {% endif %}
+        </h1>
+        <div class="edit-user-subtitle">
+          {% trans "Mettez à jour les informations de l'utilisateur" %}
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="non-field-errors">
+          <ul>
+            {% for error in form.non_field_errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div class="edit-user-grid">
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_username">{% trans "Nom d'utilisateur" %} :</label>
+            <div class="edit-user-input">
+              {{ form.username }}
+            </div>
+            {% if form.username.errors %}
+              <div class="field-errors">
+                {% for error in form.username.errors %}
+                  <div class="error-item">{{ error }}</div>
                 {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-    <form method="POST" enctype="multipart/form-data" class="form">
-        {% csrf_token %}
-         <div>
-            <label for="username">Username :</label>
-             {{form.username}}
-        </div>
-        <div>
-            <label for="nom_complet">Nom Complete :</label>
-            {{form.nom_complet }}
-        </div>
-        <div>
-            <label for="sexe">Sexe :</label>
-            {{ form.sexe }}
-        </div>
-        <div>
-            <label for="date_naissance">Date de naissance :</label>
-            {{ form.date_naissance }}
-        </div>
-        <div>
-            <label for="Pays">Pays</label>
-            {{ form.Pays }}
-        </div>
-        <div>
-            <label for="Ville">Ville :</label>
-            {{ form.Ville }}
-        </div>
-        <div>
-            <label for="Adresse">Adresse :</label>
-            {{ form.Adresse }}
-        </div>
-        <div>
-            <label for="num_tel">Num Telephone :</label>
-            {{ form.num_tel }}
-        </div>
-        <div>
-            <label for="email">Email :</label>
-           {{ form.email }}
-        </div>
-        <div>
-            <label for="role">Role :</label>
-            {{ form.role }}
-        </div>
-        <div>
-            <label for="password1">Password</label>
-            {{ form.password1 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_nom_complet">{% trans "Nom complet" %} :</label>
+            <div class="edit-user-input">
+              {{ form.nom_complet }}
+            </div>
+            {% if form.nom_complet.errors %}
+              <div class="field-errors">
+                {% for error in form.nom_complet.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_sexe">{% trans "Sexe" %} :</label>
+            <div class="edit-user-input">
+              {{ form.sexe }}
+            </div>
+            {% if form.sexe.errors %}
+              <div class="field-errors">
+                {% for error in form.sexe.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_date_naissance">{% trans "Date de naissance" %} :</label>
+            <div class="edit-user-input">
+              {{ form.date_naissance }}
+            </div>
+            {% if form.date_naissance.errors %}
+              <div class="field-errors">
+                {% for error in form.date_naissance.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_Pays">{% trans "Pays" %} :</label>
+            <div class="edit-user-input">
+              {{ form.Pays }}
+            </div>
+            {% if form.Pays.errors %}
+              <div class="field-errors">
+                {% for error in form.Pays.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_Ville">{% trans "Ville" %} :</label>
+            <div class="edit-user-input">
+              {{ form.Ville }}
+            </div>
+            {% if form.Ville.errors %}
+              <div class="field-errors">
+                {% for error in form.Ville.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_Adresse">{% trans "Adresse" %} :</label>
+            <div class="edit-user-input">
+              {{ form.Adresse }}
+            </div>
+            {% if form.Adresse.errors %}
+              <div class="field-errors">
+                {% for error in form.Adresse.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_num_tel">{% trans "Numéro de téléphone" %} :</label>
+            <div class="edit-user-input">
+              {{ form.num_tel }}
+            </div>
+            {% if form.num_tel.errors %}
+              <div class="field-errors">
+                {% for error in form.num_tel.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_email">{% trans "Email" %} :</label>
+            <div class="edit-user-input">
+              {{ form.email }}
+            </div>
+            {% if form.email.errors %}
+              <div class="field-errors">
+                {% for error in form.email.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          {% if form.ecole %}
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_ecole">{% trans "École" %} :</label>
+            <div class="edit-user-input">
+              {{ form.ecole }}
+            </div>
+            {% if form.ecole.errors %}
+              <div class="field-errors">
+                {% for error in form.ecole.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if form.role %}
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_role">{% trans "Rôle" %} :</label>
+            <div class="edit-user-input">
+              {{ form.role }}
+            </div>
+            {% if form.role.errors %}
+              <div class="field-errors">
+                {% for error in form.role.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if form.password1 %}
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_password1">{% trans "Mot de passe" %} :</label>
+            <div class="edit-user-input">
+              {{ form.password1 }}
+            </div>
+            {% if form.password1.errors %}
+              <div class="field-errors">
+                {% for error in form.password1.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if form.password2 %}
+          <div class="edit-user-field">
+            <label class="edit-user-label" for="id_password2">{% trans "Confirmation du mot de passe" %} :</label>
+            <div class="edit-user-input">
+              {{ form.password2 }}
+            </div>
+            {% if form.password2.errors %}
+              <div class="field-errors">
+                {% for error in form.password2.errors %}
+                  <div class="error-item">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
         </div>
 
-        <div class="full-width">
-            <button type="submit" class="submit-btn">{{ Submit_text }}</button>
+        <div class="edit-user-actions">
+          <button type="submit" class="edit-user-btn edit-user-btn-primary">
+            {% if Submit_text %}
+              {{ Submit_text }}
+            {% else %}
+              {% trans "Mettre à jour" %}
+            {% endif %}
+          </button>
+
+          <a href="{% url 'Les_Utlisateur' %}" class="edit-user-btn edit-user-btn-secondary">
+            {% trans "Retour à la liste" %}
+          </a>
         </div>
+      </form>
 
-    </form>
-</div>
-
-
-
-
-
-<!--
-
-<div style="margin-top: 12rem;" id="register">
-<h5>{{ erreur }}</h5>
- <div style="display: flex; justify-content: space-evenly;" class="logos">
-         <img class="logo" src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" alt="Ecomanage">
-         <h2 style="margin-top: 0px;">Ajouter un Utilisateur</h2>
     </div>
-
-<form action="" method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
-</form>
-
+  </div>
 </div>
-
-
-<div class="form-container">
-    <h2>Ajouter un élève</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="id_nom_complet">Username :</label>
-                {{ form.username }}
-            </div>
-            <div class="form-group">
-                <label for="id_sexe">Nom complet :</label>
-                {{ form.nom_complet }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_date_naissance">Date de naissance :</label>
-                {{ form.date_naissance }}
-            </div>
-            <div class="form-group">
-                <label for="id_adresse">Adresse :</label>
-                {{ form.Adresse }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_num_tel">Téléphone :</label>
-                {{ form.num_tel }}
-            </div>
-            <div class="form-group">
-                <label for="id_email">Email :</label>
-                {{ form.email }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_image">Image :</label>
-                {{ form.image }}
-            </div>
-            <div class="form-group">
-                <label for="id_classe">Classe :</label>
-                {{ form.classe }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_nom_mere">Nom de la mère :</label>
-                {{ form.nom_mere }}
-            </div>
-            <div class="form-group">
-                <label for="id_tel_parent">Téléphone parent :</label>
-                {{ form.tel_parent }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_email_parent">Email parent :</label>
-                {{ form.email_parent }}
-            </div>
-        </div>
-        <button type="submit" class="btn-submit">Ajouter</button>
-    </form>
-</div>
--->
-
-
 {% endblock %}

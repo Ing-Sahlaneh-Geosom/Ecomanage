@@ -1,10 +1,10 @@
-{% load tz %}
+{% load tz i18n %}
 
 <!doctype html>
-<html lang="fr">
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
 <head>
   <meta charset="utf-8">
-  <title>Reçu {{ object.numero }}</title>
+  <title>{% trans "Reçu" %} {{ object.numero }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { font-family: Arial, sans-serif; padding: 24px; }
@@ -16,67 +16,74 @@
     .right { text-align: right; }
     .btns { margin: 12px auto; max-width: 820px; display: flex; gap: 10px; justify-content: end; }
     @media print { .btns { display:none; } body{ padding:0; } .box{ border:none; } }
+
+    /* ✅ RTL */
+    html[dir="rtl"] body { direction: rtl; }
+    html[dir="rtl"] th, html[dir="rtl"] td { text-align: right; }
+    html[dir="rtl"] .right { text-align: left; } /* zone droite devient gauche en RTL */
+    html[dir="rtl"] .btns { justify-content: start; }
   </style>
 </head>
 <body>
 
 <div class="btns">
-  <button onclick="window.print()">Imprimer</button>
-  <button onclick="window.location.href='{% url "caisse" %}'">Retour</button>
+  <button type="button" onclick="window.print()">{% trans "Imprimer" %}</button>
+  <button type="button" onclick="window.location.href='{% url "caisse" %}'">{% trans "Retour" %}</button>
 </div>
 
 <div class="box">
-  <h2 style="margin:0;">REÇU DE CAISSE</h2>
-  <div class="muted">N° {{ object.numero }} — {{ object.date_operation|localtime|date:"d/m/Y H:i" }}</div>
+  <h2 style="margin:0;">{% trans "REÇU DE CAISSE" %}</h2>
+  <div class="muted">
+    {% trans "N°" %} {{ object.numero }} — {{ object.date_operation|localtime|date:"d/m/Y H:i" }}
+  </div>
 
   <hr>
 
   <div style="display:flex; justify-content:space-between; gap:16px;">
     <div>
-      <div><b>Élève :</b> {{ object.eleve.nom }}</div>
+      <div><b>{% trans "Élève :" %}</b> {{ object.eleve.nom }}</div>
       <div class="muted">{{ object.eleve.classe.niveau }} - {{ object.eleve.classe.nom }}</div>
-      <div class="muted"><b>Année :</b> {{ object.annee_scolaire }}</div>
+      <div class="muted"><b>{% trans "Année :" %}</b> {{ object.annee_scolaire }}</div>
     </div>
     <div class="right">
-      <div><b>Mode :</b> {{ object.mode }}</div>
-      <div class="muted"><b>Réf :</b> {{ object.numero|default:"—" }}</div>
-      <div class="muted"><b>Caissier :</b> {{ object.caissier }}</div>
+      <div><b>{% trans "Mode :" %}</b> {{ object.mode }}</div>
+      <div class="muted"><b>{% trans "Réf :" %}</b> {{ object.numero|default:"—" }}</div>
+      <div class="muted"><b>{% trans "Caissier :" %}</b> {{ object.caissier }}</div>
     </div>
   </div>
 
   <table>
-  <thead>
-    <tr>
-      <th>Type frais</th>
-      <th class="right">Facturé</th>
-      <th class="right">Payé</th>
-      <th class="right">Restant</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for r in rows %}
-    <tr>
-      <td>{{ r.type }}</td>
-      <td class="right">{{ r.facture }} {{ r.devise }}</td>
-      <td class="right">{{ r.paye }} {{ r.devise }}</td>
-      <td class="right"><b>{{ r.reste }} {{ r.devise }}</b></td>
-    </tr>
-    {% endfor %}
-    <tr>
-      <td class="right" colspan="3"><b>Total payé (ce reçu)</b></td>
-      <td class="right"><b>{{ object.total }} {{ object.devise }}</b></td>
-    </tr>
-  </tbody>
-</table>
-
+    <thead>
+      <tr>
+        <th>{% trans "Type frais" %}</th>
+        <th class="right">{% trans "Facturé" %}</th>
+        <th class="right">{% trans "Payé" %}</th>
+        <th class="right">{% trans "Restant" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.type }}</td>
+        <td class="right">{{ r.facture }} {{ r.devise }}</td>
+        <td class="right">{{ r.paye }} {{ r.devise }}</td>
+        <td class="right"><b>{{ r.reste }} {{ r.devise }}</b></td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td class="right" colspan="3"><b>{% trans "Total payé (ce reçu)" %}</b></td>
+        <td class="right"><b>{{ object.total }} {{ object.devise }}</b></td>
+      </tr>
+    </tbody>
+  </table>
 
   {% if object.note %}
-    <p class="muted"><b>Note :</b> {{ object.note }}</p>
+    <p class="muted"><b>{% trans "Note :" %}</b> {{ object.note }}</p>
   {% endif %}
 
   <div style="margin-top:22px; display:flex; justify-content:space-between;">
-    <div class="muted">Signature Caissier</div>
-    <div class="muted">Signature Parent / Élève</div>
+    <div class="muted">{% trans "Signature Caissier" %}</div>
+    <div class="muted">{% trans "Signature Parent / Élève" %}</div>
   </div>
 </div>
 

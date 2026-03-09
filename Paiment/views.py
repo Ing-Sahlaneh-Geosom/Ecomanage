@@ -372,7 +372,9 @@ class PaiementFraisView(View):
             "rows": rows
         })
 
-
+from django.http import HttpResponse
+from django.utils.translation import gettext as _
+from django.db.models import Sum
 
 def export_paiement_csv(request):
     ecole = request.user.ecole
@@ -381,7 +383,7 @@ def export_paiement_csv(request):
     type_id = request.GET.get("type") or ""
 
     if not (annee_id.isdigit() and niveau_id.isdigit() and type_id.isdigit()):
-        return HttpResponse("Filtres invalides", status=400)
+        return HttpResponse(_("Filtres invalides"), status=400, content_type="text/plain; charset=utf-8")
 
     frais_qs = FraisEleve.objects.filter(
         ecole=ecole,
@@ -399,19 +401,28 @@ def export_paiement_csv(request):
         ).values("frais_eleve_id").annotate(total=Sum("montant"))
     }
 
-    response = HttpResponse(content_type="text/csv")
+    # ✅ UTF-8 + BOM pour Excel
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="paiement_frais.csv"'
-    response.write("Eleve;Niveau;Type;Facture;Paye;Restant;Devise\n")
+    response.write("\ufeff")  # BOM
+
+    # ✅ entêtes traduits
+    response.write(
+        f"{_('Élève')};{_('Niveau')};{_('Type')};{_('Facture')};{_('Payé')};{_('Restant')};{_('Devise')}\n"
+    )
 
     for f in frais_qs:
         paye = pay_map.get(f.id, 0)
         restant = float(f.montant) - float(paye)
         if restant < 0:
             restant = 0
-        response.write(f"{f.eleve.nom};{f.eleve.classe.niveau} - {f.eleve.classe.nom};{f.type_paiement.nom};{f.montant};{paye};{restant};{f.devise}\n")
+
+        response.write(
+            f"{f.eleve.nom};{f.eleve.classe.niveau} - {f.eleve.classe.nom};{f.type_paiement.nom};"
+            f"{f.montant};{paye};{restant};{f.devise}\n"
+        )
 
     return response
-
 
 
 # PaiemtAdmin/views.py
@@ -632,6 +643,10 @@ def _next_recu_number():
     return f"RC-{year}-{last_num+1:05d}"
 
 
+
+from django.utils.translation import gettext as _
+
+
 class CaisseView(View):
     template_name = "caisse.html"
 
@@ -673,7 +688,9 @@ class CaisseView(View):
 
             # si tu veux forcer annee active seulement, décommente :
             # if annee:
-            #     eleve = Eleve.objects.filter(id=int(eleve_id), ecole=ecole, annee_scolaire=annee).select_related("classe", "classe__niveau").first()
+            #     eleve = Eleve.objects.filter(
+            #         id=int(eleve_id), ecole=ecole, annee_scolaire=annee
+            #     ).select_related("classe", "classe__niveau").first()
 
         if eleve and annee:
             frais_qs = FraisEleve.objects.filter(
@@ -711,8 +728,6 @@ class CaisseView(View):
             "frais_rows": frais_rows,
         })
 
-    from django.utils.timezone import now
-
     @transaction.atomic
     def post(self, request):
         ecole = request.user.ecole
@@ -724,12 +739,12 @@ class CaisseView(View):
         note = (request.POST.get("note") or "").strip()
 
         if not eleve_id.isdigit():
-            messages.error(request, "Choisis d'abord un élève.")
+            messages.error(request, _("Choisis d'abord un élève."))
             return redirect("caisse")
 
         eleve = Eleve.objects.filter(id=int(eleve_id), ecole=ecole).first()
         if not eleve or not annee:
-            messages.error(request, "Élève ou année scolaire invalide.")
+            messages.error(request, _("Élève ou année scolaire invalide."))
             return redirect("caisse")
 
         date_str = now().strftime("%Y%m%d")
@@ -779,14 +794,19 @@ class CaisseView(View):
 
             restant = float(frais.montant) - float(deja_paye)
             if restant <= 0:
-                # déjà soldé → on ignore ce paiement
                 continue
 
             # si l'utilisateur met plus que le restant, on limite ou on refuse
             if amount > restant:
-                messages.error(request, f"Montant trop élevé pour '{frais.type_paiement.nom}'. Restant: {restant} {frais.devise}.")
+                messages.error(
+                    request,
+                    _("Montant trop élevé pour '%(type)s'. Restant: %(restant)s %(devise)s.") % {
+                        "type": frais.type_paiement.nom,
+                        "restant": restant,
+                        "devise": frais.devise,
+                    }
+                )
                 return redirect(f"{request.path}?eleve={eleve.id}")
-
 
             PaiementFraisEleve.objects.create(
                 ecole=ecole,
@@ -802,7 +822,7 @@ class CaisseView(View):
             total += amount
 
         if total <= 0:
-            messages.error(request, "Saisis au moins un montant à payer.")
+            messages.error(request, _("Saisis au moins un montant à payer."))
             return redirect(f"{request.path}?eleve={eleve.id}")
 
         recu = RecuCaisse.objects.create(
@@ -825,13 +845,9 @@ class CaisseView(View):
                 devise=dev
             )
 
-        messages.success(request, "Paiement enregistré. Référence générée automatiquement.")
+        messages.success(request, _("Paiement enregistré. Référence générée automatiquement."))
         return redirect("recu_print", pk=recu.pk)
 
-
-from django.views.generic import DetailView
-
-from django.db.models import Sum
 
 def recu_print(request, pk):
     recu = RecuCaisse.objects.select_related("eleve", "annee_scolaire", "caissier").get(pk=pk)
@@ -840,9 +856,11 @@ def recu_print(request, pk):
     for l in recu.lignes.select_related("frais_eleve", "frais_eleve__type_paiement"):
         frais = l.frais_eleve
 
-        total_paye = (PaiementFraisEleve.objects
-                      .filter(ecole=recu.ecole, annee_scolaire=recu.annee_scolaire, frais_eleve=frais)
-                      .aggregate(s=Sum("montant"))["s"] or 0)
+        total_paye = (
+            PaiementFraisEleve.objects
+            .filter(ecole=recu.ecole, annee_scolaire=recu.annee_scolaire, frais_eleve=frais)
+            .aggregate(s=Sum("montant"))["s"] or 0
+        )
 
         restant = float(frais.montant) - float(total_paye)
         if restant < 0:

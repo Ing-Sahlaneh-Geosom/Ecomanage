@@ -1,29 +1,154 @@
 {% extends "base.html" %}
-{% block title %} Salles Liste {% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Liste des salles" %}{% endblock %}
+
 {% block main %}
 
-
 <style>
-  .page-wrap{ background:#f6f7fb; min-height: calc(100vh - 60px); }
+  .page-wrap{
+    background:#f6f7fb;
+    min-height: calc(100vh - 60px);
+    direction: rtl;
+    text-align: right;
+  }
+
+  .page-wrap .form-control,
+  .page-wrap .form-select,
+  .page-wrap .btn,
+  .page-wrap .table,
+  .page-wrap .pagination,
+  .page-wrap .alert,
+  .page-wrap .form-label,
+  .page-wrap .muted,
+  .page-wrap .small {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .page-wrap .table th,
+  .page-wrap .table td{
+    vertical-align: middle;
+  }
+
+  .page-wrap .table th.text-center,
+  .page-wrap .table td.text-center{
+    text-align:center !important;
+  }
+
+  .page-wrap .table th.text-end,
+  .page-wrap .table td.text-end{
+    text-align:left !important;
+  }
+
+  .page-wrap .d-flex.gap-2.align-items-center{
+    flex-direction: row-reverse;
+  }
+
+  .page-wrap .pagination{
+    direction: rtl;
+  }
+
+  .page-wrap .pagination .page-link{
+    text-align:center;
+  }
 
   /* ✅ Custom Modal */
-  .xmodal-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.55); display:none; z-index:9998; }
-  .xmodal{ position:fixed; inset:0; display:none; z-index:9999; padding:20px; }
-  .xmodal.is-open,.xmodal-backdrop.is-open{ display:block; }
-  .xmodal-panel{
-    max-width: 980px; margin:40px auto; background:#fff; border-radius:16px;
-    box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden;
-    transform:translateY(10px); opacity:0; animation:xmodalIn .15s ease-out forwards;
+  .xmodal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.55);
+    display:none;
+    z-index:9998;
   }
-  @keyframes xmodalIn{ to{ transform:translateY(0); opacity:1; } }
-  .xmodal-header{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(0,0,0,.08); }
-  .xmodal-title{ font-size:1.05rem; font-weight:700; margin:0; }
-  .xmodal-close{ border:0; background:transparent; width:40px; height:40px; border-radius:10px; cursor:pointer; }
-  .xmodal-close:hover{ background:rgba(0,0,0,.06); }
-  .xmodal-body{ padding:16px; }
-  .xmodal-footer{ padding:14px 16px; border-top:1px solid rgba(0,0,0,.08); display:flex; gap:10px; justify-content:flex-end; }
 
-  .muted{ color:#64748b; font-size:.9rem; }
+  .xmodal{
+    position:fixed;
+    inset:0;
+    display:none;
+    z-index:20000;
+    padding:20px;
+    direction: rtl;
+  }
+
+  .xmodal.is-open,
+  .xmodal-backdrop.is-open{
+    display:block;
+  }
+
+  .xmodal-panel{
+    max-width: 980px;
+    margin:40px auto;
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+    overflow:hidden;
+    transform:translateY(10px);
+    opacity:0;
+    animation:xmodalIn .15s ease-out forwards;
+  }
+
+  @keyframes xmodalIn{
+    to{
+      transform:translateY(0);
+      opacity:1;
+    }
+  }
+
+  .xmodal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-direction: row-reverse;
+    padding:14px 16px;
+    border-bottom:1px solid rgba(0,0,0,.08);
+  }
+
+  .xmodal-title{
+    font-size:1.05rem;
+    font-weight:700;
+    margin:0;
+    text-align:right;
+  }
+
+  .xmodal-close{
+    border:0;
+    background:transparent;
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+
+  .xmodal-close:hover{
+    background:rgba(0,0,0,.06);
+  }
+
+  .xmodal-body{
+    padding:16px;
+    text-align:right;
+  }
+
+  .xmodal-footer{
+    padding:14px 16px;
+    border-top:1px solid rgba(0,0,0,.08);
+    display:flex;
+    gap:10px;
+    justify-content:flex-start;
+    flex-direction: row-reverse;
+  }
+
+  .muted{
+    color:#64748b;
+    font-size:.9rem;
+  }
+
+  .rtl-start{
+    text-align:right !important;
+  }
+
+  .rtl-end{
+    text-align:left !important;
+  }
 </style>
 
 <div class="page-wrap py-3">
@@ -31,10 +156,13 @@
 
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
       <div>
-        <h4 class="mb-1">Registre des Salles</h4>
-        <div class="muted">Salle = Bâtiment + Nom + Étage + Description </div>
+        <h4 class="mb-1 text-dark">{% trans "Registre des salles" %}</h4>
+        <div class="muted">{% trans "Salle = Bâtiment + Nom + Étage + Description" %}</div>
       </div>
-      <button class="btn btn-primary" id="btnOpenCreate" type="button">+ Ajouter</button>
+
+      <button class="btn btn-primary" id="btnOpenCreate">
+        + {% trans "Ajouter" %}
+      </button>
     </div>
 
     <!-- Filters -->
@@ -42,16 +170,27 @@
       <div class="card-body">
         <div class="row g-2 align-items-center">
           <div class="col-12 col-md-6">
-            <input type="text" class="form-control" id="searchInput" placeholder="Rechercher (salle, bâtiment...)">
+            <input
+              type="text"
+              class="form-control"
+              id="searchInput"
+              placeholder="{% trans 'Rechercher (salle, bâtiment...)' %}"
+            >
           </div>
+
           <div class="col-12 col-md-3">
             <select class="form-select" id="batimentFilter">
-              <option value="">-- Tous les bâtiments --</option>
+              <option value="">{% trans "Tous les bâtiments" %}</option>
             </select>
           </div>
+
           <div class="col-12 col-md-3 d-flex gap-2">
-            <button class="btn btn-outline-primary w-100" id="btnSearch" type="button">Filtrer</button>
-            <button class="btn btn-outline-secondary" id="btnReset" type="button">Reset</button>
+            <button class="btn btn-outline-primary w-100" id="btnSearch" type="button">
+              {% trans "Filtrer" %}
+            </button>
+            <button class="btn btn-outline-secondary" id="btnReset" type="button">
+              {% trans "Reset" %}
+            </button>
           </div>
         </div>
       </div>
@@ -62,9 +201,10 @@
       <div class="card-body p-0">
 
         <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between px-3 py-3">
-          <div class="small text-muted">Total : <b id="totalCount">0</b></div>
+          <div class="small text-muted">{% trans "Total" %} : <b id="totalCount">0</b></div>
+
           <div class="d-flex gap-2 align-items-center">
-            <span class="small text-muted">Par page</span>
+            <span class="small text-muted">{% trans "Par page" %}</span>
             <select class="form-select form-select-sm" style="width:90px" id="pageSize">
               <option value="5">5</option>
               <option value="10" selected>10</option>
@@ -78,21 +218,27 @@
             <thead class="table-light">
               <tr>
                 <th style="width:70px;">#</th>
-                <th>Salle</th>
-                <th style="width:200px;">Bâtiment</th>
-                <th style="width:120px;" class="text-center">Étage</th>
-                <th>Description</th>
-                <th style="width:190px;" class="text-end">Actions</th>
+                <th>{% trans "Salle" %}</th>
+                <th style="width:200px;">{% trans "Bâtiment" %}</th>
+                <th style="width:120px;" class="text-center">{% trans "Étage" %}</th>
+                <th>{% trans "Description" %}</th>
+                <th style="width:190px;" class="text-end">{% trans "Actions" %}</th>
               </tr>
             </thead>
             <tbody id="tableBody">
-              <tr><td colspan="6" class="text-center py-4 text-muted">Chargement...</td></tr>
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">
+                  {% trans "Chargement..." %}
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
 
         <div class="px-3 py-3">
-          <nav><ul class="pagination justify-content-center flex-wrap mb-0" id="pagination"></ul></nav>
+          <nav>
+            <ul class="pagination justify-content-center flex-wrap mb-0" id="pagination"></ul>
+          </nav>
           <p style="font-size: xx-small;" class="text-center text-muted small mt-2 mb-0" id="pageInfo"></p>
         </div>
 
@@ -107,7 +253,7 @@
 <div class="xmodal" id="xModal">
   <div class="xmodal-panel" role="dialog" aria-modal="true">
     <div class="xmodal-header">
-      <h5 class="xmodal-title" id="xTitle">Ajouter une salle</h5>
+      <h5 class="xmodal-title" id="xTitle">{% trans "Ajouter une salle" %}</h5>
       <button class="xmodal-close" type="button" id="xClose">✕</button>
     </div>
 
@@ -117,40 +263,43 @@
 
         <div class="row g-3">
           <div class="col-12 col-md-6">
-            <label class="form-label">Bâtiment <span class="text-danger">*</span></label>
+            <label class="form-label">{% trans "Bâtiment" %} <span class="text-danger">*</span></label>
             <select class="form-select" id="batiment_id" required>
-              <option value="">-- Choisir --</option>
+              <option value="">{% trans "Choisir" %}</option>
             </select>
           </div>
 
           <div class="col-12 col-md-6">
-            <label class="form-label">Nom salle <span class="text-danger">*</span></label>
-            <input class="form-control" id="nom" required placeholder="Ex: Salle 1 / Informatique">
+            <label class="form-label">{% trans "Nom salle" %} <span class="text-danger">*</span></label>
+            <input class="form-control" id="nom" required placeholder="{% trans 'Ex: Salle 1 / Informatique' %}">
           </div>
 
           <div class="col-12 col-md-4">
-            <label class="form-label">Étage <span class="text-danger">*</span></label>
+            <label class="form-label">{% trans "Étage" %} <span class="text-danger">*</span></label>
             <select class="form-select" id="etage" required>
-              <option value="">-- Choisir --</option>
+              <option value="">{% trans "Choisir" %}</option>
             </select>
-            <div class="muted mt-1">Les étages dépendent du bâtiment.</div>
+            <div class="muted mt-1">{% trans "Les étages dépendent du bâtiment." %}</div>
           </div>
 
           <div class="col-12 col-md-8">
-            <label class="form-label">Description</label>
-            <input class="form-control" id="description" placeholder="Petite description (optionnel)">
+            <label class="form-label">{% trans "Description" %}</label>
+            <input class="form-control" id="description" placeholder="{% trans 'Petite description (optionnel)' %}">
           </div>
 
           <div class="col-12">
             <div class="alert alert-danger d-none" id="formError"></div>
           </div>
         </div>
-
       </div>
 
       <div class="xmodal-footer">
-        <button type="button" class="btn btn-outline-secondary" id="btnCancel">Annuler</button>
-        <button type="submit" class="btn btn-primary" id="btnSave">Enregistrer</button>
+        <button type="button" class="btn btn-outline-secondary" id="btnCancel">
+          {% trans "Annuler" %}
+        </button>
+        <button type="submit" class="btn btn-primary" id="btnSave">
+          {% trans "Enregistrer" %}
+        </button>
       </div>
     </form>
   </div>
@@ -166,21 +315,56 @@ const URL_DETAIL = (id) => "{% url 'salles_api_detail' 999999 %}".replace("99999
 const URL_UPDATE = (id) => "{% url 'salles_api_update' 999999 %}".replace("999999", id);
 const URL_DELETE = (id) => "{% url 'salles_api_delete' 999999 %}".replace("999999", id);
 
+/* Traductions JS */
+const TEXT_PREVIOUS           = "{% trans 'Précédent' %}";
+const TEXT_NEXT               = "{% trans 'Suivant' %}";
+const TEXT_EMPTY              = "{% trans 'Aucune salle.' %}";
+const TEXT_DELETE             = "{% trans 'Supprimer' %}";
+const TEXT_EDIT               = "{% trans 'Modifier' %}";
+const TEXT_LOADING            = "{% trans 'Chargement...' %}";
+const TEXT_LOADING_ERROR      = "{% trans 'Erreur chargement.' %}";
+const TEXT_ROOM_LOADING_ERROR = "{% trans 'Erreur chargement salle.' %}";
+const TEXT_DELETE_ERROR       = "{% trans 'Erreur suppression.' %}";
+const TEXT_SAVE_ERROR         = "{% trans 'Erreur lors de l enregistrement.' %}";
+const TEXT_CHOOSE             = "{% trans 'Choisir' %}";
+const TEXT_ALL_BUILDINGS      = "{% trans 'Tous les bâtiments' %}";
+const TEXT_PAGE               = "{% trans 'Page' %}";
+const TEXT_FLOOR              = "{% trans 'Étage' %}";
+const TEXT_THIS_ROOM          = "{% trans 'cette salle' %}";
+const TEXT_ADD_ROOM           = "{% trans 'Ajouter une salle' %}";
+const TEXT_EDIT_ROOM          = "{% trans 'Modifier la salle' %}";
+const TEXT_SAVE               = "{% trans 'Enregistrer' %}";
+const TEXT_UPDATE             = "{% trans 'Mettre à jour' %}";
+const TEXT_CONFIRM_DELETE     = "{% trans 'Supprimer la salle' %}";
+const TEXT_CHOOSE_BUILDING    = "{% trans 'Choisis un bâtiment.' %}";
+const TEXT_ROOM_NAME_REQUIRED = "{% trans 'Le nom de la salle est obligatoire.' %}";
+const TEXT_CHOOSE_FLOOR       = "{% trans 'Choisis un étage.' %}";
+const TEXT_OF                 = "{% trans 'sur' %}";
+const TEXT_DASH               = "{% trans '-' %}";
+
 /* CSRF */
 function getCookie(name){
-  let v=null;
-  if(document.cookie && document.cookie!==""){
-    const c=document.cookie.split(";");
-    for(let i=0;i<c.length;i++){
-      const x=c[i].trim();
-      if(x.substring(0,name.length+1)===name+"="){ v=decodeURIComponent(x.substring(name.length+1)); break; }
+  let v = null;
+  if(document.cookie && document.cookie !== ""){
+    const c = document.cookie.split(";");
+    for(let i = 0; i < c.length; i++){
+      const x = c[i].trim();
+      if(x.substring(0, name.length + 1) === name + "="){
+        v = decodeURIComponent(x.substring(name.length + 1));
+        break;
+      }
     }
   }
   return v;
 }
 const CSRF = getCookie("csrftoken");
 
-const state = { q:"", batiment:"", page:1, page_size:10 };
+const state = {
+  q: "",
+  batiment: "",
+  page: 1,
+  page_size: 10
+};
 
 const els = {
   tableBody: document.getElementById("tableBody"),
@@ -213,60 +397,91 @@ const els = {
 
 function h(str){
   return String(str ?? "").replace(/[&<>"']/g, s => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
   }[s]));
 }
 
 function setError(msg){
-  if(!msg){ els.formError.classList.add("d-none"); els.formError.textContent=""; return; }
+  if(!msg){
+    els.formError.classList.add("d-none");
+    els.formError.textContent = "";
+    return;
+  }
   els.formError.classList.remove("d-none");
   els.formError.textContent = msg;
 }
 
 /* Custom modal open/close */
-function openModal(){ els.xModal.classList.add("is-open"); els.xBackdrop.classList.add("is-open"); document.body.style.overflow="hidden"; }
-function closeModal(){ els.xModal.classList.remove("is-open"); els.xBackdrop.classList.remove("is-open"); document.body.style.overflow=""; }
+function openModal(){
+  els.xModal.classList.add("is-open");
+  els.xBackdrop.classList.add("is-open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(){
+  els.xModal.classList.remove("is-open");
+  els.xBackdrop.classList.remove("is-open");
+  document.body.style.overflow = "";
+}
+
 els.xClose.addEventListener("click", closeModal);
 els.btnCancel.addEventListener("click", closeModal);
 els.xBackdrop.addEventListener("click", closeModal);
-document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && els.xModal.classList.contains("is-open")) closeModal(); });
+
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape" && els.xModal.classList.contains("is-open")){
+    closeModal();
+  }
+});
 
 /* Load batiments (filter + modal) */
 async function loadBatiments(){
-  const res = await fetch(URL_BATS, { headers: {"Accept":"application/json"} });
+  const res = await fetch(URL_BATS, {
+    headers: {"Accept":"application/json"}
+  });
   if(!res.ok) return;
+
   const data = await res.json();
 
-  // filter
   const keepFilter = els.batimentFilter.value || "";
-  els.batimentFilter.innerHTML = `<option value="">-- Tous les bâtiments --</option>` +
+  els.batimentFilter.innerHTML =
+    `<option value="">-- ${TEXT_ALL_BUILDINGS} --</option>` +
     data.items.map(b => `<option value="${b.id}">${h(b.nom)}</option>`).join("");
   els.batimentFilter.value = keepFilter;
 
-  // modal
   const keepModal = els.batiment_id.value || "";
-  els.batiment_id.innerHTML = `<option value="">-- Choisir --</option>` +
+  els.batiment_id.innerHTML =
+    `<option value="">-- ${TEXT_CHOOSE} --</option>` +
     data.items.map(b => `<option value="${b.id}">${h(b.nom)}</option>`).join("");
   els.batiment_id.value = keepModal;
 }
 
 /* Load etages based on batiment */
-async function loadEtagesForBatiment(batimentId, selectedValue=""){
-  els.etage.innerHTML = `<option value="">-- Choisir --</option>`;
+async function loadEtagesForBatiment(batimentId, selectedValue = ""){
+  els.etage.innerHTML = `<option value="">-- ${TEXT_CHOOSE} --</option>`;
   if(!batimentId) return;
 
   const url = `${URL_ETAGES}?batiment_id=${encodeURIComponent(batimentId)}`;
-  const res = await fetch(url, { headers: {"Accept":"application/json"} });
+  const res = await fetch(url, {
+    headers: {"Accept":"application/json"}
+  });
   if(!res.ok) return;
+
   const data = await res.json();
 
-  els.etage.innerHTML = `<option value="">-- Choisir --</option>` +
+  els.etage.innerHTML =
+    `<option value="">-- ${TEXT_CHOOSE} --</option>` +
     data.items.map(x => `<option value="${x.value}">${h(x.label)}</option>`).join("");
 
   if(selectedValue !== "" && selectedValue !== null && selectedValue !== undefined){
     els.etage.value = String(selectedValue);
   }
 }
+
 els.batiment_id.addEventListener("change", () => {
   loadEtagesForBatiment(els.batiment_id.value, "");
 });
@@ -280,11 +495,16 @@ async function loadList(){
     page_size: String(state.page_size),
   });
 
-  els.tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Chargement...</td></tr>`;
-  const res = await fetch(`${URL_LIST}?${params.toString()}`, { headers: {"Accept":"application/json"} });
+  els.tableBody.innerHTML =
+    `<tr><td colspan="6" class="text-center py-4 text-muted">${TEXT_LOADING}</td></tr>`;
+
+  const res = await fetch(`${URL_LIST}?${params.toString()}`, {
+    headers: {"Accept":"application/json"}
+  });
 
   if(!res.ok){
-    els.tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Erreur chargement.</td></tr>`;
+    els.tableBody.innerHTML =
+      `<tr><td colspan="6" class="text-center py-4 text-danger">${TEXT_LOADING_ERROR}</td></tr>`;
     return;
   }
 
@@ -296,108 +516,115 @@ function renderTable(items, page, pages, total){
   els.totalCount.textContent = total;
 
   if(!items.length){
-    els.tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Aucune salle.</td></tr>`;
+    els.tableBody.innerHTML =
+      `<tr><td colspan="6" class="text-center py-4 text-muted">${TEXT_EMPTY}</td></tr>`;
   }else{
     const startIndex = (page - 1) * state.page_size;
 
-    // ✅ IMPORTANT: pas de onclick inline => data-action
-    els.tableBody.innerHTML = items.map((s,i)=>`
+    els.tableBody.innerHTML = items.map((s, i) => `
       <tr>
         <td>${startIndex + i + 1}</td>
         <td class="fw-semibold">${h(s.nom)}</td>
         <td class="text-muted">${h(s.batiment.nom)}</td>
-        <td class="text-center">${s.etage === 0 ? "Étage 0" : "Étage " + h(s.etage)}</td>
-        <td class="text-muted">${h(s.description || "-")}</td>
+        <td class="text-center">${s.etage === 0 ? TEXT_FLOOR + " 0" : TEXT_FLOOR + " " + h(s.etage)}</td>
+        <td class="text-muted">${h(s.description || TEXT_DASH)}</td>
         <td class="text-end">
           <button type="button" class="btn btn-sm btn-outline-primary"
-                  data-action="edit" data-id="${s.id}">Modifier</button>
+                  data-action="edit" data-id="${s.id}">${TEXT_EDIT}</button>
           <button type="button" class="btn btn-sm btn-outline-danger"
-                  data-action="delete" data-id="${s.id}" data-name="${h(s.nom)}">Supprimer</button>
+                  data-action="delete" data-id="${s.id}" data-name="${h(s.nom)}">${TEXT_DELETE}</button>
         </td>
       </tr>
     `).join("");
   }
 
   renderPagination(page, pages);
-  els.pageInfo.textContent = `Page ${page} / ${pages}`;
+  els.pageInfo.textContent = `${TEXT_PAGE} ${page} ${TEXT_OF} ${pages}`;
 }
 
 function renderPagination(page, pages){
-  const win=2;
-  const link = (label,p,disabled=false,active=false)=>`
-    <li class="page-item ${disabled?"disabled":""} ${active?"active":""}">
+  const win = 2;
+
+  const link = (label, p, disabled = false, active = false) => `
+    <li class="page-item ${disabled ? "disabled" : ""} ${active ? "active" : ""}">
       <a class="page-link" href="#" data-page="${p}">${label}</a>
-    </li>`;
+    </li>
+  `;
 
   let html = "";
-  html += link("«",1,page===1);
-  html += link("Précédent",Math.max(1,page-1),page===1);
+  html += link("»", 1, page === 1);
+  html += link(TEXT_PREVIOUS, Math.max(1, page - 1), page === 1);
 
-  for(let p=1;p<=pages;p++){
-    if(p>=page-win && p<=page+win){
-      html += link(String(p),p,false,p===page);
+  for(let p = 1; p <= pages; p++){
+    if(p >= page - win && p <= page + win){
+      html += link(String(p), p, false, p === page);
     }
   }
 
-  html += link("Suivant",Math.min(pages,page+1),page===pages);
-  html += link("»",pages,page===pages);
+  html += link(TEXT_NEXT, Math.min(pages, page + 1), page === pages);
+  html += link("«", pages, page === pages);
 
   els.pagination.innerHTML = html;
 }
 
-/* Pagination click (event delegation) */
-els.pagination.addEventListener("click", (e)=>{
+/* Pagination click */
+els.pagination.addEventListener("click", (e) => {
   const a = e.target.closest("a.page-link");
   if(!a) return;
+
   e.preventDefault();
   const p = parseInt(a.getAttribute("data-page"), 10);
   if(!p) return;
+
   state.page = p;
   loadList();
 });
 
 /* Filters */
-els.btnSearch.addEventListener("click", ()=>{
+els.btnSearch.addEventListener("click", () => {
   state.q = els.searchInput.value.trim();
   state.batiment = els.batimentFilter.value;
   state.page = 1;
   loadList();
 });
-els.btnReset.addEventListener("click", ()=>{
-  els.searchInput.value="";
-  els.batimentFilter.value="";
-  state.q="";
-  state.batiment="";
-  state.page=1;
-  loadList();
-});
-els.pageSize.addEventListener("change", ()=>{
-  state.page_size = parseInt(els.pageSize.value,10) || 10;
+
+els.btnReset.addEventListener("click", () => {
+  els.searchInput.value = "";
+  els.batimentFilter.value = "";
+  state.q = "";
+  state.batiment = "";
   state.page = 1;
   loadList();
 });
-els.batimentFilter.addEventListener("change", ()=>{
+
+els.pageSize.addEventListener("change", () => {
+  state.page_size = parseInt(els.pageSize.value, 10) || 10;
+  state.page = 1;
+  loadList();
+});
+
+els.batimentFilter.addEventListener("change", () => {
   state.batiment = els.batimentFilter.value;
   state.page = 1;
   loadList();
 });
 
 /* Open Create */
-els.btnOpenCreate.addEventListener("click", async ()=>{
-  els.xTitle.textContent="Ajouter une salle";
-  els.btnSave.textContent="Enregistrer";
-  els.id.value="";
-  els.nom.value="";
-  els.description.value="";
-  els.batiment_id.value="";
+els.btnOpenCreate.addEventListener("click", async () => {
+  els.xTitle.textContent = TEXT_ADD_ROOM;
+  els.btnSave.textContent = TEXT_SAVE;
+  els.id.value = "";
+  els.nom.value = "";
+  els.description.value = "";
+  els.batiment_id.value = "";
   await loadEtagesForBatiment("", "");
   setError("");
   openModal();
-  setTimeout(()=>els.nom.focus(), 50);
+  setTimeout(() => els.nom.focus(), 50);
 });
 
-/* Table actions (edit/delete) ✅ FIX refresh bug */
-els.tableBody.addEventListener("click", async (e)=>{
+/* Table actions */
+els.tableBody.addEventListener("click", async (e) => {
   const btn = e.target.closest("button[data-action]");
   if(!btn) return;
 
@@ -406,41 +633,55 @@ els.tableBody.addEventListener("click", async (e)=>{
 
   if(action === "edit"){
     setError("");
-    const res = await fetch(URL_DETAIL(id), { headers: {"Accept":"application/json"} });
-    if(!res.ok){ alert("Erreur chargement salle."); return; }
+
+    const res = await fetch(URL_DETAIL(id), {
+      headers: {"Accept":"application/json"}
+    });
+
+    if(!res.ok){
+      alert(TEXT_ROOM_LOADING_ERROR);
+      return;
+    }
+
     const s = await res.json();
 
-    els.xTitle.textContent="Modifier la salle";
-    els.btnSave.textContent="Mettre à jour";
+    els.xTitle.textContent = TEXT_EDIT_ROOM;
+    els.btnSave.textContent = TEXT_UPDATE;
     els.id.value = s.id;
     els.nom.value = s.nom || "";
     els.description.value = s.description || "";
     els.batiment_id.value = String(s.batiment_id);
 
-    // ✅ charger étages selon bâtiment puis sélectionner le bon étage
     await loadEtagesForBatiment(String(s.batiment_id), String(s.etage));
 
     openModal();
-    setTimeout(()=>els.nom.focus(), 50);
+    setTimeout(() => els.nom.focus(), 50);
   }
 
   if(action === "delete"){
-    const name = btn.getAttribute("data-name") || "cette salle";
-    if(!confirm(`Supprimer "${name}" ?`)) return;
+    const name = btn.getAttribute("data-name") || TEXT_THIS_ROOM;
+    if(!confirm(`${TEXT_CONFIRM_DELETE} "${name}" ؟`)) return;
 
     const res = await fetch(URL_DELETE(id), {
-      method:"POST",
-      headers:{ "X-CSRFToken": CSRF, "Accept":"application/json" }
+      method: "POST",
+      headers: {
+        "X-CSRFToken": CSRF,
+        "Accept":"application/json"
+      }
     });
-    const data = await res.json().catch(()=>({}));
-    if(!res.ok || !data.ok){ alert(data.error || "Erreur suppression."); return; }
+
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok || !data.ok){
+      alert(data.error || TEXT_DELETE_ERROR);
+      return;
+    }
 
     loadList();
   }
 });
 
 /* Submit (create/update) */
-els.form.addEventListener("submit", async (e)=>{
+els.form.addEventListener("submit", async (e) => {
   e.preventDefault();
   setError("");
 
@@ -449,9 +690,20 @@ els.form.addEventListener("submit", async (e)=>{
   const etage = els.etage.value;
   const description = els.description.value.trim();
 
-  if(!batId){ setError("Choisis un bâtiment."); return; }
-  if(!nom){ setError("Le nom de la salle est obligatoire."); return; }
-  if(etage === "" || etage === null){ setError("Choisis un étage."); return; }
+  if(!batId){
+    setError(TEXT_CHOOSE_BUILDING);
+    return;
+  }
+
+  if(!nom){
+    setError(TEXT_ROOM_NAME_REQUIRED);
+    return;
+  }
+
+  if(etage === "" || etage === null){
+    setError(TEXT_CHOOSE_FLOOR);
+    return;
+  }
 
   const payload = new URLSearchParams();
   payload.set("batiment_id", batId);
@@ -463,8 +715,8 @@ els.form.addEventListener("submit", async (e)=>{
   const url = id ? URL_UPDATE(id) : URL_CREATE;
 
   const res = await fetch(url, {
-    method:"POST",
-    headers:{
+    method: "POST",
+    headers: {
       "X-CSRFToken": CSRF,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
@@ -472,9 +724,9 @@ els.form.addEventListener("submit", async (e)=>{
     body: payload.toString()
   });
 
-  const data = await res.json().catch(()=>({}));
+  const data = await res.json().catch(() => ({}));
   if(!res.ok || !data.ok){
-    setError(data.error || "Erreur lors de l'enregistrement.");
+    setError(data.error || TEXT_SAVE_ERROR);
     return;
   }
 

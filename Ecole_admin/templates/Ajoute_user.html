@@ -1,176 +1,279 @@
-{% load static %}
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block Title %}{% trans "Ajouter un utilisateur" %}{% endblock %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S'inscrire</title>
-    <link rel="stylesheet" href="{% static 'css/css/bootstrap.min.css'%}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    
+{% block main %}
+<style>
+  .user-form-page{
+    background:#f5f7fb;
+    min-height:calc(100vh - 60px);
+    padding:32px 0 48px;
+  }
 
+  .user-form-shell{
+    max-width:1400px;
+    margin:0 auto;
+    padding:0 16px;
+  }
 
+  .user-form-card{
+    background:#fff;
+    border:1px solid #e8edf3;
+    border-radius:24px;
+    box-shadow:0 10px 30px rgba(15,23,42,.06);
+    padding:28px 24px 30px;
+  }
 
-<div class="containaire mt-5">
-    <div style="display: flex; align-items: center; justify-content: center;">
-        <img src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png' %}" height="40" width="40" alt="">
-        <h2 style="margin-top: 1rem; margin-left: 1rem; "> S'inscrire </h2>
-    </div>
-    {% if form.errors %}
-        <div class="error-messages bg-danger">
-            <ul>
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-            </ul>
+  .user-form-header{
+    text-align:center;
+    margin-bottom:26px;
+  }
+
+  .user-form-title{
+    margin:0;
+    font-size:3rem;
+    line-height:1.1;
+    font-weight:700;
+    color:#24344d;
+  }
+
+  .user-form-subtitle{
+    margin-top:8px;
+    color:#7a8699;
+    font-size:1rem;
+  }
+
+  .user-error-box{
+    background:#fff1f2;
+    border:1px solid #fecdd3;
+    color:#9f1239;
+    border-radius:16px;
+    padding:14px 16px;
+    margin-bottom:20px;
+  }
+
+  .user-error-box ul{
+    margin:0;
+    padding-left:18px;
+  }
+
+  .user-grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:24px 28px;
+  }
+
+  .user-field{
+    display:flex;
+    flex-direction:column;
+  }
+
+  .user-field--full{
+    grid-column:1 / -1;
+  }
+
+  .user-label{
+    font-size:1rem;
+    font-weight:700;
+    color:#445268;
+    margin-bottom:10px;
+  }
+
+  .user-label .required{
+    color:#e11d48;
+  }
+
+  .user-input input,
+  .user-input select,
+  .user-input textarea{
+    width:100%;
+    min-height:56px;
+    border:1px solid #d7dee8;
+    border-radius:14px;
+    background:#fff;
+    padding:14px 16px;
+    font-size:1rem;
+    color:#24344d;
+    outline:none;
+    transition:.2s ease;
+    box-shadow:none;
+  }
+
+  .user-input textarea{
+    min-height:120px;
+    resize:vertical;
+  }
+
+  .user-input input:focus,
+  .user-input select:focus,
+  .user-input textarea:focus{
+    border-color:#3b82f6;
+    box-shadow:0 0 0 4px rgba(59,130,246,.10);
+  }
+
+  .user-input input[type="file"]{
+    padding:10px 12px;
+  }
+
+  .user-help-text{
+    margin-top:8px;
+    font-size:.92rem;
+    color:#94a3b8;
+  }
+
+  .user-actions{
+    display:flex;
+    gap:12px;
+    margin-top:28px;
+    flex-wrap:wrap;
+  }
+
+  .user-btn{
+    border:none;
+    border-radius:14px;
+    padding:14px 24px;
+    font-size:1rem;
+    font-weight:700;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:.2s ease;
+  }
+
+  .user-btn-primary{
+    background:#22c55e;
+    color:#fff;
+  }
+
+  .user-btn-primary:hover{
+    background:#16a34a;
+    color:#fff;
+  }
+
+  .user-btn-secondary{
+    background:#2563eb;
+    color:#fff;
+  }
+
+  .user-btn-secondary:hover{
+    background:#1d4ed8;
+    color:#fff;
+  }
+
+  @media (max-width: 1100px){
+    .user-grid{
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px){
+    .user-form-title{
+      font-size:2rem;
+    }
+
+    .user-grid{
+      grid-template-columns:1fr;
+      gap:18px;
+    }
+
+    .user-form-card{
+      padding:22px 16px 24px;
+    }
+  }
+</style>
+
+<div class="user-form-page">
+  <div class="user-form-shell">
+    <div class="user-form-card">
+
+      <div class="user-form-header">
+        <h1 class="user-form-title">{% trans "Ajouter un utilisateur" %}</h1>
+        <div class="user-form-subtitle">{% trans "Remplissez les informations ci-dessous" %}</div>
+      </div>
+
+      {% if form.errors %}
+        <div class="user-error-box">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
         </div>
-    {% endif %}
-    <form method="POST" enctype="multipart/form-data" class="form">
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-         <div>
-            <label for="username">Username :</label>
-             {{form.username}}
-        </div>
-        <div>
-            <label for="nom_complet">Nom Complete :</label>
-            {{form.nom_complet }}
-        </div>
-        <div>
-            <label for="sexe">Sexe :</label>
-            {{ form.sexe }}
-        </div>
-        <div>
-            <label for="date_naissance">Date de naissance :</label>
-            {{ form.date_naissance }}
-        </div>
-        <div>
-            <label for="Pays">Pays</label>
-            {{ form.Pays }}
-        </div>
-        <div>
-            <label for="Ville">Ville :</label>
-            {{ form.Ville }}
-        </div>
-        <div>
-            <label for="Adresse">Adresse :</label>
-            {{ form.Adresse }}
-        </div>
-        <div>
-            <label for="num_tel">Num Telephone :</label>
-            {{ form.num_tel }}
-        </div>
-        <div>
-            <label for="email">Email :</label>
-           {{ form.email }}
-        </div>
-        <div>
-            <label for="role">Ecole :</label>
-            {{ form.ecole }}
-        </div>
-        <div>
-            <label for="password1">Password</label>
-            {{ form.password1 }}
-        </div>
-        <div>
-            <label for="password2">Confirmation du  password</label>
-            {{ form.password2 }}
+
+        <div class="user-grid">
+
+          <div class="user-field">
+            <label class="user-label" for="id_username">{% trans "Nom d'utilisateur" %} :</label>
+            <div class="user-input">{{ form.username }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_nom_complet">{% trans "Nom complet" %} :</label>
+            <div class="user-input">{{ form.nom_complet }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_sexe">{% trans "Sexe" %} :</label>
+            <div class="user-input">{{ form.sexe }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_date_naissance">{% trans "Date de naissance" %} :</label>
+            <div class="user-input">{{ form.date_naissance }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_Pays">{% trans "Pays" %} :</label>
+            <div class="user-input">{{ form.Pays }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_Ville">{% trans "Ville" %} :</label>
+            <div class="user-input">{{ form.Ville }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_Adresse">{% trans "Adresse" %} :</label>
+            <div class="user-input">{{ form.Adresse }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_num_tel">{% trans "Numéro de téléphone" %} :</label>
+            <div class="user-input">{{ form.num_tel }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_email">{% trans "Email" %} :</label>
+            <div class="user-input">{{ form.email }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_password1">{% trans "Mot de passe" %} :</label>
+            <div class="user-input">{{ form.password1 }}</div>
+          </div>
+
+          <div class="user-field">
+            <label class="user-label" for="id_password2">{% trans "Confirmation du mot de passe" %} :</label>
+            <div class="user-input">{{ form.password2 }}</div>
+          </div>
+
         </div>
 
-        <div class="full-width">
-            <button type="submit" class="btn btn-success"> S'inscrire</button>
-            <a href="{% url 'Connection'%}" type="submit" class="btn btn-primary ">Se connecte</a>
+        <div class="user-actions">
+          <button type="submit" class="user-btn user-btn-primary">
+            {% trans "Ajouter" %}
+          </button>
         </div>
+      </form>
 
-    </form>
-</div>
-
-
-
-
-
-<!--
-
-<div style="margin-top: 12rem;" id="register">
-<h5>{{ erreur }}</h5>
- <div style="display: flex; justify-content: space-evenly;" class="logos">
-         <img class="logo" src="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}" alt="Ecomanage">
-         <h2 style="margin-top: 0px;">Ajouter un Utilisateur</h2>
     </div>
-
-<form action="" method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
-</form>
-
+  </div>
 </div>
-
-
-<div class="form-container">
-    <h2>Ajouter un élève</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="id_nom_complet">Username :</label>
-                {{ form.username }}
-            </div>
-            <div class="form-group">
-                <label for="id_sexe">Nom complet :</label>
-                {{ form.nom_complet }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_date_naissance">Date de naissance :</label>
-                {{ form.date_naissance }}
-            </div>
-            <div class="form-group">
-                <label for="id_adresse">Adresse :</label>
-                {{ form.Adresse }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_num_tel">Téléphone :</label>
-                {{ form.num_tel }}
-            </div>
-            <div class="form-group">
-                <label for="id_email">Email :</label>
-                {{ form.email }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_image">Image :</label>
-                {{ form.image }}
-            </div>
-            <div class="form-group">
-                <label for="id_classe">Classe :</label>
-                {{ form.classe }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_nom_mere">Nom de la mère :</label>
-                {{ form.nom_mere }}
-            </div>
-            <div class="form-group">
-                <label for="id_tel_parent">Téléphone parent :</label>
-                {{ form.tel_parent }}
-            </div>
-
-            <div class="form-group">
-                <label for="id_email_parent">Email parent :</label>
-                {{ form.email_parent }}
-            </div>
-        </div>
-        <button type="submit" class="btn-submit">Ajouter</button>
-    </form>
-</div>
--->
-
-
-</body>
-</html>
+{% endblock %}

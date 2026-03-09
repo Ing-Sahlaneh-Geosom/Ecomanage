@@ -477,6 +477,7 @@ msgstr "إلغاء"
 msgid "Enregistrer"
 msgstr "حفظ"
 
+
 msgid "Libellé obligatoire."
 msgstr "التسمية مطلوبة."
 
@@ -1718,3 +1719,824 @@ msgstr "الشهر"
 msgid "Saisie des absences des enseignants (EDT)"
 msgstr "إدخال غيابات الأساتذة (EDT)"
 
+
+
+msgid "RAPPORT GÉNÉRAL D'EXAMEN DE CLASSE"
+msgstr "التقرير العام لامتحان الصف"
+
+msgid "Report"
+msgstr "تقرير"
+
+msgid "Rapport général d'examen de classe"
+msgstr "التقرير العام لامتحان الصف"
+
+msgid "Période*"
+msgstr "الفترة*"
+
+
+msgid "Année scolaire*"
+msgstr "السنة الدراسية*"
+
+msgid "Niveaux*"
+msgstr "المستويات*"
+
+msgid "La liste des classes*"
+msgstr "قائمة الأقسام*"
+
+msgid "Classe :"
+msgstr "القسم:"
+
+msgid "sélectionne une classe ci-dessous."
+msgstr "اختر قسماً من الأسفل."
+
+msgid "Le :"
+msgstr "بتاريخ:"
+
+msgid "Date naissance"
+msgstr "تاريخ الميلاد"
+
+msgid "Nb matières"
+msgstr "عدد المواد"
+
+msgid "Moyenne"
+msgstr "المعدل"
+
+msgid "Absences (h)"
+msgstr "الغيابات (ساعة)"
+
+msgid "Choisis une <strong>classe</strong> et une <strong>période</strong>, puis clique <strong>Filtrer</strong>."
+msgstr "اختر <strong>قسماً</strong> و<strong>فترة</strong> ثم اضغط <strong>تصفية</strong>."
+
+msgid "Période :"
+msgstr "الفترة:"
+
+msgid "Année :"
+msgstr "السنة:"
+
+msgid "Choisir classe et période avant l'export Excel."
+msgstr "اختر القسم والفترة قبل تصدير ملف إكسل."
+
+msgid "Rapport"
+msgstr "تقرير"
+
+msgid "Rapport général d'examen - %(classe)s - %(periode)s - %(annee)s"
+msgstr "التقرير العام للامتحان - %(classe)s - %(periode)s - %(annee)s"
+
+
+msgid "Jusqu'à"
+msgstr "حتى"
+
+msgid "Motif (optionnel)"
+msgstr "السبب (اختياري)"
+
+
+msgid "Tous les enseignants"
+msgstr "كل الأساتذة"
+
+msgid "Aucun enseignant trouvé."
+msgstr "لم يتم العثور على أي أستاذ."
+
+msgid "Aucune absence pour ce mois"
+msgstr "لا توجد غيابات لهذا الشهر"
+
+msgid "Supprimer cette absence ?"
+msgstr "هل تريد حذف هذا الغياب؟"
+
+msgid "Suivi mensuel des absences des employés"
+msgstr "المتابعة الشهرية لغيابات الموظفين"
+
+msgid "Employé"
+msgstr "الموظف"
+
+msgid "Tous les employés"
+msgstr "كل الموظفين"
+
+msgid "Saisie des absences des employés (EDT)"
+msgstr "إدخال غيابات الموظفين (EDT)"
+
+msgid "Rechercher (nom, username, email, téléphone)..."
+msgstr "بحث (الاسم، اسم المستخدم، البريد الإلكتروني، الهاتف)..."
+
+msgid "Liste des parents"
+msgstr "قائمة أولياء الأمور"
+
+msgid "Total :"
+msgstr "المجموع:"
+
+msgid "Rechercher"
+msgstr "بحث"
+
+msgid "Reset"
+msgstr "إعادة"
+
+msgid "Username"
+msgstr "اسم المستخدم"
+
+msgid "Rôle :"
+msgstr "الدور:"
+
+msgid "Aucun parent trouvé pour “%(q)s”."
+msgstr "لم يتم العثور على أي وليّ أمر لـ “%(q)s”."
+
+msgid "Enfants"
+msgstr "الأبناء"
+
+msgid "Type frais"
+msgstr "نوع الرسوم"
+
+msgid "Finance/Gestionnaire"
+msgstr "المالية/المدير"
+
+msgid "Frais"
+msgstr "الرسوم"
+
+msgid "Devise"
+msgstr "العملة"
+
+msgid "Veuillez d’abord filtrer (choisir Niveau + Type frais)."
+msgstr "يرجى التصفية أولاً (اختيار المستوى + نوع الرسوم)."
+
+msgid "Configuration Paiement"
+msgstr "إعدادات الدفع"
+
+msgid "Type de frais"
+msgstr "نوع الرسوم"
+
+msgid "Montrer aux élèves"
+msgstr "عرض للتلاميذ"
+
+msgid "FRAIS"
+msgstr "الرسوم"
+
+msgid "Filtre d’abord (Année + Niveau + Type), puis clique sur “Montrer aux élèves”."
+msgstr "قم بالتصفية أولاً (السنة + المستوى + نوع الرسوم)، ثم اضغط على \"عرض للتلاميذ\"."
+
+msgid "Paiement des frais"
+msgstr "دفع الرسوم"
+
+msgid "PAIEMENT DES FRAIS DE SCOLARITÉ"
+msgstr "دفع الرسوم الدراسية"
+
+msgid "Paiement des frais de scolarité"
+msgstr "دفع الرسوم الدراسية"
+
+msgid "⏷ Filtre"
+msgstr "⏷ تصفية"
+
+msgid "FICHE DE PAIEMENT"
+msgstr "وصل الدفع"
+
+msgid "Niveau :"
+msgstr "المستوى:"
+
+msgid "Type de frais :"
+msgstr "نوع الرسوم:"
+
+msgid "Frais facturés"
+msgstr "الرسوم المفوترة"
+
+msgid "Frais payés"
+msgstr "الرسوم المدفوعة"
+
+msgid "Frais restants"
+msgstr "الرسوم المتبقية"
+
+msgid "Filtres invalides"
+msgstr "عوامل التصفية غير صحيحة"
+
+msgid "Mode de paiement"
+msgstr "طريقة الدفع"
+
+msgid "Facture"
+msgstr "المبلغ المستحق"
+
+msgid "Payé"
+msgstr "المدفوع"
+
+msgid "Restant"
+msgstr "المتبقي"
+
+msgid "CAISSE"
+msgstr "الصندوق"
+
+msgid "Sélection"
+msgstr "اختيار"
+
+msgid "Prépare le paiement puis valide"
+msgstr "حضّر الدفع ثم قم بالتأكيد"
+
+msgid "Mobile money"
+msgstr "الدفع عبر الهاتف"
+
+msgid "Virement"
+msgstr "تحويل بنكي"
+
+msgid "Chèque"
+msgstr "شيك"
+
+msgid "Référence"
+msgstr "المرجع"
+
+msgid "Optionnel"
+msgstr "اختياري"
+
+msgid "Générée automatiquement"
+msgstr "يتم توليدها تلقائياً"
+
+msgid "Mode paiement"
+msgstr "طريقة الدفع"
+
+msgid "Espèces"
+msgstr "نقداً"
+
+msgid "Facturé"
+msgstr "المفوترة"
+
+msgid "Montant à payer"
+msgstr "المبلغ المراد دفعه"
+
+msgid "Max:"
+msgstr "الحد الأقصى:"
+
+msgid "Aucun frais généré pour cet élève."
+msgstr "لا توجد رسوم مُولّدة لهذا التلميذ."
+
+msgid "Valider Paiement & Générer Reçu"
+msgstr "تأكيد الدفع وإنشاء وصل"
+
+msgid "Déjà soldé"
+msgstr "تم السداد بالكامل"
+
+msgid "Choisis d'abord un élève."
+msgstr "اختر تلميذاً أولاً."
+
+msgid "Élève ou année scolaire invalide."
+msgstr "التلميذ أو السنة الدراسية غير صحيحة."
+
+msgid "Montant trop élevé pour '%(type)s'. Restant: %(restant)s %(devise)s."
+msgstr "المبلغ كبير جداً بالنسبة لـ '%(type)s'. المتبقي: %(restant)s %(devise)s."
+
+msgid "Saisis au moins un montant à payer."
+msgstr "أدخل على الأقل مبلغاً واحداً للدفع."
+
+msgid "Paiement enregistré. Référence générée automatiquement."
+msgstr "تم تسجيل الدفع. تم إنشاء المرجع تلقائياً."
+
+msgid "Signature Caissier"
+msgstr "توقيع أمين الصندوق"
+
+msgid "Signature Parent / Élève"
+msgstr "توقيع وليّ الأمر / التلميذ"
+
+msgid "Total payé (ce reçu)"
+msgstr "إجمالي المدفوع (هذا الوصل)"
+
+msgid "REÇU DE CAISSE"
+msgstr "وصل الصندوق"
+
+msgid "Mode :"
+msgstr "طريقة الدفع:"
+
+msgid "Réf :"
+msgstr "المرجع:"
+
+msgid "Caissier :"
+msgstr "أمين الصندوق:"
+
+msgid "Élève :"
+msgstr "التلميذ:"
+
+msgid "Journal"
+msgstr "اليومية"
+
+msgid "Clôture"
+msgstr "إقفال"
+
+msgid "Historique Caisse"
+msgstr "سجل الصندوق"
+
+msgid "HISTORIQUE CAISSE"
+msgstr "سجل الصندوق"
+
+msgid "Finance"
+msgstr "المالية"
+
+msgid "Filtres"
+msgstr "عوامل التصفية"
+
+msgid "Date début"
+msgstr "تاريخ البداية"
+
+msgid "Date fin"
+msgstr "تاريخ النهاية"
+
+msgid "N° reçu / élève / classe"
+msgstr "رقم الوصل / التلميذ / القسم"
+
+msgid "Totaux (reçus validés)"
+msgstr "الإجماليات (الإيصالات المؤكدة)"
+
+msgid "Total:"
+msgstr "الإجمالي:"
+
+msgid "Mobile"
+msgstr "موبايل"
+
+msgid "Tous"
+msgstr "الكل"
+
+msgid "Erreur / doublon / ..."
+msgstr "خطأ / تكرار / ..."
+
+msgid "Le reçu sera marqué"
+msgstr "سيتم وضع الوصل كـ"
+
+msgid "il ne sera plus compté dans les totaux"
+msgstr "ولن يتم احتسابه ضمن الإجماليات"
+
+msgid "Confirmer annulation"
+msgstr "تأكيد الإلغاء"
+
+msgid "Annuler le reçu %(num)s"
+msgstr "إلغاء الوصل %(num)s"
+
+
+msgid "Clôture Caisse"
+msgstr "إقفال الصندوق"
+
+msgid "CLÔTURE DE CAISSE"
+msgstr "إقفال الصندوق"
+
+msgid "Jour"
+msgstr "اليوم"
+
+msgid "Total (validé)"
+msgstr "الإجمالي (المؤكد)"
+
+msgid "Totaux par mode"
+msgstr "الإجماليات حسب طريقة الدفع"
+
+msgid "Détails du jour"
+msgstr "تفاصيل اليوم"
+
+msgid "Caissier"
+msgstr "أمين الصندوق"
+
+msgid "Heure"
+msgstr "الوقت"
+
+msgid "Aucun reçu."
+msgstr "لا توجد إيصالات."
+
+msgid "Afficher"
+msgstr "عرض"
+
+msgid "Ajouter une spécialité"
+msgstr "إضافة تخصص"
+
+msgid "Registre des bâtiments"
+msgstr "سجل المباني"
+
+msgid "Ex: Bâtiment A"
+msgstr "مثال: مبنى A"
+
+msgid "Adresse (optionnel)"
+msgstr "عنوان (اختياري)"
+
+msgid "Description (optionnel)"
+msgstr "وصف (اختياري)"
+
+msgid "Ajouter un bâtiment"
+msgstr "إضافة مبنى"
+
+msgid "Étages"
+msgstr "الطوابق"
+
+msgid "Par page"
+msgstr "لكل صفحة"
+
+msgid "Rechercher (nom, code, adresse...)"
+msgstr "بحث (الاسم، الرمز، العنوان...)"
+
+msgid "Nb étages"
+msgstr "عدد الطوابق"
+
+msgid "Code"
+msgstr "الرمز"
+
+msgid "Ex: A, B1..."
+msgstr "مثال: A أو B1"
+
+msgid "Aucun bâtiment."
+msgstr "لا يوجد مبانٍ."
+
+msgid "Liste des salles"
+msgstr "قائمة القاعات"
+
+msgid "Registre des salles"
+msgstr "سجل القاعات"
+
+msgid "Salle = Bâtiment + Nom + Étage + Description"
+msgstr "القاعة = المبنى + الاسم + الطابق + الوصف"
+
+msgid "Rechercher (salle, bâtiment...)"
+msgstr "بحث (قاعة، مبنى...)"
+
+msgid "Tous les bâtiments"
+msgstr "جميع المباني"
+
+msgid "Salle"
+msgstr "قاعة"
+
+msgid "Bâtiment"
+msgstr "مبنى"
+
+msgid "Étage"
+msgstr "طابق"
+
+msgid "Aucune salle."
+msgstr "لا توجد قاعات"
+
+msgid "Les étages dépendent du bâtiment."
+msgstr "الطوابق تعتمد على المبنى"
+
+msgid "Nom salle"
+msgstr "اسم القاعة"
+
+msgid "Ajoute emploi"
+msgstr "إضافة حصة"
+
+msgid "Ajouter un créneau (AUTO)"
+msgstr "إضافة حصة تلقائياً"
+
+msgid "Modifier un créneau (AUTO)"
+msgstr "تعديل الحصة"
+
+msgid "Samedi"
+msgstr "السبت"
+
+msgid "Dimanche"
+msgstr "الأحد"
+
+msgid "Lundi"
+msgstr "الاثنين"
+
+msgid "Mardi"
+msgstr "الثلاثاء"
+
+msgid "Mercredi"
+msgstr "الأربعاء"
+
+msgid "Jeudi"
+msgstr "الخميس"
+
+
+msgid "Créneau choisi"
+msgstr "الحصة المختارة"
+
+
+msgid "Créneaux disponibles"
+msgstr "الحصص المتاحة"
+
+msgid "Choisis classe + jour…"
+msgstr "اختر القسم واليوم"
+
+msgid "Rafraîchir"
+msgstr "تحديث"
+
+msgid "Heures occupées (classe)"
+msgstr "الحصص المحجوزة"
+
+msgid "Salle libre"
+msgstr "قاعة متاحة"
+
+msgid "Prof libre (de cette classe)"
+msgstr "أستاذ متاح"
+
+msgid "Matière (du prof)"
+msgstr "المادة"
+
+msgid "Choisir"
+msgstr "اختر"
+
+msgid "Ex: Salle 1 / Informatique"
+msgstr "مثال: القاعة 1 / الإعلام الآلي"
+
+msgid "Petite description (optionnel)"
+msgstr "وصف قصير (اختياري)"
+
+
+msgid "Ordre"
+msgstr "الترتيب"
+
+msgid "Liste des créneaux"
+msgstr "قائمة الحصص"
+
+msgid "Créneaux emploi du temps"
+msgstr "حصص جدول الحصص"
+
+msgid "Liste des créneaux programmés pour l’année scolaire active."
+msgstr "قائمة الحصص المبرمجة للسنة الدراسية النشطة."
+
+msgid "Année active"
+msgstr "السنة النشطة"
+
+msgid "Supprimer ce créneau ?"
+msgstr "هل تريد حذف هذه الحصة؟"
+
+msgid "Supprimer ce créneau"
+msgstr "حذف هذه الحصة"
+
+msgid "ce créneau"
+msgstr "هذه الحصة"
+
+msgid "Aucun créneau."
+msgstr "لا توجد أي حصة."
+
+msgid "Choisis niveau + classe + jour…"
+msgstr "اختر المستوى + القسم + اليوم…"
+
+msgid "Choisir un créneau d’abord"
+msgstr "اختر حصة أولاً"
+
+msgid "Choisir un prof d’abord"
+msgstr "اختر أستاذاً أولاً"
+
+msgid "Matin"
+msgstr "الصباح"
+
+msgid "Après-midi"
+msgstr "بعد الظهر"
+
+msgid "Durée"
+msgstr "المدة"
+
+msgid "Destinataires"
+msgstr "المستلمون"
+
+
+msgid "Filtre"
+msgstr "التصفية"
+
+msgid "Sujet"
+msgstr "الموضوع"
+
+msgid "Message"
+msgstr "الرسالة"
+
+msgid "Non lus"
+msgstr "غير المقروءة"
+
+msgid "Messages reçus"
+msgstr "الرسائل المستلمة"
+
+msgid "Lu"
+msgstr "مقروء"
+
+
+msgid "Vous avez un nouveau message."
+msgstr "لديك رسالة جديدة."
+
+msgid "Lire le message"
+msgstr "قراءة الرسالة"
+
+msgid "Aller à la messagerie"
+msgstr "الذهاب إلى المراسلة"
+
+
+
+msgid "Administration"
+msgstr "الإدارة"
+
+msgid "Aucun message"
+msgstr "لا توجد رسائل"
+
+
+msgid "Parent d'un élève"
+msgstr "ولي أمر تلميذ"
+
+msgid "Parents d'une classe"
+msgstr "أولياء قسم"
+
+msgid "Parents de toutes mes classes"
+msgstr "أولياء جميع أقسامي"
+
+msgid "Un parent"
+msgstr "ولي أمر واحد"
+
+msgid "Parents d'un niveau"
+msgstr "أولياء مستوى"
+
+msgid "Tous les parents"
+msgstr "جميع الأولياء"
+
+msgid "Un professeur"
+msgstr "أستاذ واحد"
+
+msgid "Profs d'une classe"
+msgstr "أساتذة قسم"
+
+msgid "Tous les professeurs"
+msgstr "جميع الأساتذة"
+
+msgid "Supprimer ce message ?"
+msgstr "هل تريد حذف هذه الرسالة؟"
+
+
+msgid "Erreur de chargement du message."
+msgstr "خطأ أثناء تحميل الرسالة."
+
+msgid "Erreur lors de la suppression."
+msgstr "خطأ أثناء الحذف."
+
+msgid "Parents"
+msgstr "الأولياء"
+
+msgid "Professeurs"
+msgstr "الأساتذة"
+
+msgid "Aucune école associée."
+msgstr "لا توجد مدرسة مرتبطة."
+
+
+
+msgid "Choisir le type de destinataire et le filtre."
+msgstr "اختر نوع المستلم والتصفية."
+
+msgid "Sujet et contenu sont obligatoires."
+msgstr "الموضوع والمحتوى إجباريان."
+
+msgid "Choisir un parent."
+msgstr "اختر ولي أمر."
+
+msgid "Choisir une classe."
+msgstr "اختر قسماً."
+
+msgid "Choisir un niveau."
+msgstr "اختر مستوى."
+
+msgid "Filtre parent invalide."
+msgstr "تصفية الأولياء غير صالحة."
+
+msgid "Choisir un professeur."
+msgstr "اختر أستاذاً."
+
+msgid "Ce professeur n'a pas de compte utilisateur."
+msgstr "هذا الأستاذ ليس لديه حساب مستخدم."
+
+msgid "Filtre prof invalide."
+msgstr "تصفية الأساتذة غير صالحة."
+
+msgid "Groupe destinataire invalide."
+msgstr "مجموعة المستلمين غير صالحة."
+
+msgid "Le professeur peut envoyer seulement aux parents."
+msgstr "يمكن للأستاذ الإرسال إلى الأولياء فقط."
+
+msgid "Choisir un élève."
+msgstr "اختر تلميذاً."
+
+msgid "Cet élève n'a pas de compte parent."
+msgstr "هذا التلميذ ليس لديه حساب ولي أمر."
+
+msgid "Classe non autorisée"
+msgstr "القسم غير مسموح به."
+
+msgid "Filtre invalide."
+msgstr "التصفية غير صالحة."
+
+msgid "Message envoyé ✅ (%(count)s destinataire(s))"
+msgstr "تم إرسال الرسالة ✅ (%(count)s مستلم/مستلمين)"
+
+msgid "Promotions"
+msgstr "الترقيات"
+
+msgid "Étudiants en attente d'une décision"
+msgstr "الطلاب في انتظار قرار"
+
+msgid "Évaluer l'élève pour la promotion"
+msgstr "تقييم التلميذ من أجل الترقية"
+
+msgid "Afficher la décision finale"
+msgstr "عرض القرار النهائي"
+
+msgid "Élève diplômé"
+msgstr "تلميذ متخرج"
+
+msgid "Voir les élèves en promotion"
+msgstr "عرض التلاميذ في الترقية"
+
+msgid "Promouvoir les élèves en attente"
+msgstr "ترقية التلاميذ المنتظرين"
+
+msgid "Décision d'orientation"
+msgstr "قرار التوجيه"
+
+msgid "Promotions par classe"
+msgstr "الترقيات حسب القسم"
+
+msgid "Promotions par niveaux"
+msgstr "الترقيات حسب المستويات"
+
+msgid "Changement de classe d'un élève"
+msgstr "تغيير قسم تلميذ"
+
+msgid "Orientation"
+msgstr "التوجيه"
+
+msgid "Orientation scolaire"
+msgstr "التوجيه المدرسي"
+
+msgid "Fiche de vœux"
+msgstr "استمارة الرغبات"
+
+msgid "Enregistrement des vœux"
+msgstr "تسجيل الرغبات"
+
+msgid "Afficher les vœux des élèves"
+msgstr "عرض رغبات التلاميذ"
+
+msgid "Orientation finale"
+msgstr "التوجيه النهائي"
+
+msgid "Rapport des orientations"
+msgstr "تقرير التوجيهات"
+
+msgid "Archives"
+msgstr "الأرشيف"
+
+msgid "Résultats annuels par classes"
+msgstr "النتائج السنوية حسب الأقسام"
+
+msgid "Attestation scolaire"
+msgstr "شهادة مدرسية"
+
+msgid "Archives des bulletins"
+msgstr "أرشيف الكشوف"
+
+msgid "Archives des transcriptions"
+msgstr "أرشيف كشوف الدرجات"
+
+msgid "Liste des élèves archivés"
+msgstr "قائمة التلاميذ المؤرشفين"
+
+
+msgid "Liste des utilisateurs"
+msgstr "قائمة المستخدمين"
+
+
+msgid "Gestion et consultation de la liste des utilisateurs"
+msgstr "إدارة واستعراض قائمة المستخدمين"
+
+msgid "Ajouter un utilisateur"
+msgstr "إضافة مستخدم"
+
+msgid "Nom d'utilisateur"
+msgstr "اسم المستخدم"
+
+msgid "Rechercher par nom d’utilisateur"
+msgstr "البحث باسم المستخدم"
+
+msgid "Rôle"
+msgstr "الدور"
+
+msgid "Tous les rôles"
+msgstr "جميع الأدوار"
+
+msgid "Admin"
+msgstr "مدير"
+
+msgid "Secrétaire"
+msgstr "سكرتير"
+
+msgid "Féminin"
+msgstr "أنثى"
+
+msgid "Masculin"
+msgstr "ذكر"
+
+
+msgid "Pays"
+msgstr "البلد"
+
+msgid "Ville"
+msgstr "المدينة"
+
+
+msgid "Numéro de téléphone"
+msgstr "رقم الهاتف"
+
+msgid "Résultats affichés selon les filtres sélectionnés"
+msgstr "النتائج المعروضة حسب عوامل التصفية المختارة"
+
+msgid "Remplissez les informations ci-dessous"
+msgstr "املأ المعلومات أدناه"
+
+msgid "École"
+msgstr "المدرسة"
+
+msgid "Mot de passe"
+msgstr "كلمة المرور"
+
+msgid "Confirmation du mot de passe"
+msgstr "تأكيد كلمة المرور"

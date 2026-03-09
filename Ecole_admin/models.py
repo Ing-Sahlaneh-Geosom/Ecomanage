@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.conf import settings
 from django.db import  transaction
 from datetime import timedelta
+from django.utils.translation import gettext_lazy as _
 
 
 
@@ -105,22 +106,22 @@ class EmploiDuTemps(models.Model):
 
 class User(AbstractUser):
     ROLES = (
-        ('admin', 'Administrateur'),
-        ('secretaire', 'Secrétaire'),
-        ('parent', 'Parent'),
-        ('proffesseur', 'Professeur'),
+        ('admin', _('Administrateur')),
+        ('secretaire', _('Secrétaire')),
+        ('parent', _('Parent')),
+        ('proffesseur', _('Professeur')),
     )
     SEXE = (
-        ('M','musculin'),
-        ('F','feminin'),
+        ('M',_('musculin')),
+        ('F',_('feminin')),
     )
 
     nom_complet = models.CharField(max_length=120, blank=True, default="")
     sexe = models.CharField(max_length=1, choices=SEXE, default='M')
     date_naissance = models.DateField( default=timezone.now)
-    Pays = models.CharField(max_length=50 , default='Djibouti')
-    Ville = models.CharField(max_length=12, default='Djibouti')
-    Adresse = models.CharField(max_length=100 , default='Adresse inconue')
+    Pays = models.CharField(max_length=50 )
+    Ville = models.CharField(max_length=52, default='')
+    Adresse = models.CharField(max_length=100 , default='')
     num_tel = models.CharField(max_length=50, blank=True, default="")
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=ROLES, null=True, blank=True)
@@ -643,11 +644,11 @@ class FraisEleve(models.Model):
 from django.db import models
 
 class ModePaiement(models.TextChoices):
-    ESPECES = "especes", "Espèces"
-    CHEQUE = "cheque", "Chèque"
-    VIREMENT = "virement", "Virement"
-    MOBILE = "mobile", "Mobile money"
-
+    ESPECES  = "especes", _("Espèces")
+    CHEQUE   = "cheque", _("Chèque")
+    VIREMENT = "virement", _("Virement")
+    MOBILE   = "mobile", _("Mobile money")
+    
 class PaiementFraisEleve(models.Model):
     ecole = models.ForeignKey("Ecole", on_delete=models.CASCADE)
     annee_scolaire = models.ForeignKey("AnneeScolaire", on_delete=models.CASCADE)
@@ -674,8 +675,8 @@ import uuid
 
 class RecuCaisse(models.Model):
     STATUT_CHOICES = (
-        ("valide", "Validé"),
-        ("annule", "Annulé"),
+        ("valide", _("Validé")),
+        ("annule", _("Annulé")),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -691,7 +692,7 @@ class RecuCaisse(models.Model):
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     devise = models.CharField(max_length=10, default="DJF")
 
-    mode = models.CharField(max_length=20, default="especes")
+    mode = models.CharField(max_length=20, default=_("especes"))
     reference = models.CharField(max_length=100, blank=True)
     note = models.CharField(max_length=255, blank=True)
 

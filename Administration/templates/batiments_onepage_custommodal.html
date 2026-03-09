@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %} Batiment Liste {% endblock %}
+{% load i18n %}
 {% block main %}
 
 
@@ -9,12 +10,12 @@
     position: fixed; inset: 0;
     background: rgba(15, 23, 42, .55);
     display: none;
-    z-index: 9998;
+   z-index: 20000;
   }
   .xmodal{
     position: fixed; inset: 0;
     display: none;
-    z-index: 9999;
+    z-index: 20001;
     padding: 20px;
   }
   .xmodal.is-open,
@@ -65,11 +66,11 @@
 
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
       <div>
-        <h4 class="mb-1">Registre des Bâtiments</h4>
+        <h4 class="mb-1 text-dark">{% trans "Registre des bâtiments" %}</h4>
                 
 
       </div>
-      <button class="btn btn-primary" id="btnOpenCreate">+ Ajouter</button>
+      <button class="btn btn-primary" id="btnOpenCreate">+ {% trans "Ajouter" %}</button>
     </div>
 
     <div class="card shadow-sm mb-3 border-0" style="border-radius:16px;">
@@ -77,62 +78,117 @@
         <div class="row g-2 align-items-center">
           <div class="col-12 col-md-6">
             <input type="text" class="form-control" id="searchInput"
-                   placeholder="Rechercher (nom, code, adresse...)">
+                   placeholder="{% trans 'Rechercher (nom, code, adresse...)' %}">
           </div>
 
           <div class="col-12 col-md-3">
             <select class="form-select" id="statusFilter">
-              <option value="">Tous</option>
-              <option value="1">Actifs</option>
-              <option value="0">Inactifs</option>
+              <option value="">{% trans "Tous" %}</option>
+              <option value="1">{% trans "Actifs" %}</option>
+              <option value="0">{% trans "Inactifs" %}</option>
             </select>
           </div>
 
           <div class="col-12 col-md-3 d-flex gap-2">
-            <button class="btn btn-outline-primary w-100" id="btnSearch">Filtrer</button>
-            <button class="btn btn-outline-secondary" id="btnReset">Reset</button>
+            <button class="btn btn-outline-primary w-100" id="btnSearch"> {% trans "Filtrer" %}</button>
+            <button class="btn btn-outline-secondary" id="btnReset">{% trans "Reset" %}</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card shadow-sm border-0" style="border-radius:16px;">
+ <div class="card shadow-sm border-0" style="border-radius:16px;">
       <div class="card-body p-0">
 
         <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between px-3 py-3">
-          <div class="small text-muted">Total : <b id="totalCount">0</b></div>
+
+          <div class="small text-muted">
+            {% trans "Total" %} : <b id="totalCount">0</b>
+          </div>
+
           <div class="d-flex gap-2 align-items-center">
-            <span class="small text-muted">Par page</span>
-            <select class="form-select form-select-sm" style="width:90px" id="pageSize">
+
+            <span class="small text-muted">
+              {% trans "Par page" %}
+            </span>
+
+            <select class="form-select form-select-sm"
+                    style="width:90px"
+                    id="pageSize">
+
               <option value="5">5</option>
               <option value="10" selected>10</option>
               <option value="20">20</option>
+
             </select>
+
           </div>
+
         </div>
+
 
         <div class="table-responsive">
+
           <table class="table table-hover table-striped align-middle mb-0">
+
             <thead class="table-light">
+
             <tr>
+
               <th style="width:70px;">#</th>
-              <th>Nom</th>
-              <th style="width:120px;">Code</th>
-              <th>Adresse</th>
-              <th style="width:110px;" class="text-center">Étages</th>
-              <th style="width:120px;">Statut</th>
-              <th style="width:190px;" class="text-end">Actions</th>
+
+              <th>{% trans "Nom" %}</th>
+
+              <th style="width:120px;">
+                {% trans "Code" %}
+              </th>
+
+              <th>
+                {% trans "Adresse" %}
+              </th>
+
+              <th style="width:110px;" class="text-center">
+                {% trans "Étages" %}
+              </th>
+
+              <th style="width:120px;">
+                {% trans "Statut" %}
+              </th>
+
+              <th style="width:190px;" class="text-end">
+                {% trans "Actions" %}
+              </th>
+
             </tr>
+
             </thead>
+
             <tbody id="tableBody">
-              <tr><td colspan="7" class="text-center py-4 text-muted">Chargement...</td></tr>
+
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                  {% trans "Chargement..." %}
+                </td>
+              </tr>
+
             </tbody>
+
           </table>
+
         </div>
 
+
         <div class="px-3 py-3">
-          <nav><ul class="pagination justify-content-center flex-wrap mb-0" id="pagination"></ul></nav>
-          <p style="font-size: xx-small;" class="text-center text-muted small mt-2 mb-0" id="pageInfo"></p>
+
+          <nav>
+            <ul class="pagination justify-content-center flex-wrap mb-0" id="pagination"></ul>
+          </nav>
+
+          <p style="font-size: xx-small;"
+             class="text-center text-muted small mt-2 mb-0"
+             id="pageInfo">
+          </p>
+
         </div>
 
       </div>
@@ -140,69 +196,174 @@
 
   </div>
 </div>
+
 
 <!-- Backdrop -->
 <div class="xmodal-backdrop" id="xBackdrop"></div>
 
-<!-- Custom Modal -->
+
+<!-- Modal -->
+
 <div class="xmodal" id="xModal" aria-hidden="true">
+
   <div class="xmodal-panel" role="dialog" aria-modal="true" aria-labelledby="xTitle">
+
     <div class="xmodal-header">
-      <h5 class="xmodal-title" id="xTitle">Ajouter un bâtiment</h5>
-      <button class="xmodal-close" type="button" id="xClose" aria-label="Fermer">✕</button>
+
+      <h5 class="xmodal-title text-dark" id="xTitle">
+        {% trans "Ajouter un bâtiment" %}
+      </h5>
+
+      <button class="xmodal-close" type="button" id="xClose" aria-label="Fermer">
+        ✕
+      </button>
+
     </div>
 
-    <form id="batimentForm">
-      <div class="xmodal-body">
-        <input type="hidden" id="batimentId" value="">
 
-        <div class="row g-3">
-          <div class="col-12 col-md-6">
-            <label class="form-label">Nom <span class="text-danger">*</span></label>
-            <input class="form-control" id="nom" required placeholder="Ex: Bâtiment A">
-          </div>
+<form id="batimentForm">
 
-          <div class="col-12 col-md-3">
-            <label class="form-label">Code</label>
-            <input class="form-control" id="code" placeholder="Ex: A, B1...">
-          </div>
+<div class="xmodal-body">
 
-          <div class="col-12 col-md-3">
-            <label class="form-label">Nb étages</label>
-            <input type="number" min="0" class="form-control" id="nb_etages" value="0">
-          </div>
+<input type="hidden" id="batimentId" value="">
 
-          <div class="col-12">
-            <label class="form-label">Adresse</label>
-            <input class="form-control" id="adresse" placeholder="Adresse (optionnel)">
-          </div>
 
-          <div class="col-12">
-            <label class="form-label">Description</label>
-            <textarea class="form-control" id="description" rows="3" placeholder="Description (optionnel)"></textarea>
-          </div>
+<div class="row g-3">
 
-          <div class="col-12">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="actif" checked>
-              <label class="form-check-label" for="actif">Actif</label>
-            </div>
-          </div>
 
-          <div class="col-12">
-            <div class="alert alert-danger d-none" id="formError"></div>
-          </div>
-        </div>
-      </div>
+<div class="col-12 col-md-6">
 
-      <div class="xmodal-footer">
-        <button type="button" class="btn btn-outline-secondary" id="btnCancel">Annuler</button>
-        <button type="submit" class="btn btn-primary" id="btnSave">Enregistrer</button>
-      </div>
-    </form>
-  </div>
+<label class="form-label">
+{% trans "Nom" %} <span class="text-danger">*</span>
+</label>
+
+<input class="form-control"
+       id="nom"
+       required
+       placeholder="{% trans 'Ex: Bâtiment A' %}">
+
 </div>
 
+
+
+<div class="col-12 col-md-3">
+
+<label class="form-label">
+{% trans "Code" %}
+</label>
+
+<input class="form-control"
+       id="code"
+       placeholder="{% trans 'Ex: A, B1...' %}">
+
+</div>
+
+
+
+<div class="col-12 col-md-3">
+
+<label class="form-label">
+{% trans "Nb étages" %}
+</label>
+
+<input type="number"
+       min="0"
+       class="form-control"
+       id="nb_etages"
+       value="0">
+
+</div>
+
+
+
+<div class="col-12">
+
+<label class="form-label">
+{% trans "Adresse" %}
+</label>
+
+<input class="form-control"
+       id="adresse"
+       placeholder="{% trans 'Adresse (optionnel)' %}">
+
+</div>
+
+
+
+<div class="col-12">
+
+<label class="form-label">
+{% trans "Description" %}
+</label>
+
+<textarea class="form-control"
+          id="description"
+          rows="3"
+          placeholder="{% trans 'Description (optionnel)' %}">
+</textarea>
+
+</div>
+
+
+
+<div class="col-12">
+
+<div class="form-check">
+
+<input class="form-check-input"
+       type="checkbox"
+       id="actif"
+       checked>
+
+<label class="form-check-label" for="actif">
+{% trans "Actif" %}
+</label>
+
+</div>
+
+</div>
+
+
+<div class="col-12">
+
+<div class="alert alert-danger d-none" id="formError"></div>
+
+</div>
+
+
+</div>
+</div>
+
+
+<div class="xmodal-footer">
+
+<button type="button"
+        class="btn btn-outline-secondary"
+        id="btnCancel">
+
+{% trans "Annuler" %}
+
+</button>
+
+
+<button type="submit"
+        class="btn btn-primary"
+        id="btnSave">
+
+{% trans "Enregistrer" %}
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+
+   
 <script>
 /* ============================
    ✅ URLs Django
@@ -331,7 +492,11 @@ function renderTable(items, page, pages, total){
   els.totalCount.textContent = total;
 
   if(!items.length){
-    els.tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Aucun bâtiment.</td></tr>`;
+    els.tableBody.innerHTML = `<tr>
+      <td colspan="7" class="text-center py-4 text-muted">
+      {% trans "Aucun bâtiment." %}
+      </td>
+      </tr>`;
   }else{
     const startIndex = (page - 1) * state.page_size;
 
@@ -373,19 +538,26 @@ function renderPagination(page, pages){
   }
 
   html += link("«", 1, page===1);
-  html += link("Précédent", Math.max(1, page-1), page===1);
 
+  html += link("{% trans 'Précédent' %}", Math.max(1, page-1), page===1);
+
+ 
   for(let p=1; p<=pages; p++){
     if(p >= page-win && p <= page+win){
       html += link(String(p), p, false, p===page);
     }
   }
 
-  html += link("Suivant", Math.min(pages, page+1), page===pages);
+  html += link("{% trans 'Suivant' %}", Math.min(pages, page+1), page===pages);
+
   html += link("»", pages, page===pages);
 
   els.pagination.innerHTML = html;
 }
+
+
+
+
 
 function goPage(p){
   state.page = p;
@@ -419,8 +591,6 @@ els.pageSize.addEventListener("change", () => {
 els.btnOpenCreate.addEventListener("click", openCreate);
 
 function openCreate(){
-  els.xTitle.textContent = "Ajouter un bâtiment";
-  els.btnSave.textContent = "Enregistrer";
   els.id.value = "";
   els.nom.value = "";
   els.code.value = "";

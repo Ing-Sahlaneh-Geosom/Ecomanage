@@ -1314,7 +1314,6 @@ def bulletins_visual(request):
 
 
 
-
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
@@ -1326,6 +1325,7 @@ from .services_rapport import build_rapport_classe
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, Alignment
+
 
 
 @login_required
@@ -1367,33 +1367,48 @@ def rapport_conseil_classe(request):
     if selected_classe and selected_periode:
         rapport = build_rapport_classe(selected_classe, selected_periode, annee, ecole)
 
-    # ✅ EXPORT EXCEL
-    import openpyxl
-    from openpyxl.utils import get_column_letter
-    from openpyxl.styles import Font, Alignment
-
+    # ✅ EXPORT EXCEL (traductions)
     if request.GET.get("export") == "excel":
         if not (rapport and selected_classe and selected_periode):
-            return HttpResponse("Choisir classe et période avant l'export Excel.", content_type="text/plain")
+            return HttpResponse(_("Choisir classe et période avant l'export Excel."), content_type="text/plain")
 
         wb = openpyxl.Workbook()
         ws = wb.active
-        ws.title = "Rapport"
+        ws.title = _("Rapport")
 
         # Titre
-        title = f"Rapport général d'examen - {selected_classe.nom} - {selected_periode.nom} - {annee.nom}"
+        title = _("Rapport général d'examen - %(classe)s - %(periode)s - %(annee)s") % {
+            "classe": selected_classe.nom,
+            "periode": selected_periode.nom,
+            "annee": annee.nom,
+        }
         ws["A1"] = title
         ws["A1"].font = Font(bold=True, size=14)
         ws["A1"].alignment = Alignment(horizontal="center")
+
         # largeur merge (colonnes = 6 fixes + matières + 6 final)
         total_cols = 6 + len(rapport["subjects"]) + 6
         ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
 
-        # Entêtes
-        headers = ["N°", "Nom", "Classe", "Date naissance", "Sexe", "Statut"]
+        # Entêtes (traduits)
+        headers = [
+            _("N°"),
+            _("Nom"),
+            _("Classe"),
+            _("Date naissance"),
+            _("Sexe"),
+            _("Statut"),
+        ]
         for m in rapport["subjects"]:
-            headers.append(m.nom.upper())
-        headers += ["Total", "Nb matières", "Moyenne", "Absences (h)", "Appréciation", "Rang"]
+            headers.append(m.nom.upper())  # matières: DB -> pas gettext ici
+        headers += [
+            _("Total"),
+            _("Nb matières"),
+            _("Moyenne"),
+            _("Absences (h)"),
+            _("Appréciation"),
+            _("Rang"),
+        ]
 
         row_start = 3
         for col, h in enumerate(headers, start=1):
@@ -1412,7 +1427,6 @@ def rapport_conseil_classe(request):
             ws.cell(rr, 6, r.get("status", "-"))
 
             c = 7
-            # ✅ IMPORTANT: notes_list (pas r["notes"])
             for idx_m in range(len(rapport["subjects"])):
                 val = r["notes_list"][idx_m]
                 ws.cell(rr, c, float(val) if val is not None else "")
@@ -1436,7 +1450,6 @@ def rapport_conseil_classe(request):
         resp["Content-Disposition"] = f'attachment; filename="{filename}"'
         wb.save(resp)
         return resp
-
 
     ctx = {
         "ecole": ecole,

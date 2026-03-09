@@ -1,54 +1,186 @@
 {% extends "base.html" %}
-{% block title %} Ajoute emploi {% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Liste des créneaux" %}{% endblock %}
+
 {% block main %}
 
+<style>
+  .page-wrap{
+    background:#f6f7fb;
+    min-height: calc(100vh - 60px);
+    direction: rtl;
+    text-align: right;
+  }
 
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Créneaux Emploi du temps - {{ annee_active.nom }}</h4>
-    <a class="btn btn-primary" href="{% url 'emploi_create_auto' %}">+ Ajouter</a>
-  </div>
+  .page-wrap .table,
+  .page-wrap .btn,
+  .page-wrap .alert,
+  .page-wrap .small,
+  .page-wrap .form-control,
+  .page-wrap .form-select {
+    direction: rtl;
+    text-align: right;
+  }
 
-  <div class="table-responsive">
-    <table class="table table-bordered table-striped align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>Classe</th>
-          <th>Jour</th>
-          <th>Heure</th>
-          <th>Matière</th>
-          <th>Professeur</th>
-          <th>Salle</th>
-          <th style="width:180px;">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for e in emplois %}
-        <tr>
-          <td>{{ e.classe }}</td>
-          <td>{{ e.jour }}</td>
-          <td>{{ e.heure_debut|time:"H:i" }} - {{ e.heure_fin|time:"H:i" }}</td>
-          <td>{{ e.matiere.nom }}</td>
-          <td>{{ e.professeur.nom_conplet }}</td>
-          <td>{{ e.salle }}</td>
-          <td class="text-nowrap">
-            <a class="btn btn-sm btn-outline-primary" href="{% url 'emploi_update_auto' e.id %}">Modifier</a>
+  .page-wrap .table th,
+  .page-wrap .table td{
+    vertical-align: middle;
+  }
 
-            <form method="post" action="{% url 'emploi_delete' e.id %}" style="display:inline;">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-outline-danger" type="submit"
-                onclick="return confirm('Supprimer ce créneau ?');">
-                Supprimer
-              </button>
-            </form>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="7" class="text-center text-muted">Aucun créneau.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  .page-wrap .table th.text-center,
+  .page-wrap .table td.text-center{
+    text-align: center !important;
+  }
+
+  .page-wrap .table th.text-end,
+  .page-wrap .table td.text-end{
+    text-align: left !important;
+  }
+
+  .page-wrap .text-nowrap{
+    white-space: nowrap;
+  }
+
+  .muted{
+    color:#64748b;
+    font-size:.92rem;
+  }
+
+  .card-soft{
+    border:0;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 4px 18px rgba(15,23,42,.06);
+  }
+
+  .header-actions{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    flex-direction: row-reverse;
+  }
+
+  .action-group{
+    display:flex;
+    gap:8px;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+    flex-direction: row-reverse;
+  }
+
+  .btn-inline-form{
+    display:inline;
+    margin:0;
+  }
+
+  .year-badge{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:999px;
+    background:#eef2ff;
+    color:#334155;
+    font-size:.88rem;
+    font-weight:600;
+  }
+</style>
+
+<div class="page-wrap py-4">
+  <div class="container">
+
+    <div class="header-actions mb-3">
+      <div>
+        <div class="muted">
+          {% trans "Liste des créneaux programmés pour l’année scolaire active." %}
+        </div>
+      </div>
+
+      <div>
+        <a class="btn btn-primary" href="{% url 'emploi_create_auto' %}">
+          + {% trans "Ajouter" %}
+        </a>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <span class="year-badge">
+        {% trans "Année active" %} : {{ annee_active.nom }}
+      </span>
+    </div>
+
+    <div class="card card-soft">
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>{% trans "Classe" %}</th>
+              <th>{% trans "Jour" %}</th>
+              <th>{% trans "Heure" %}</th>
+              <th>{% trans "Matière" %}</th>
+              <th>{% trans "Professeur" %}</th>
+              <th>{% trans "Salle" %}</th>
+              <th style="width:190px;" class="text-end">{% trans "Actions" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in emplois %}
+            <tr>
+              <td>{{ e.classe }}</td>
+              <td>{{ e.jour }}</td>
+              <td>
+                {{ e.heure_debut|time:"H:i" }} - {{ e.heure_fin|time:"H:i" }}
+              </td>
+              <td>{{ e.matiere.nom }}</td>
+              <td>{{ e.professeur.nom_conplet }}</td>
+              <td>{{ e.salle }}</td>
+              <td class="text-end text-nowrap">
+                <div class="action-group">
+                  <a class="btn btn-sm btn-outline-primary"
+                     href="{% url 'emploi_update_auto' e.id %}">
+                    {% trans "Modifier" %}
+                  </a>
+
+                  <form method="post"
+                        action="{% url 'emploi_delete' e.id %}"
+                        class="btn-inline-form js-delete-form"
+                        data-name="{{ e.classe }} - {{ e.jour }} - {{ e.heure_debut|time:'H:i' }}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" type="submit">
+                      {% trans "Supprimer" %}
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">
+                {% trans "Aucun créneau." %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<script>
+  const TEXT_CONFIRM_DELETE_SLOT = "{% trans 'Supprimer ce créneau ?' %}";
+  const TEXT_CONFIRM_DELETE_SLOT_NAMED = "{% trans 'Supprimer ce créneau' %}";
+  const TEXT_THIS_SLOT = "{% trans 'ce créneau' %}";
+
+  document.querySelectorAll(".js-delete-form").forEach((form) => {
+    form.addEventListener("submit", function(e){
+      const name = form.dataset.name || TEXT_THIS_SLOT;
+      const ok = confirm(`${TEXT_CONFIRM_DELETE_SLOT_NAMED} "${name}" ؟`);
+      if(!ok){
+        e.preventDefault();
+      }
+    });
+  });
+</script>
 
 {% endblock %}

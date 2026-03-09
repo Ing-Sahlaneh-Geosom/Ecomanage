@@ -360,13 +360,13 @@ def unread_qs(user, ecole, annee):
         lu=False,
         deleted_by_receiver=False
     )
-
+from django.utils.translation import gettext as _
 
 @login_required(login_url="Connection")
 def messagerie_home(request):
     ecole = request.user.ecole
     if not ecole:
-        return HttpResponseForbidden("Aucune école associée.")
+        return HttpResponseForbidden(_("Aucune école associée."))
 
     annee = get_annee_active(request)
 
@@ -392,7 +392,7 @@ def messagerie_home(request):
     if request.method == "POST":
         # parent ne peut pas envoyer
         if role_is(request.user, "parent"):
-            return HttpResponseForbidden("Accès refusé")
+            return HttpResponseForbidden(_("Accès refusé"))
 
         receiver_group = request.POST.get("receiver_group")  # parents/profs/eleves (admin)
         target = request.POST.get("target")
@@ -401,11 +401,11 @@ def messagerie_home(request):
         contenu = (request.POST.get("contenu") or "").strip()
 
         if not receiver_group or not target:
-            messages.error(request, "Choisir le type de destinataire et le filtre.")
+            messages.error(request, _("Choisir le type de destinataire et le filtre."))
             return redirect("messagerie_home")
 
         if not sujet or not contenu:
-            messages.error(request, "Sujet et contenu sont obligatoires.")
+            messages.error(request, _("Sujet et contenu sont obligatoires."))
             return redirect("messagerie_home")
 
         receivers = []
@@ -420,7 +420,7 @@ def messagerie_home(request):
                 if target == "one":
                     parent_id = request.POST.get("parent_id")
                     if not parent_id:
-                        messages.error(request, "Choisir un parent.")
+                        messages.error(request, _("Choisir un parent."))
                         return redirect("messagerie_home")
                     parent = get_object_or_404(User, id=parent_id, ecole=ecole, role="parent")
                     receivers = [parent]
@@ -428,55 +428,69 @@ def messagerie_home(request):
                 elif target == "classe":
                     classe_id = request.POST.get("classe_id")
                     if not classe_id:
-                        messages.error(request, "Choisir une classe.")
+                        messages.error(request, _("Choisir une classe."))
                         return redirect("messagerie_home")
-                    eleves = Eleve.objects.filter(ecole=ecole, annee_scolaire=annee, classe_id=classe_id).select_related("parent_user")
+                    eleves = Eleve.objects.filter(
+                        ecole=ecole,
+                        annee_scolaire=annee,
+                        classe_id=classe_id
+                    ).select_related("parent_user")
                     receivers = [e.parent_user for e in eleves if e.parent_user]
 
                 elif target == "niveau":
                     niveau_id = request.POST.get("niveau_id")
                     if not niveau_id:
-                        messages.error(request, "Choisir un niveau.")
+                        messages.error(request, _("Choisir un niveau."))
                         return redirect("messagerie_home")
-                    eleves = Eleve.objects.filter(ecole=ecole, annee_scolaire=annee, classe__niveau_id=niveau_id).select_related("parent_user")
+                    eleves = Eleve.objects.filter(
+                        ecole=ecole,
+                        annee_scolaire=annee,
+                        classe__niveau_id=niveau_id
+                    ).select_related("parent_user")
                     receivers = [e.parent_user for e in eleves if e.parent_user]
 
                 elif target == "tous":
-                    eleves = Eleve.objects.filter(ecole=ecole, annee_scolaire=annee).select_related("parent_user")
+                    eleves = Eleve.objects.filter(
+                        ecole=ecole,
+                        annee_scolaire=annee
+                    ).select_related("parent_user")
                     receivers = [e.parent_user for e in eleves if e.parent_user]
                 else:
-                    messages.error(request, "Filtre parent invalide.")
+                    messages.error(request, _("Filtre parent invalide."))
                     return redirect("messagerie_home")
 
             elif receiver_group == "profs":
                 if target == "one":
                     prof_id = request.POST.get("prof_id")
                     if not prof_id:
-                        messages.error(request, "Choisir un professeur.")
+                        messages.error(request, _("Choisir un professeur."))
                         return redirect("messagerie_home")
                     prof = get_object_or_404(Proffeseur, id=prof_id, ecole=ecole)
                     if not prof.user:
-                        messages.error(request, "Ce professeur n'a pas de compte utilisateur.")
+                        messages.error(request, _("Ce professeur n'a pas de compte utilisateur."))
                         return redirect("messagerie_home")
                     receivers = [prof.user]
 
                 elif target == "classe":
                     classe_id = request.POST.get("classe_id")
                     if not classe_id:
-                        messages.error(request, "Choisir une classe.")
+                        messages.error(request, _("Choisir une classe."))
                         return redirect("messagerie_home")
-                    profs = Proffeseur.objects.filter(ecole=ecole, classes__id=classe_id).select_related("user").distinct()
+                    profs = Proffeseur.objects.filter(
+                        ecole=ecole,
+                        classes__id=classe_id
+                    ).select_related("user").distinct()
                     receivers = [p.user for p in profs if p.user]
 
                 elif target == "tous":
                     profs = Proffeseur.objects.filter(ecole=ecole).select_related("user")
                     receivers = [p.user for p in profs if p.user]
                 else:
-                    messages.error(request, "Filtre prof invalide.")
+                    messages.error(request, _("Filtre prof invalide."))
                     return redirect("messagerie_home")
 
             else:
-                messages.error(request, "Groupe destinataire invalide.")
+                messages.error(request, _("Groupe destinataire invalide."))
                 return redirect("messagerie_home")
 
         # ==========================
@@ -485,40 +499,48 @@ def messagerie_home(request):
         elif role_is(request.user, "proffesseur"):
             # prof peut envoyer aux parents, et aussi recevoir/repondre aux admin/sec
             if receiver_group != "parents":
-                messages.error(request, "Le professeur peut envoyer seulement aux parents.")
+                messages.error(request, _("Le professeur peut envoyer seulement aux parents."))
                 return redirect("messagerie_home")
 
             if target == "eleve":
                 eleve_id = request.POST.get("eleve_id")
                 if not eleve_id:
-                    messages.error(request, "Choisir un élève.")
+                    messages.error(request, _("Choisir un élève."))
                     return redirect("messagerie_home")
                 eleve = get_object_or_404(Eleve, id=eleve_id, ecole=ecole, annee_scolaire=annee)
                 if not eleve.parent_user:
-                    messages.error(request, "Cet élève n'a pas de compte parent.")
+                    messages.error(request, _("Cet élève n'a pas de compte parent."))
                     return redirect("messagerie_home")
                 receivers = [eleve.parent_user]
 
             elif target == "classe":
                 classe_id = request.POST.get("classe_id")
                 if not classe_id:
-                    messages.error(request, "Choisir une classe.")
+                    messages.error(request, _("Choisir une classe."))
                     return redirect("messagerie_home")
                 if not prof_classes.filter(id=classe_id).exists():
-                    return HttpResponseForbidden("Classe non autorisée")
+                    return HttpResponseForbidden(_("Classe non autorisée"))
 
-                eleves = Eleve.objects.filter(ecole=ecole, annee_scolaire=annee, classe_id=classe_id).select_related("parent_user")
+                eleves = Eleve.objects.filter(
+                    ecole=ecole,
+                    annee_scolaire=annee,
+                    classe_id=classe_id
+                ).select_related("parent_user")
                 receivers = [e.parent_user for e in eleves if e.parent_user]
 
             elif target == "toutes":
-                eleves = Eleve.objects.filter(ecole=ecole, annee_scolaire=annee, classe__in=prof_classes).select_related("parent_user")
+                eleves = Eleve.objects.filter(
+                    ecole=ecole,
+                    annee_scolaire=annee,
+                    classe__in=prof_classes
+                ).select_related("parent_user")
                 receivers = [e.parent_user for e in eleves if e.parent_user]
             else:
-                messages.error(request, "Filtre invalide.")
+                messages.error(request, _("Filtre invalide."))
                 return redirect("messagerie_home")
 
         else:
-            return HttpResponseForbidden("Accès refusé")
+            return HttpResponseForbidden(_("Accès refusé"))
 
         # dedoublonnage
         receivers = list({u.id: u for u in receivers}.values())
@@ -536,7 +558,10 @@ def messagerie_home(request):
             )
             count += 1
 
-        messages.success(request, f"Message envoyé ✅ ({count} destinataire(s))")
+        messages.success(
+            request,
+            _("Message envoyé ✅ (%(count)s destinataire(s))") % {"count": count}
+        )
         return redirect("messagerie_home")
 
     unread_count = unread_qs(request.user, ecole, annee).count()
@@ -547,7 +572,6 @@ def messagerie_home(request):
         "prof_classes": prof_classes,
         "unread_count": unread_count,
     })
-
 
 @login_required(login_url="Connection")
 def message_ajax_detail(request, pk):

@@ -1,46 +1,185 @@
 {% extends "base.html" %}
-{% block title %}Historique Caisse{% endblock %}
+{% load i18n %}
+
+{% block title %}{% trans "Historique Caisse" %}{% endblock %}
 {% block main %}
 <style>
-  .modal { z-index: 2000 !important; }
-  .modal-backdrop { z-index: 1990 !important; }
+
+
+  /* ===== Modal custom SmartSchool (sans bootstrap) ===== */
+
+  .ss-modal{
+    position: fixed;
+    inset: 0;
+    display: none;             /* ✅ caché par défaut */
+    z-index: 999999;
+    isolation: isolate;
+
+    /* ✅ centre parfait */
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+  .ss-modal[aria-hidden="false"]{ display: flex; }
+
+  .ss-modal__backdrop{
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.62);
+    backdrop-filter: blur(2px);
+  }
+
+  .ss-modal__panel{
+    position: relative;
+    width: min(680px, 100%);
+    max-height: calc(100vh - 36px);
+    overflow: auto;
+
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 35px 110px rgba(0,0,0,.40);
+    border: 1px solid rgba(0,0,0,.10);
+
+    transform: translateY(14px) scale(.98);
+    opacity: 0;
+    transition: transform .18s ease, opacity .18s ease;
+  }
+  .ss-modal[aria-hidden="false"] .ss-modal__panel{
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .ss-modal__head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid #eee;
+    background: #fafafa;
+  }
+
+  .ss-modal__title{
+    margin: 0;
+    font-size: 18px;
+    font-weight: 900;
+    color: #111;
+  }
+
+  .ss-modal__x{
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 1;
+  }
+  .ss-modal__x:hover{ background:#f3f4f6; }
+
+  .ss-modal__body{
+    padding: 16px 18px 18px;
+  }
+
+  .ss-label{
+    display:block;
+    font-size: 13px;
+    font-weight: 900;
+    color:#111;
+    margin: 0 0 8px;
+  }
+
+  .ss-input{
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 12px;
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+  }
+  .ss-input:focus{
+    border-color: rgba(47,118,255,.55);
+    box-shadow: 0 0 0 4px rgba(47,118,255,.16);
+  }
+
+  .ss-alert{
+    margin-top: 14px;
+    padding: 14px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(245,158,11,.45);
+    background: rgba(245,158,11,.16);
+    color: #111;
+    font-weight: 800;
+  }
+
+  .ss-modal__foot{
+    display:flex;
+    justify-content:flex-end;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .ss-btn{
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #111;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 900;
+  }
+  .ss-btn:hover{ background:#f9fafb; }
+
+  .ss-btn--danger{
+    border-color: #ef4444;
+    background: #ef4444;
+    color: #fff;
+  }
+  .ss-btn--danger:hover{ filter: brightness(.95); }
+
+  /* ✅ RTL support */
+  html[dir="rtl"] .ss-modal__head{ flex-direction: row-reverse; }
+  html[dir="rtl"] .ss-modal__foot{ justify-content: flex-start; }
 </style>
+
 
 <div class="container-fluid px-4 py-3">
 
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 class="fw-bold m-0">HISTORIQUE CAISSE</h6>
-    <div class="text-muted small">Finance › Caisse › Historique</div>
+    <h6 class="fw-bold m-0">{% trans "HISTORIQUE CAISSE" %}</h6>
+    <div class="text-muted small">{% trans "Finance" %} › {% trans "Caisse" %} › {% trans "Historique" %}</div>
   </div>
 
   <div class="card shadow-sm mb-3">
-    <div class="card-header bg-white fw-semibold">Filtres</div>
+    <div class="card-header bg-white fw-semibold">{% trans "Filtres" %}</div>
     <div class="card-body">
       <form method="GET" class="row g-3 align-items-end">
         <div class="col-md-3">
-          <label class="form-label fw-bold">Date début</label>
+          <label class="form-label fw-bold">{% trans "Date début" %}</label>
           <input type="date" class="form-control" name="d1" value="{{ d1 }}">
         </div>
         <div class="col-md-3">
-          <label class="form-label fw-bold">Date fin</label>
+          <label class="form-label fw-bold">{% trans "Date fin" %}</label>
           <input type="date" class="form-control" name="d2" value="{{ d2 }}">
         </div>
         <div class="col-md-2">
-          <label class="form-label fw-bold">Mode</label>
+          <label class="form-label fw-bold">{% trans "Mode" %}</label>
           <select class="form-select" name="mode">
-            <option value="">Tous</option>
-            <option value="especes" {% if mode == "especes" %}selected{% endif %}>Espèces</option>
-            <option value="mobile" {% if mode == "mobile" %}selected{% endif %}>Mobile</option>
-            <option value="virement" {% if mode == "virement" %}selected{% endif %}>Virement</option>
-            <option value="cheque" {% if mode == "cheque" %}selected{% endif %}>Chèque</option>
+            <option value="">{% trans "Tous" %}</option>
+            <option value="especes" {% if mode == "especes" %}selected{% endif %}>{% trans "Espèces" %}</option>
+            <option value="mobile" {% if mode == "mobile" %}selected{% endif %}>{% trans "Mobile" %}</option>
+            <option value="virement" {% if mode == "virement" %}selected{% endif %}>{% trans "Virement" %}</option>
+            <option value="cheque" {% if mode == "cheque" %}selected{% endif %}>{% trans "Chèque" %}</option>
           </select>
         </div>
         <div class="col-md-3">
-          <label class="form-label fw-bold">Recherche</label>
-          <input class="form-control" name="q" value="{{ q }}" placeholder="N° reçu / élève / classe">
+          <label class="form-label fw-bold">{% trans "Recherche" %}</label>
+          <input class="form-control" name="q" value="{{ q }}" placeholder="{% trans 'N° reçu / élève / classe' %}">
         </div>
         <div class="col-md-1 d-grid">
-          <button class="btn btn-success fw-bold">Filtrer</button>
+          <button class="btn btn-success fw-bold" type="submit">{% trans "Filtrer" %}</button>
         </div>
       </form>
     </div>
@@ -48,8 +187,8 @@
 
   <div class="card shadow-sm mb-3">
     <div class="card-header bg-white fw-semibold d-flex justify-content-between">
-      <span>Totaux (reçus validés)</span>
-      <span class="fw-bold">Total: {{ grand_total }}</span>
+      <span>{% trans "Totaux (reçus validés)" %}</span>
+      <span class="fw-bold">{% trans "Total:" %} {{ grand_total }}</span>
     </div>
     <div class="card-body">
       <div class="row g-2">
@@ -61,7 +200,7 @@
             </div>
           </div>
         {% empty %}
-          <div class="text-muted">Aucun paiement.</div>
+          <div class="text-muted">{% trans "Aucun paiement." %}</div>
         {% endfor %}
       </div>
     </div>
@@ -69,8 +208,8 @@
 
   <div class="card shadow-sm">
     <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-      <span>Journal</span>
-      <a class="btn btn-sm btn-outline-dark" href="{% url 'cloture_caisse' %}">Clôture</a>
+      <span>{% trans "Journal" %}</span>
+      <a class="btn btn-sm btn-outline-dark" href="{% url 'cloture_caisse' %}">{% trans "Clôture" %}</a>
     </div>
 
     <div class="card-body p-0">
@@ -78,14 +217,14 @@
         <table class="table table-striped align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th>N°</th>
-              <th>Date</th>
-              <th>Élève</th>
-              <th>Classe</th>
-              <th>Total</th>
-              <th>Mode</th>
-              <th>Statut</th>
-              <th style="width:220px;">Actions</th>
+              <th>{% trans "N°" %}</th>
+              <th>{% trans "Date" %}</th>
+              <th>{% trans "Élève" %}</th>
+              <th>{% trans "Classe" %}</th>
+              <th>{% trans "Total" %}</th>
+              <th>{% trans "Mode" %}</th>
+              <th>{% trans "Statut" %}</th>
+              <th style="width:220px;">{% trans "Actions" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -99,73 +238,129 @@
               <td>{{ r.mode }}</td>
               <td>
                 {% if r.statut == "annule" %}
-                  <span class="badge bg-danger">Annulé</span>
+                  <span class="badge bg-danger">{% trans "Annulé" %}</span>
                 {% else %}
-                  <span class="badge bg-success">Validé</span>
+                  <span class="badge bg-success">{% trans "Validé" %}</span>
                 {% endif %}
               </td>
               <td class="d-flex gap-2">
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'recu_print' r.pk %}">Imprimer</a>
-                <a class="btn btn-sm btn-outline-dark" href="{% url 'historique_eleve' r.eleve.id %}">Élève</a>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'recu_print' r.pk %}">{% trans "Imprimer" %}</a>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'historique_eleve' r.eleve.id %}">{% trans "Élève" %}</a>
 
                 {% if r.statut == "valide" %}
-                <button class="btn btn-sm btn-outline-danger"
-                        type="button"
-                        data-bs-toggle="modal"
-                        data-bs-target="#annuleModal{{ r.pk }}">
-                  Annuler
+               <button type="button"
+                        class="btn btn-sm btn-outline-danger js-open-modal"
+                        data-open="#cancelModal-{{ r.pk }}">
+                  {% trans "Annuler" %}
                 </button>
                 {% endif %}
-
               </td>
             </tr>
-
-            
             {% empty %}
-              <tr><td colspan="8" class="text-center text-muted py-4">Aucun enregistrement.</td></tr>
+              <tr><td colspan="8" class="text-center text-muted py-4">{% trans "Aucun enregistrement." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
-        
+
       </div>
     </div>
 
   </div>
 
 </div>
+
 <!-- ✅ MODALS EN DEHORS DE LA TABLE (IMPORTANT) -->
+{# ✅ MODALS CUSTOM (sans bootstrap) #}
 {% for r in rows %}
   {% if r.statut == "valide" %}
-  <div class="modal fade" id="annuleModal{{ r.pk }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
+  <div class="ss-modal" id="cancelModal-{{ r.pk }}" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="ss-modal__backdrop" data-close></div>
 
-        <div class="modal-header">
-          <h6 class="modal-title">Annuler le reçu {{ r.numero }}</h6>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="ss-modal__panel" role="document">
+      <div class="ss-modal__head">
+        <h6 class="ss-modal__title">
+          {% blocktrans with num=r.numero %}Annuler le reçu {{ num }}{% endblocktrans %}
+        </h6>
+        <button type="button" class="ss-modal__x" aria-label="{% trans 'Fermer' %}" data-close>×</button>
+      </div>
+
+      <form method="POST" action="{% url 'annuler_recu' r.pk %}" class="ss-modal__body">
+        {% csrf_token %}
+
+        <label class="ss-label">{% trans "Motif" %}</label>
+        <input class="ss-input" name="motif" placeholder="{% trans 'Erreur / doublon / ...' %}" required>
+
+        <div class="ss-alert">
+          {% trans "Le reçu sera marqué" %} <b>{% trans "Annulé" %}</b>
+          ({% trans "il ne sera plus compté dans les totaux" %}).
         </div>
 
-        <form method="POST" action="{% url 'annuler_recu' r.pk %}">
-          {% csrf_token %}
-          <div class="modal-body">
-            <label class="form-label fw-bold">Motif</label>
-            <input class="form-control" name="motif" placeholder="Erreur / doublon / ..." required>
-
-            <div class="alert alert-warning mt-3 mb-0">
-              Le reçu sera marqué <b>Annulé</b> (il ne sera plus compté dans les totaux).
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fermer</button>
-            <button type="submit" class="btn btn-danger">Confirmer annulation</button>
-          </div>
-        </form>
-
-      </div>
+        <div class="ss-modal__foot">
+          <button type="button" class="ss-btn" data-close>{% trans "Fermer" %}</button>
+          <button type="submit" class="ss-btn ss-btn--danger">{% trans "Confirmer annulation" %}</button>
+        </div>
+      </form>
     </div>
   </div>
   {% endif %}
 {% endfor %}
+
+<script>
+  (function(){
+    let activeModal = null;
+    let lastFocus = null;
+
+    function openModal(modal){
+      if(!modal) return;
+      lastFocus = document.activeElement;
+      activeModal = modal;
+
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+
+      const focusEl = modal.querySelector('input, button, textarea, select, a[href]');
+      if(focusEl) focusEl.focus();
+    }
+
+    function closeModal(modal){
+      if(!modal) return;
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      activeModal = null;
+
+      if(lastFocus && typeof lastFocus.focus === "function"){
+        lastFocus.focus();
+      }
+    }
+
+    // Open
+    document.addEventListener("click", function(e){
+      const btn = e.target.closest(".js-open-modal");
+      if(btn){
+        const sel = btn.getAttribute("data-open");
+        const modal = sel ? document.querySelector(sel) : null;
+        openModal(modal);
+      }
+    });
+
+    // Close (backdrop / X / Fermer)
+    document.addEventListener("click", function(e){
+      if(!activeModal) return;
+      const closeEl = e.target.closest("[data-close]");
+      if(closeEl && activeModal.contains(closeEl)){
+        e.preventDefault();
+        closeModal(activeModal);
+      }
+    });
+
+    // ESC
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape" && activeModal){
+        e.preventDefault();
+        closeModal(activeModal);
+      }
+    });
+  })();
+</script>
 
 {% endblock %}

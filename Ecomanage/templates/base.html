@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <link rel="icon" type="image/png" href="{% static 'img/Screenshot_20250712-115931_Chrome (2) - Copie.png'%}">
+    <link rel="icon" type="image/png" href="{% static 'img/smartschool_logo_transparent.png'%}">
 
   <title>{% block title %}{% endblock %}</title>
 
@@ -376,33 +376,33 @@ body, .main-content, .content, .page-content {
 
     
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuPromotion" aria-expanded="false">
-        📋 Promotions <span class="arrow">▾</span>
+         📋 {% trans "Promotions" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuPromotion">
-        <a href="">- Etudiants en attente d'une decisions</a>
-        <a href="">- Évaluer l'élève pour la promotion</a>
-        <a href="">- Afficher la decision finale</a>
-        <a href="">- Eleve diplome</a>
-        <a href="">- Voir les eleves en promotion </a>
-        <a href="">- Promouvior les eleves en attente</a>
-        <a href="">- decision d'orientation </a>
-        <a href="">Promotions pas classe</a>
-        <a href="">Promotions par niveaux </a>
-        <a href=""> Changement de classes d'un eleve</a>
+        <a href="">- {% trans "Étudiants en attente d'une décision" %}</a>
+        <a href="">- {% trans "Évaluer l'élève pour la promotion" %}</a>
+        <a href="">- {% trans "Afficher la décision finale" %}</a>
+        <a href="">- {% trans "Élève diplômé" %}</a>
+        <a href="">- {% trans "Voir les élèves en promotion" %}</a>
+        <a href="">- {% trans "Promouvoir les élèves en attente" %}</a>
+        <a href="">- {% trans "Décision d'orientation" %}</a>
+        <a href="">- {% trans "Promotions par classe" %}</a>
+        <a href="">- {% trans "Promotions par niveaux" %}</a>
+        <a href="">- {% trans "Changement de classe d'un élève" %}</a>
       </div>
 
-       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuOrientation" aria-expanded="false">
-        📋 Orientation <span class="arrow">▾</span>
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuOrientation" aria-expanded="false">
+        📋 {% trans "Orientation" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuOrientation">
-        <a href="">- orientation scolaire</a>
-        <a href="">- Fiche de voeux </a>
-        <a href="">- Enregistrement des voeux </a>
-        <a href="">- Afficher les voeux des eleves</a>
-        <a href="">- orientation finale </a>
-        <a href="">- Rapport des orientation </a>
-
+        <a href="">- {% trans "Orientation scolaire" %}</a>
+        <a href="">- {% trans "Fiche de vœux" %}</a>
+        <a href="">- {% trans "Enregistrement des vœux" %}</a>
+        <a href="">- {% trans "Afficher les vœux des élèves" %}</a>
+        <a href="">- {% trans "Orientation finale" %}</a>
+        <a href="">- {% trans "Rapport des orientations" %}</a>
       </div>
+
     
 
     {% if current == 'employe_list' or current == 'absences_enseignants' or current == 'suivi_absences_enseignants' or current == 'absences_employes' or current == 'suivi_absences_employes' or current == 'liste_parents' %}
@@ -489,20 +489,17 @@ body, .main-content, .content, .page-content {
 
       </div>
     {% endif %}
-
-    <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuArchve" aria-expanded="false">
-        📋 Archive <span class="arrow">▾</span>
+      <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuArchive" aria-expanded="false">
+        📋 {% trans "Archives" %} <span class="arrow">▾</span>
       </button>
-      <div class="collapse submenu" id="menuArchve">
-        <a href="">- Resultats annuelles par classes</a>
-        <a href="">- Attestation scolaire</a>
-        <a href="">- Archives des bulletins</a>
-        <a href="">- Archives des transcriptions </a>
-        <a href="">- Listes des eleves Archives </a>
-        <a href="">- Rapport des orientation </a>
-
+      <div class="collapse submenu" id="menuArchive">
+        <a href="">- {% trans "Résultats annuels par classes" %}</a>
+        <a href="">- {% trans "Attestation scolaire" %}</a>
+        <a href="">- {% trans "Archives des bulletins" %}</a>
+        <a href="">- {% trans "Archives des transcriptions" %}</a>
+        <a href="">- {% trans "Liste des élèves archivés" %}</a>
+        <a href="">- {% trans "Rapport des orientations" %}</a>
       </div>
-
    
        
        <a class="{% if current == 'messagerie_home' %}active{% endif %}" href="{% url 'messagerie_home'%}">✉️{% trans  "Messagerie" %}</a>

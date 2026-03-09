@@ -40,6 +40,35 @@ class UserForm(UserCreationForm):
         }
 
 
+class UserUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'nom_complet',
+            'sexe',
+            'date_naissance',
+            'Pays',
+            'Ville',
+            'Adresse',
+            'num_tel',
+            'email',
+            'ecole',
+        ]
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+
+        qs = User.objects.filter(username=username)
+
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError("Ce nom d'utilisateur existe déjà.")
+
+        return username
 
 
 
@@ -958,10 +987,10 @@ class TypePaiementForm(forms.ModelForm):
 
         # ✅ Pas bootstrap pour les inputs (tu as dit modal custom)
         self.fields["nom"].widget.attrs.update({
-            "placeholder": "Nom",
+            "placeholder": _("Nom"),
             "autocomplete": "off",
         })
         self.fields["description"].widget.attrs.update({
-            "placeholder": "Description",
+            "placeholder": _("Description"),
             "rows": 4,
         })

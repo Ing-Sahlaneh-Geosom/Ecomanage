@@ -7,7 +7,7 @@ from django.urls import reverse , reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.generic import ListView, UpdateView, DeleteView, CreateView, TemplateView , View
 from django.contrib.auth  import login , logout , authenticate
-from Ecole_admin.form import EleveForm, ConnectionForm, UserForm , ChangePasswordForm
+from Ecole_admin.form import EleveForm, ConnectionForm, UserForm , ChangePasswordForm , UserUpdateForm
 from Ecole_admin.models import Eleve, User, AnneeScolaire, Classe
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
@@ -321,12 +321,12 @@ class ListeDesUtilisateur(LoginRequiredMixin , RoleRequiredMixin ,ListView):
 
 
 
-class UpdateUser( LoginRequiredMixin , RoleRequiredMixin ,UpdateView):
+class UpdateUser(LoginRequiredMixin, RoleRequiredMixin, UpdateView):
     model = User
-    template_name = "Ajoute_user.html"
-    form_class = UserForm
+    template_name = "update_user.html"
+    form_class = UserUpdateForm
     success_url = reverse_lazy('Les_Utlisateur')
-    allowed_roles = ['admin',]
+    allowed_roles = ['admin']
     login_url = 'Connection'
 
     def get_context_data(self, **kwargs):
@@ -335,15 +335,14 @@ class UpdateUser( LoginRequiredMixin , RoleRequiredMixin ,UpdateView):
         context['Submit_text'] = "Modifier"
         return context
 
-    
 
-
-class CreateUtilisateur(CreateView):
+class CreateUtilisateur(EcoleAssignMixin, LoginRequiredMixin, RoleRequiredMixin, CreateView):
     model = User
     template_name = 'Ajoute_user.html'
     form_class = UserForm
     success_url = reverse_lazy('Les_Utlisateur')
-    
+    allowed_roles = ['admin']
+    login_url = 'Connection'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

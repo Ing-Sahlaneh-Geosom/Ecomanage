@@ -1,144 +1,271 @@
+
 {% extends "base.html" %}
-{% block title %} Ajoute emploi {% endblock %}
+{% load i18n %}
+{% block title %}
+  {% if mode == "create" %}
+    {% trans "Ajouter un créneau (AUTO)" %}
+  {% else %}
+    {% trans "Modifier un créneau (AUTO)" %}
+  {% endif %}
+{% endblock %}
+
 {% block main %}
 
-
 <style>
-  .slot-btn { border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; background:#fff; cursor:pointer; }
-  .slot-btn:hover{ background:#f1f5f9; }
-  .slot-btn.active{ border-color:#2563eb; background:#dbeafe; }
-  .box { border:1px solid rgba(0,0,0,.08); border-radius:14px; }
-  .muted{ color:#64748b; font-size:.9rem; }
+  .page-wrap{
+    background:#f6f7fb;
+    min-height: calc(100vh - 60px);
+    direction: rtl;
+    text-align: right;
+  }
+
+  .page-wrap .form-control,
+  .page-wrap .form-select,
+  .page-wrap .form-label,
+  .page-wrap .btn,
+  .page-wrap .alert,
+  .page-wrap .small,
+  .page-wrap .card,
+  .page-wrap .muted {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .slot-btn{
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    padding:10px 12px;
+    background:#fff;
+    cursor:pointer;
+    text-align:center;
+  }
+
+  .slot-btn:hover{
+    background:#f1f5f9;
+  }
+
+  .slot-btn.active{
+    border-color:#2563eb;
+    background:#dbeafe;
+  }
+
+  .box{
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:14px;
+    background:#fff;
+  }
+
+  .muted{
+    color:#64748b;
+    font-size:.9rem;
+  }
+
+  .page-card{
+    border:0;
+    border-radius:16px;
+    box-shadow:0 4px 18px rgba(15,23,42,.06);
+  }
+
+  .header-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-direction:row-reverse;
+  }
+
+  .footer-actions{
+    display:flex;
+    justify-content:flex-start;
+    gap:10px;
+    flex-direction:row-reverse;
+  }
+
+  .slot-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-direction:row-reverse;
+  }
+
+  .rtl-center{
+    text-align:center !important;
+  }
+
+  .chosen-slot{
+    background:#0b1220 !important;
+    color:#fff !important;
+    font-weight:600;
+  }
+  
+
+  @media (max-width: 767px){
+    .header-row,
+    .slot-header{
+      align-items:flex-start;
+      flex-direction:column;
+    }
+  }
 </style>
 
-<div class="container mt-4" style="max-width:1100px;">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h4 class="mb-1">
-        {% if mode == "create" %}Ajouter un créneau (AUTO){% else %}Modifier un créneau (AUTO){% endif %}
-      </h4>
-      <div class="muted">Année: {{ annee_active.nom }}</div>
+<div class="page-wrap py-4">
+  <div class="container" style="max-width:1100px;">
+
+    <div class="header-row mb-3">
+      <div>
+        <h4 class="mb-1 text-dark">
+          {% if mode == "create" %}
+            {% trans "Ajouter un créneau (AUTO)" %}
+          {% else %}
+            {% trans "Modifier un créneau (AUTO)" %}
+          {% endif %}
+        </h4>
+        <div class="muted">{% trans "Année" %} : {{ annee_active.nom }}</div>
+      </div>
+
+      <a class="btn btn-outline-secondary" href="{% url 'emploi_list' %}">
+        {% trans "Retour" %}
+      </a>
     </div>
-    <a class="btn btn-outline-secondary" href="{% url 'emploi_list' %}">Retour</a>
-  </div>
 
-  {% if form.errors %}
-    <div class="alert alert-danger">
-      <b>Erreur :</b> {{ form.non_field_errors }}
-      <div class="small">{{ form.errors }}</div>
-    </div>
-  {% endif %}
-
-  <form method="post" id="autoForm" class="card card-body shadow-sm">
-    {% csrf_token %}
-
-    <!-- hidden times -->
-    <input type="hidden" name="heure_debut" id="heureDebut" value="{% if obj %}{{ obj.heure_debut|time:'H:i' }}{% endif %}">
-    <input type="hidden" name="heure_fin" id="heureFin" value="{% if obj %}{{ obj.heure_fin|time:'H:i' }}{% endif %}">
-
-    <div class="row g-3">
-
-      <div class="col-md-4">
-        <label class="form-label">Niveau</label>
-        <select class="form-select" id="niveauSelect">
-          <option value="">-- Choisir --</option>
-        </select>
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        <b>{% trans "Erreur" %} :</b> {{ form.non_field_errors }}
+        <div class="small">{{ form.errors }}</div>
       </div>
+    {% endif %}
 
-      <div class="col-md-4">
-        <label class="form-label">Classe <span class="text-danger">*</span></label>
-        <select class="form-select" name="classe" id="classeSelect" required disabled>
-          <option value="">-- Choisir --</option>
-        </select>
-      </div>
+    <form method="post" id="autoForm" class="card page-card card-body">
+      {% csrf_token %}
 
-      <div class="col-md-4">
-        <label class="form-label">Jour <span class="text-danger">*</span></label>
-        <select class="form-select" name="jour" id="jourSelect" required>
-          <option value="">-- Choisir --</option>
-          <option>Samedi</option>
-          <option>Dimanche</option>
-          <option>Lundi</option>
-          <option>Mardi</option>
-          <option>Mercredi</option>
-          <option>Jeudi</option>
-        </select>
-      </div>
+      <input type="hidden" name="heure_debut" id="heureDebut" value="{% if obj %}{{ obj.heure_debut|time:'H:i' }}{% endif %}">
+      <input type="hidden" name="heure_fin" id="heureFin" value="{% if obj %}{{ obj.heure_fin|time:'H:i' }}{% endif %}">
 
-      <div class="col-md-4">
-        <label class="form-label">Période</label>
-        <select class="form-select" id="periodSelect">
-          <option value="morning" selected>Matin ({{ morning_start }} - {{ morning_end }})</option>
-          <option value="afternoon">Après-midi ({{ after_start }} - {{ after_end }})</option>
-        </select>
-      </div>
+      <div class="row g-3">
 
-      <div class="col-md-4">
-        <label class="form-label">Durée</label>
-        <select class="form-select" id="durationSelect">
-          <option value="60">1h</option>
-          <option value="120">2h</option>
-          <option value="180">3h</option>
-        </select>
-      </div>
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Niveau" %}</label>
+          <select class="form-select" id="niveauSelect">
+            <option value="">{% trans "Choisir" %}</option>
+          </select>
+        </div>
 
-      <div class="col-md-4">
-        <label class="form-label">Créneau choisi</label>
-        <div class="form-control" id="chosenSlot" style="background:#0b1220; color:#fff;">Aucun</div>
-      </div>
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Classe" %} <span class="text-danger">*</span></label>
+          <select class="form-select" name="classe" id="classeSelect" required disabled>
+            <option value="">{% trans "Choisir" %}</option>
+          </select>
+        </div>
 
-      <div class="col-12">
-        <div class="box p-3">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <div class="fw-semibold">Créneaux disponibles</div>
-              <div class="muted" id="periodLabel">Choisis classe + jour…</div>
-            </div>
-            <button class="btn btn-sm btn-outline-primary" type="button" id="btnReloadSlots">Rafraîchir</button>
-          </div>
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Jour" %} <span class="text-danger">*</span></label>
+          <select class="form-select" name="jour" id="jourSelect" required>
+            <option value="">{% trans "Choisir" %}</option>
+            <option>{% trans "Samedi" %}</option>
+            <option>{% trans "Dimanche" %}</option>
+            <option>{% trans "Lundi" %}</option>
+            <option>{% trans "Mardi" %}</option>
+            <option>{% trans "Mercredi" %}</option>
+            <option>{% trans "Jeudi" %}</option>
+          </select>
+        </div>
 
-          <div id="slotsWrap" class="mt-3 d-flex flex-wrap gap-2">
-            <span class="muted">Choisis niveau + classe + jour…</span>
-          </div>
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Période" %}</label>
+          <select class="form-select" id="periodSelect">
+            <option value="morning">{% trans "Matin" %} ({{ morning_start }} - {{ morning_end }})</option>
+            <option value="afternoon">{% trans "Après-midi" %} ({{ after_start }} - {{ after_end }})</option>
+          </select>
+        </div>
 
-          <div class="mt-3">
-            <div class="muted">Heures occupées (classe) :</div>
-            <div id="busyWrap" class="muted"></div>
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Durée" %}</label>
+          <select class="form-select" id="durationSelect">
+            <option value="60">1h</option>
+            <option value="120">2h</option>
+            <option value="180">3h</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Créneau choisi" %}</label>
+          <div class="form-control chosen-slot" id="chosenSlot">
+            {% trans "Aucun" %}
           </div>
         </div>
+
+        <div class="col-12">
+          <div class="box p-3">
+            <div class="slot-header">
+              <div>
+                <div class="fw-semibold">{% trans "Créneaux disponibles" %}</div>
+                <div class="muted" id="periodLabel">{% trans "Choisis niveau + classe + jour…" %}</div>
+              </div>
+
+              <button class="btn btn-sm btn-outline-primary" type="button" id="btnReloadSlots">
+                {% trans "Rafraîchir" %}
+              </button>
+            </div>
+
+            <div id="slotsWrap" class="mt-3 d-flex flex-wrap gap-2">
+              <span class="muted">{% trans "Choisis niveau + classe + jour…" %}</span>
+            </div>
+
+            <div class="mt-3">
+              <div class="muted">{% trans "Heures occupées (classe)" %} :</div>
+              <div id="busyWrap" class="muted"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Salle libre" %} <span class="text-danger">*</span></label>
+          <select class="form-select" name="salle" id="salleSelect" required disabled>
+            <option value="">{% trans "Choisir un créneau d’abord" %}</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Prof libre (de cette classe)" %} <span class="text-danger">*</span></label>
+          <select class="form-select" name="professeur" id="profSelect" required disabled>
+            <option value="">{% trans "Choisir un créneau d’abord" %}</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">{% trans "Matière (du prof)" %} <span class="text-danger">*</span></label>
+          <select class="form-select" name="matiere" id="matiereSelect" required disabled>
+            <option value="">{% trans "Choisir un prof d’abord" %}</option>
+          </select>
+        </div>
+
       </div>
 
-      <div class="col-md-4">
-        <label class="form-label">Salle libre <span class="text-danger">*</span></label>
-        <select class="form-select" name="salle" id="salleSelect" required disabled>
-          <option value="">-- Choisir un créneau d’abord --</option>
-        </select>
+      <div class="footer-actions mt-4">
+        <a class="btn btn-outline-secondary" href="{% url 'emploi_list' %}">
+          {% trans "Annuler" %}
+        </a>
+        <button class="btn btn-primary" type="submit" id="btnSave" disabled>
+          {% trans "Enregistrer" %}
+        </button>
       </div>
-
-      <div class="col-md-4">
-        <label class="form-label">Prof libre (de cette classe) <span class="text-danger">*</span></label>
-        <select class="form-select" name="professeur" id="profSelect" required disabled>
-          <option value="">-- Choisir un créneau d’abord --</option>
-        </select>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label">Matière (du prof) <span class="text-danger">*</span></label>
-        <select class="form-select" name="matiere" id="matiereSelect" required disabled>
-          <option value="">-- Choisir un prof d’abord --</option>
-        </select>
-      </div>
-
-    </div>
-
-    <div class="d-flex justify-content-end gap-2 mt-4">
-      <a class="btn btn-outline-secondary" href="{% url 'emploi_list' %}">Annuler</a>
-      <button class="btn btn-primary" type="submit" id="btnSave" disabled>Enregistrer</button>
-    </div>
-  </form>
+    </form>
+  </div>
 </div>
 
 <script>
+const TXT_LOADING                = "{% trans 'Chargement...' %}";
+const TXT_NONE                   = "{% trans 'Aucun' %}";
+const TXT_ERROR                  = "{% trans 'Erreur' %}";
+const TXT_NO_SLOT                = "{% trans 'Aucun créneau disponible.' %}";
+const TXT_CHOOSE_CLASS_DAY       = "{% trans 'Choisis classe + jour.' %}";
+const TXT_CHOOSE                 = "{% trans 'Choisir' %}";
+const TXT_CHOOSE_SLOT_FIRST      = "{% trans 'Choisir un créneau d’abord' %}";
+const TXT_CHOOSE_PROF_FIRST      = "{% trans 'Choisir un prof d’abord' %}";
+const TXT_NO_SUBJECT             = "{% trans 'Aucune matière' %}";
+const TXT_RESOURCES_ERROR        = "{% trans 'Erreur ressources' %}";
+
 const URL_NIVEAUX = "{% url 'api_niveaux' %}";
 const URL_CLASSES = "{% url 'api_classes' %}";
 const URL_SLOTS   = "{% url 'api_slots' %}";
@@ -164,17 +291,31 @@ const els = {
   btnSave: document.getElementById("btnSave"),
 };
 
-function opt(value, label){ const o=document.createElement("option"); o.value=value; o.textContent=label; return o; }
-function resetSelect(sel, placeholder){ sel.innerHTML=""; sel.appendChild(opt("", placeholder)); }
-function setDisabled(sel, yes){ sel.disabled = !!yes; }
+function opt(value, label){
+  const o = document.createElement("option");
+  o.value = value;
+  o.textContent = label;
+  return o;
+}
+
+function resetSelect(sel, placeholder){
+  sel.innerHTML = "";
+  sel.appendChild(opt("", placeholder));
+}
+
+function setDisabled(sel, yes){
+  sel.disabled = !!yes;
+}
 
 function clearResources(){
-  resetSelect(els.salle, "-- Choisir un créneau d’abord --");
-  resetSelect(els.prof, "-- Choisir un créneau d’abord --");
-  resetSelect(els.mat, "-- Choisir un prof d’abord --");
+  resetSelect(els.salle, TXT_CHOOSE_SLOT_FIRST);
+  resetSelect(els.prof, TXT_CHOOSE_SLOT_FIRST);
+  resetSelect(els.mat, TXT_CHOOSE_PROF_FIRST);
+
   setDisabled(els.salle, true);
   setDisabled(els.prof, true);
   setDisabled(els.mat, true);
+
   els.btnSave.disabled = true;
 }
 
@@ -182,7 +323,8 @@ function validateReady(){
   const ok = !!(
     els.classe.value &&
     els.jour.value &&
-    els.hd.value && els.hf.value &&
+    els.hd.value &&
+    els.hf.value &&
     els.salle.value &&
     els.prof.value &&
     els.mat.value
@@ -191,23 +333,30 @@ function validateReady(){
 }
 
 async function loadNiveaux(){
-  const res = await fetch(URL_NIVEAUX, {headers:{Accept:"application/json"}});
+  const res = await fetch(URL_NIVEAUX, {
+    headers: { Accept: "application/json" }
+  });
   const data = await res.json();
   data.items.forEach(n => els.niveau.appendChild(opt(n.id, n.nom)));
 }
 
 async function loadClasses(niveauId){
   setDisabled(els.classe, true);
-  resetSelect(els.classe, "-- Choisir --");
+  resetSelect(els.classe, TXT_CHOOSE);
+
   if(!niveauId) return;
 
-  const res = await fetch(`${URL_CLASSES}?niveau_id=${encodeURIComponent(niveauId)}`, {headers:{Accept:"application/json"}});
+  const res = await fetch(
+    `${URL_CLASSES}?niveau_id=${encodeURIComponent(niveauId)}`,
+    { headers: { Accept: "application/json" } }
+  );
   const data = await res.json();
+
   data.items.forEach(c => els.classe.appendChild(opt(c.id, c.nom)));
   setDisabled(els.classe, false);
 
   {% if obj %}
-  els.classe.value = "{{ obj.classe_id }}";
+    els.classe.value = "{{ obj.classe_id }}";
   {% endif %}
 }
 
@@ -219,7 +368,7 @@ function setChosenSlot(start, end){
 
 async function loadSlots(){
   clearResources();
-  els.slotsWrap.innerHTML = `<span class="text-muted">Chargement...</span>`;
+  els.slotsWrap.innerHTML = `<span class="text-muted">${TXT_LOADING}</span>`;
   els.busyWrap.textContent = "";
   els.periodLabel.textContent = "";
 
@@ -229,7 +378,7 @@ async function loadSlots(){
   const period = els.period.value;
 
   if(!classeId || !jour){
-    els.slotsWrap.innerHTML = `<span class="text-muted">Choisis classe + jour.</span>`;
+    els.slotsWrap.innerHTML = `<span class="text-muted">${TXT_CHOOSE_CLASS_DAY}</span>`;
     return;
   }
 
@@ -238,11 +387,13 @@ async function loadSlots(){
     + `&duration=${encodeURIComponent(duration)}`
     + `&period=${encodeURIComponent(period)}`;
 
-  const res = await fetch(url, {headers:{Accept:"application/json"}});
+  const res = await fetch(url, {
+    headers: { Accept: "application/json" }
+  });
   const data = await res.json();
 
   if(!data.ok){
-    els.slotsWrap.innerHTML = `<span class="text-danger">${data.error || "Erreur"}</span>`;
+    els.slotsWrap.innerHTML = `<span class="text-danger">${data.error || TXT_ERROR}</span>`;
     return;
   }
 
@@ -250,14 +401,15 @@ async function loadSlots(){
 
   els.busyWrap.textContent = data.busy.length
     ? data.busy.map(x => `${x.start}-${x.end}`).join(" • ")
-    : "Aucun";
+    : TXT_NONE;
 
   if(!data.items.length){
-    els.slotsWrap.innerHTML = `<span class="text-danger">Aucun créneau disponible.</span>`;
+    els.slotsWrap.innerHTML = `<span class="text-danger">${TXT_NO_SLOT}</span>`;
     return;
   }
 
   els.slotsWrap.innerHTML = "";
+
   data.items.forEach((s) => {
     const b = document.createElement("button");
     b.type = "button";
@@ -275,51 +427,56 @@ async function loadResourcesForSlot(jour, start, end){
   const classeId = els.classe.value;
   const url = `${URL_RES}?jour=${encodeURIComponent(jour)}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&classe_id=${encodeURIComponent(classeId)}`;
 
-  const res = await fetch(url, {headers:{Accept:"application/json"}});
+  const res = await fetch(url, {
+    headers: { Accept: "application/json" }
+  });
   const data = await res.json();
 
   if(!data.ok){
-    alert(data.error || "Erreur ressources");
+    alert(data.error || TXT_RESOURCES_ERROR);
     return;
   }
 
-  // salles libres
-  resetSelect(els.salle, "-- Choisir --");
+  resetSelect(els.salle, TXT_CHOOSE);
   data.salles.forEach(s => els.salle.appendChild(opt(s.id, s.label)));
   setDisabled(els.salle, false);
-  if(data.salles.length === 1) els.salle.value = String(data.salles[0].id);
+  if(data.salles.length === 1){
+    els.salle.value = String(data.salles[0].id);
+  }
 
-  // profs libres (déjà filtrés par classe)
-  resetSelect(els.prof, "-- Choisir --");
+  resetSelect(els.prof, TXT_CHOOSE);
   data.profs.forEach(p => els.prof.appendChild(opt(p.id, p.label)));
   setDisabled(els.prof, false);
-  if(data.profs.length === 1) els.prof.value = String(data.profs[0].id);
+  if(data.profs.length === 1){
+    els.prof.value = String(data.profs[0].id);
+  }
 
-  // matières (du prof)
   await loadMatieresForProf();
-
   validateReady();
 }
 
 async function loadMatieresForProf(){
-  resetSelect(els.mat, "-- Choisir --");
+  resetSelect(els.mat, TXT_CHOOSE);
   setDisabled(els.mat, true);
 
   const profId = els.prof.value;
   const classeId = els.classe.value;
+
   if(!profId || !classeId){
-    resetSelect(els.mat, "-- Choisir un prof d’abord --");
+    resetSelect(els.mat, TXT_CHOOSE_PROF_FIRST);
     setDisabled(els.mat, true);
     validateReady();
     return;
   }
 
   const url = `${URL_MATS}?professeur_id=${encodeURIComponent(profId)}&classe_id=${encodeURIComponent(classeId)}`;
-  const res = await fetch(url, {headers:{Accept:"application/json"}});
+  const res = await fetch(url, {
+    headers: { Accept: "application/json" }
+  });
   const data = await res.json();
 
   if(!data.ok || !data.items.length){
-    resetSelect(els.mat, "-- Aucune matière --");
+    resetSelect(els.mat, TXT_NO_SUBJECT);
     setDisabled(els.mat, true);
     validateReady();
     return;
@@ -328,36 +485,43 @@ async function loadMatieresForProf(){
   data.items.forEach(m => els.mat.appendChild(opt(m.id, m.nom)));
   setDisabled(els.mat, false);
 
-  if(data.items.length === 1) els.mat.value = String(data.items[0].id);
+  if(data.items.length === 1){
+    els.mat.value = String(data.items[0].id);
+  }
+
   validateReady();
 }
 
+function resetSlotChoice(){
+  els.hd.value = "";
+  els.hf.value = "";
+  els.chosen.textContent = TXT_NONE;
+}
+
 els.niveau.addEventListener("change", () => {
-  els.hd.value=""; els.hf.value="";
-  els.chosen.textContent="Aucun";
+  resetSlotChoice();
   clearResources();
   loadClasses(els.niveau.value);
 });
 
-["change"].forEach(evt => {
+["change"].forEach((evt) => {
   els.classe.addEventListener(evt, () => {
-    els.hd.value=""; els.hf.value="";
-    els.chosen.textContent="Aucun";
+    resetSlotChoice();
     loadSlots();
   });
+
   els.jour.addEventListener(evt, () => {
-    els.hd.value=""; els.hf.value="";
-    els.chosen.textContent="Aucun";
+    resetSlotChoice();
     loadSlots();
   });
+
   els.period.addEventListener(evt, () => {
-    els.hd.value=""; els.hf.value="";
-    els.chosen.textContent="Aucun";
+    resetSlotChoice();
     loadSlots();
   });
+
   els.duration.addEventListener(evt, () => {
-    els.hd.value=""; els.hf.value="";
-    els.chosen.textContent="Aucun";
+    resetSlotChoice();
     loadSlots();
   });
 });
@@ -382,7 +546,6 @@ els.prof.addEventListener("change", loadMatieresForProf);
 els.salle.addEventListener("change", validateReady);
 els.mat.addEventListener("change", validateReady);
 
-// init
 (async function(){
   await loadNiveaux();
 
