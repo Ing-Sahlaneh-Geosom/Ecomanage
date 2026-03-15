@@ -3,49 +3,227 @@
 {% block main %}
 {% include "_taps.html" %}
 
-<div class="d-flex justify-content-between align-items-center mb-2">
-  <div>
-    <h4 class="mb-0 text-dark">{% trans "Saisie des notes" %}</h4>
-    <div class="text-muted">
-      {{ devoir.nom }} — {{ classe.nom }} — {{ devoir.matiere.nom }} ({{ devoir.periode.nom }})
+<style>
+  .note-header-card {
+    background: linear-gradient(135deg, #4da3ff 0%, #7bb8ff 100%);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+  }
+
+  .note-header-card .subtext {
+    color: rgba(255,255,255,0.92);
+  }
+
+  .note-main-card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  }
+
+  .table-note thead tr:first-child th {
+    background: #d9ecff;
+    color: #0f3d6e;
+    border-color: #c7e2ff;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 700;
+  }
+
+  .table-note thead tr:nth-child(2) th {
+    background: #edf6ff;
+    color: #24527a;
+    border-color: #d6ebff;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .table-note tbody td {
+    vertical-align: middle;
+  }
+
+  .table-note tbody tr:nth-child(even) {
+    background: #fafcff;
+  }
+
+  .eleve-col {
+    min-width: 260px;
+  }
+
+  .matricule-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #eef6ff;
+    color: #1f5f99;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .devoir-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f3d6e;
+  }
+
+  .devoir-meta {
+    font-size: 12px;
+    color: #4d6b88;
+    line-height: 1.35;
+    margin-top: 4px;
+  }
+
+  .input-note,
+  .input-coef {
+    min-width: 90px;
+    text-align: center;
+  }
+
+  .save-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    background: #fff;
+    padding-top: 14px;
+  }
+
+  .btn-save-notes {
+    background: #1f9d55;
+    border-color: #1f9d55;
+    padding: 10px 28px;
+    font-weight: 600;
+    border-radius: 10px;
+  }
+
+  .btn-save-notes:hover {
+    background: #198754;
+    border-color: #198754;
+  }
+
+  .btn-back-soft {
+    border-radius: 10px;
+  }
+</style>
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div class="flex-grow-1">
+    <div class="card note-header-card shadow-sm">
+      <div class="card-body">
+        <h4 class="mb-2">{% trans "Saisie des notes" %}</h4>
+        <div class="subtext mb-1">
+            <strong>{% trans "Niveau" %} :</strong> {{ classe.niveau.nom }}
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <strong>{% trans "Classe" %} :</strong> {{ classe.nom }}
+        </div>
+        <div class="subtext mb-1">
+            <strong>{% trans "Professeur" %} :</strong> {{ professeur.nom_conplet }}
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <strong>{% trans "Trimestre" %} :</strong> {{ periode.nom }}
+        </div>
+        <div class="subtext">
+          {% trans "Remplissez seulement les devoirs voulus et laissez les autres champs vides." %}
+        </div>
+      </div>
     </div>
   </div>
-  <a class="btn btn-outline-secondary" href="{% url 'note_saisie_setup' %}">{% trans "Retour" %}</a>
+
+  <div>
+    <a class="btn btn-outline-secondary btn-back-soft" href="{% url 'note_saisie_setup' %}">
+      {% trans "Retour" %}
+    </a>
+  </div>
 </div>
 
 <form method="post">
   {% csrf_token %}
 
-  <div class="card">
-    <div class="card-body table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <th>{% trans "Élève" %}</th>
-            <th style="width:160px;">{% trans "Note" %} / {{ devoir.points }}</th>
-            <th style="width:120px;">{% trans "Coef" %}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for e in eleves %}
-          <tr>
-            <td>{{ e.nom }}</td>
-            <td>
-              <input class="form-control" type="number" step="0.01" min="0" max="{{ devoir.points }}"
-                     name="note_{{ e.id }}"
-                     value="{% if exist.e.id %}{{ exist.e.id.note }}{% endif %}">
-            </td>
-            <td>
-              <input class="form-control" type="number" min="1"
-                     name="coef_{{ e.id }}"
-                     value="{% if exist.e.id %}{{ exist.e.id.coefficient }}{% else %}{{ devoir.coefficient }}{% endif %}">
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="card note-main-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered table-note align-middle mb-0">
+          <thead>
+            <tr>
+              <th rowspan="2" style="width: 70px;">{% trans "N°" %}</th>
+              <th rowspan="2" class="eleve-col">{% trans "Élève" %}</th>
 
-      <button class="btn btn-success">{% trans "Enregistrer" %}</button>
+              {% for devoir in devoirs %}
+                <th colspan="2">
+                  <div class="devoir-title">{{ devoir.nom }}</div>
+                  <div class="devoir-meta">
+                    {{ devoir.matiere.nom }}<br>
+                    {{ devoir.periode.nom }}<br>
+                    {% trans "Barème" %} : {{ devoir.points }} / {% trans "Coefficient" %} : {{ devoir.coefficient }}
+                  </div>
+                </th>
+              {% endfor %}
+            </tr>
+            <tr>
+              {% for devoir in devoirs %}
+                <th style="min-width: 110px;">{% trans "Note" %}</th>
+                <th style="min-width: 95px;">{% trans "Coef" %}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td class="text-center fw-bold">{{ forloop.counter }}</td>
+
+                <td>
+                  <div class="fw-semibold">{{ row.eleve.nom }}</div>
+                  <div class="matricule-badge">
+                    {% trans "Matricule" %} :
+                    {% if row.eleve.identifiant %}
+                      {{ row.eleve.identifiant }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </div>
+                </td>
+
+                {% for cell in row.cellules %}
+                  <td>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="{{ cell.devoir.points }}"
+                      class="form-control input-note"
+                      name="note_{{ row.eleve.id }}_{{ cell.devoir.id }}"
+                      value="{{ cell.note }}"
+                      placeholder="0 - {{ cell.devoir.points }}"
+                    >
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      min="1"
+                      class="form-control input-coef"
+                      name="coef_{{ row.eleve.id }}_{{ cell.devoir.id }}"
+                      value="{{ cell.coefficient }}"
+                    >
+                  </td>
+                {% endfor %}
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="100%" class="text-center text-muted py-4">
+                  {% trans "Aucun élève trouvé dans cette classe." %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="save-bar">
+        <div class="d-flex justify-content-center mt-3">
+          <button type="submit" class="btn btn-success btn-save-notes">
+            {% trans "Enregistrer les notes" %}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </form>

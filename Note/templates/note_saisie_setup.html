@@ -3,18 +3,109 @@
 {% block main %}
 {% include "_taps.html" %}
 
-<h4 class="mb-3 text-dark">{% trans "Saisie des notes" %}</h4>
+<h4 class="mb-2 text-dark">{% trans "Saisie des notes" %}</h4>
+<div class="text-muted mb-3">
+  {% trans "Choisissez d'abord le niveau, puis la classe, ensuite le professeur et enfin le trimestre." %}
+</div>
 
-<div class="card">
+<div class="card shadow-sm border-0">
   <div class="card-body">
-    <form method="get">
+    <form method="get" id="setupForm">
       <div class="row g-3">
-        <div class="col-md-6">{{ form.devoir.label_tag }}{{ form.devoir }}</div>
-        <div class="col-md-6">{{ form.classe.label_tag }}{{ form.classe }}</div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold" for="id_niveau">{% trans "Niveau" %}</label>
+          <select name="niveau" id="id_niveau" class="form-select">
+            <option value="">{% trans "Sélectionner..." %}</option>
+            {% for niveau in niveaux %}
+              <option value="{{ niveau.id }}" {% if niveau_selected and niveau_selected.id == niveau.id %}selected{% endif %}>
+                {{ niveau.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold" for="id_classe">{% trans "Classe" %}</label>
+          <select name="classe" id="id_classe" class="form-select">
+            <option value="">{% trans "Sélectionner..." %}</option>
+            {% for classe in classes %}
+              <option value="{{ classe.id }}" {% if classe_selected and classe_selected.id == classe.id %}selected{% endif %}>
+                {{ classe.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold" for="id_professeur">{% trans "Professeur" %}</label>
+          <select name="professeur" id="id_professeur" class="form-select">
+            <option value="">{% trans "Sélectionner..." %}</option>
+            {% for prof in professeurs %}
+              <option value="{{ prof.id }}" {% if professeur_selected and professeur_selected.id == prof.id %}selected{% endif %}>
+                {{ prof.nom_conplet }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold" for="id_periode">{% trans "Trimestre" %}</label>
+          <select name="periode" id="id_periode" class="form-select">
+            <option value="">{% trans "Sélectionner..." %}</option>
+            {% for p in periodes %}
+              <option value="{{ p.id }}" {% if periode_selected and periode_selected.id == p.id %}selected{% endif %}>
+                {{ p.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
-      <button class="btn btn-primary mt-3">{% trans "Continuer" %}</button>
+
+      <div class="d-flex justify-content-center mt-4">
+        <button type="submit" class="btn btn-primary px-4" name="action" value="continue" id="btnContinue">
+          {% trans "Continuer" %}
+        </button>
+      </div>
     </form>
   </div>
 </div>
+
+<script>
+(function () {
+
+  const niveau = document.getElementById("id_niveau");
+  const classe = document.getElementById("id_classe");
+  const professeur = document.getElementById("id_professeur");
+
+  function reload(params) {
+    const url = new URL(window.location.href);
+    url.search = "";
+    const qs = new URLSearchParams(params);
+    window.location.href = url.pathname + "?" + qs.toString();
+  }
+
+  niveau.addEventListener("change", function () {
+    reload({
+      niveau: niveau.value
+    });
+  });
+
+  classe.addEventListener("change", function () {
+    reload({
+      niveau: niveau.value,
+      classe: classe.value
+    });
+  });
+
+  professeur.addEventListener("change", function () {
+    reload({
+      niveau: niveau.value,
+      classe: classe.value,
+      professeur: professeur.value
+    });
+  });
+
+})();
+</script>
 
 {% endblock %}

@@ -664,7 +664,23 @@ def notes_gestion(request):
         "notes": qs[:800],
     })
 
+from decimal import Decimal, InvalidOperation
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+
+from Ecole_admin.models import (
+    Classe,
+    Devoir,
+    Eleve,
+    Niveau,
+    Note,
+    PeriodeScolaire,
+    Proffeseur,
+)
 
 @login_required
 def note_saisie_setup(request):
@@ -672,95 +688,302 @@ def note_saisie_setup(request):
         return HttpResponse("Accès refusé", status=403)
 
     ecole, annee = _ctx_school(request)
-    form = NoteSaisieSetupForm(request.GET or None, ecole=ecole, annee_scolaire=annee)
 
-    if request.method == "GET" and form.is_valid():
-        devoir = form.cleaned_data["devoir"]
-        classe = form.cleaned_data["classe"]
+    niveau_id = (request.GET.get("niveau") or "").strip()
+    classe_id = (request.GET.get("classe") or "").strip()
+    prof_id = (request.GET.get("professeur") or "").strip()
+    periode_id = (request.GET.get("periode") or "").strip()
+    action = (request.GET.get("action") or "").strip()
 
-        if not devoir.classes.filter(pk=classe.pk).exists():
-            messages.error(request, "Cette classe n'est pas associée à ce devoir.")
+    niveaux = Niveau.objects.filter(
+        ecole=ecole,
+        actif=True
+    ).order_by("ordre", "nom")
+
+    classes = Classe.objects.none()
+    professeurs = Proffeseur.objects.none()
+    periodes = PeriodeScolaire.objects.none()
+
+    niveau_selected = None
+    classe_selected = None
+    professeur_selected = None
+    periode_selected = None
+
+    # 1) niveau
+    if niveau_id:
+        try:
+            niveau_selected = Niveau.objects.get(
+                pk=niveau_id,
+                ecole=ecole,
+                actif=True
+            )
+            classes = Classe.objects.filter(
+                ecole=ecole,
+                niveau=niveau_selected,
+                actif=True
+            ).order_by("nom")
+        except Niveau.DoesNotExist:
+            niveau_selected = None
+
+    # 2) classe
+    if classe_id and niveau_selected:
+        try:
+            classe_selected = Classe.objects.get(
+                pk=classe_id,
+                ecole=ecole,
+                niveau=niveau_selected,
+                actif=True
+            )
+
+            professeurs = Proffeseur.objects.filter(
+                ecole=ecole,
+                actif=True,
+                classes=classe_selected
+            ).distinct().order_by("nom_conplet")
+
+            if _is_prof(request.user):
+                professeurs = professeurs.filter(user=request.user)
+
+        except Classe.DoesNotExist:
+            classe_selected = None
+
+    # 3) professeur
+    if prof_id and classe_selected:
+        try:
+            professeur_selected = Proffeseur.objects.get(
+                pk=prof_id,
+                ecole=ecole,
+                actif=True,
+                classes=classe_selected
+            )
+
+            if _is_prof(request.user) and professeur_selected.user_id != request.user.id:
+                return HttpResponse("Accès refusé", status=403)
+
+            # IMPORTANT :
+            # On ne filtre PAS par est_active=True ici
+            # On prend uniquement les périodes qui ont déjà des devoirs
+            periodes = PeriodeScolaire.objects.filter(
+                ecole=ecole,
+                annee_scolaire=annee,
+                devoir__ecole=ecole,
+                devoir__annee_scolaire=annee,
+                devoir__niveau=niveau_selected,
+                devoir__professeur=professeur_selected,
+                devoir__classes=classe_selected,
+            ).distinct().order_by("debut", "nom")
+
+        except Proffeseur.DoesNotExist:
+            professeur_selected = None
+
+    # 4) période
+    if periode_id and professeur_selected:
+        try:
+            periode_selected = PeriodeScolaire.objects.get(
+                pk=periode_id,
+                ecole=ecole,
+                annee_scolaire=annee
+            )
+        except PeriodeScolaire.DoesNotExist:
+            periode_selected = None
+
+    # 5) continuer
+    if action == "continue":
+        if not niveau_selected:
+            messages.error(request, "Veuillez sélectionner un niveau.")
             return redirect("note_saisie_setup")
 
-        return redirect("note_saisie", devoir_id=devoir.id, classe_id=classe.id)
+        if not classe_selected:
+            messages.error(request, "Veuillez sélectionner une classe.")
+            return redirect("note_saisie_setup")
 
-    return render(request, "note_saisie_setup.html", {"form": form})
+        if not professeur_selected:
+            messages.error(request, "Veuillez sélectionner un professeur.")
+            return redirect("note_saisie_setup")
 
+        if not periode_selected:
+            messages.error(request, "Veuillez sélectionner un trimestre.")
+            return redirect("note_saisie_setup")
+
+        return redirect(
+            "note_saisie",
+            classe_id=classe_selected.id,
+            prof_id=professeur_selected.id,
+            periode_id=periode_selected.id,
+        )
+
+    return render(request, "note_saisie_setup.html", {
+        "niveaux": niveaux,
+        "classes": classes,
+        "professeurs": professeurs,
+        "periodes": periodes,
+        "niveau_selected": niveau_selected,
+        "classe_selected": classe_selected,
+        "professeur_selected": professeur_selected,
+        "periode_selected": periode_selected,
+    })
 
 
 @login_required
-def note_saisie(request, devoir_id, classe_id):
+def note_saisie(request, classe_id, prof_id, periode_id):
     if not (_is_admin_or_secretaire(request.user) or _is_prof(request.user)):
         return HttpResponse("Accès refusé", status=403)
 
     ecole, annee = _ctx_school(request)
-    devoir = get_object_or_404(Devoir, pk=devoir_id, ecole=ecole, annee_scolaire=annee)
-    classe = get_object_or_404(Classe, pk=classe_id, ecole=ecole)
 
-    if not devoir.classes.filter(pk=classe.pk).exists():
-        return HttpResponseBadRequest("Classe non autorisée pour ce devoir.")
+    classe = get_object_or_404(
+        Classe,
+        pk=classe_id,
+        ecole=ecole,
+        actif=True
+    )
 
-    eleves = Eleve.objects.filter(ecole=ecole, annee_scolaire=annee, classe=classe).order_by("nom")
+    professeur = get_object_or_404(
+        Proffeseur,
+        pk=prof_id,
+        ecole=ecole,
+        actif=True,
+        classes=classe
+    )
 
-    exist = {
-        n.eleve_id: n
-        for n in Note.objects.filter(ecole=ecole, annee_scolaire=annee, devoir=devoir, eleve__in=eleves)
-    }
+    periode = get_object_or_404(
+        PeriodeScolaire,
+        pk=periode_id,
+        ecole=ecole,
+        annee_scolaire=annee
+    )
+
+    if _is_prof(request.user) and professeur.user_id != request.user.id:
+        return HttpResponse("Accès refusé", status=403)
+
+    devoirs = list(
+        Devoir.objects.filter(
+            ecole=ecole,
+            annee_scolaire=annee,
+            niveau=classe.niveau,
+            professeur=professeur,
+            classes=classe,
+            periode=periode,
+        )
+        .select_related("matiere", "periode", "niveau", "professeur")
+        .distinct()
+        .order_by("matiere__nom", "nom")
+    )
+
+    if not devoirs:
+        messages.warning(
+            request,
+            "Aucun devoir trouvé pour ce professeur dans cette classe et ce trimestre."
+        )
+        return redirect("note_saisie_setup")
+
+    eleves = list(
+        Eleve.objects.filter(
+            ecole=ecole,
+            annee_scolaire=annee,
+            classe=classe
+        ).order_by("nom")
+    )
+
+    notes_existantes = Note.objects.filter(
+        ecole=ecole,
+        annee_scolaire=annee,
+        eleve__in=eleves,
+        devoir__in=devoirs,
+    ).select_related("devoir", "eleve")
+
+    notes_map = {}
+    for n in notes_existantes:
+        notes_map[(n.eleve_id, n.devoir_id)] = n
 
     if request.method == "POST":
-        tri = periode_to_trimestre(devoir.periode)
-
         with transaction.atomic():
-            for e in eleves:
-                key_note = f"note_{e.id}"
-                key_coef = f"coef_{e.id}"
+            for eleve in eleves:
+                for devoir in devoirs:
+                    key_note = f"note_{eleve.id}_{devoir.id}"
+                    key_coef = f"coef_{eleve.id}_{devoir.id}"
 
-                val = (request.POST.get(key_note) or "").strip()
-                coef = (request.POST.get(key_coef) or "").strip()
+                    val_note = (request.POST.get(key_note) or "").strip()
+                    val_coef = (request.POST.get(key_coef) or "").strip()
 
-                if val == "":
-                    continue
+                    if val_note == "":
+                        continue
 
-                try:
-                    note_val = Decimal(val.replace(",", "."))
-                except Exception:
-                    continue
+                    try:
+                        note_val = Decimal(val_note.replace(",", "."))
+                    except (InvalidOperation, ValueError):
+                        continue
 
-                try:
-                    coef_val = int(coef) if coef else devoir.coefficient
-                except Exception:
-                    coef_val = devoir.coefficient
+                    if note_val < 0 or note_val > devoir.points:
+                        continue
 
-                obj = exist.get(e.id)
-                if obj:
-                    obj.note = note_val
-                    obj.coefficient = coef_val
-                    obj.matiere = devoir.matiere
-                    obj.user = request.user
-                    obj.trimestre = tri
-                    obj.save()
-                else:
-                    Note.objects.create(
-                        user=request.user,
-                        eleve=e,
-                        matiere=devoir.matiere,
-                        devoir=devoir,
-                        trimestre=tri,
-                        note=note_val,
-                        coefficient=coef_val,
-                        annee_scolaire=annee,
-                        ecole=ecole,
-                    )
+                    try:
+                        coef_val = int(val_coef) if val_coef else devoir.coefficient
+                    except (TypeError, ValueError):
+                        coef_val = devoir.coefficient
 
-        messages.success(request, "Notes enregistrées.")
-        return redirect("notes_gestion")
+                    if coef_val < 1:
+                        coef_val = devoir.coefficient
+
+                    tri = periode_to_trimestre(devoir.periode)
+
+                    obj = notes_map.get((eleve.id, devoir.id))
+                    if obj:
+                        obj.note = note_val
+                        obj.coefficient = coef_val
+                        obj.matiere = devoir.matiere
+                        obj.user = request.user
+                        obj.trimestre = tri
+                        obj.save()
+                    else:
+                        obj = Note.objects.create(
+                            user=request.user,
+                            eleve=eleve,
+                            matiere=devoir.matiere,
+                            devoir=devoir,
+                            trimestre=tri,
+                            note=note_val,
+                            coefficient=coef_val,
+                            annee_scolaire=annee,
+                            ecole=ecole,
+                        )
+                        notes_map[(eleve.id, devoir.id)] = obj
+
+        messages.success(request, "Notes enregistrées avec succès.")
+        return redirect(
+            "note_saisie",
+            classe_id=classe.id,
+            prof_id=professeur.id,
+            periode_id=periode.id,
+        )
+
+    rows = []
+    for eleve in eleves:
+        cellule_devoirs = []
+        for devoir in devoirs:
+            note_obj = notes_map.get((eleve.id, devoir.id))
+            cellule_devoirs.append({
+                "devoir": devoir,
+                "note": note_obj.note if note_obj else "",
+                "coefficient": note_obj.coefficient if note_obj else devoir.coefficient,
+            })
+
+        rows.append({
+            "eleve": eleve,
+            "cellules": cellule_devoirs,
+        })
 
     return render(request, "note_saisie.html", {
-        "devoir": devoir,
         "classe": classe,
-        "eleves": eleves,
-        "exist": exist,
+        "professeur": professeur,
+        "periode": periode,
+        "devoirs": devoirs,
+        "rows": rows,
     })
+
+
+
+
 
 
 from django.contrib.auth.decorators import login_required

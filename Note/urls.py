@@ -22,7 +22,7 @@ urlpatterns = [
     # notes
     path("notes/", views.notes_gestion, name="notes_gestion"),
     path("notes/saisie/", views.note_saisie_setup, name="note_saisie_setup"),
-    path("notes/saisie/<int:devoir_id>/<int:classe_id>/", views.note_saisie, name="note_saisie"),
+    path("notes/saisie/<int:classe_id>/<int:prof_id>/<int:periode_id>/", views.note_saisie, name="note_saisie"),
     path("notes/import/", views.note_import, name="note_import"),
     path("notes/import/template/", views.note_import_template_xlsx, name="note_import_template_csv"),
 
