@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+
+
+<style>
+  .report-back-link {
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .report-back-link:hover {
+    text-decoration: underline;
+  }
+
+  .rtl-arrow {
+    display: inline-block;
+  }
+
+  html[dir="rtl"] .rtl-arrow {
+    transform: scaleX(-1);
+  }
+</style>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-light">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <a href="javascript:history.back()" class="report-back-link text-primary">
+        <span class="rtl-arrow">←</span> {% trans "Retour" %}
+      </a>
+
+      <h2 class="h3 m-0 text-dark text-center flex-grow-1">{% trans "Rapport Centre" %}</h2>
+
+      <div style="width:72px;"></div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="row g-4">
+      {% for section in sections %}
+        <div class="col-lg-6">
+          <div class="card h-100">
+            <div class="card-header">
+              <strong>{{ section.title }}</strong>
+            </div>
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead>
+                  <tr>
+                    <th style="width:70px;">#</th>
+                    <th>{% trans "Nom du rapport" %}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in section.reports %}
+                    <tr>
+                      <td>{{ forloop.counter }}</td>
+                      <td><a href="{% url item.1 %}">{{ item.0 }}</a></td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="2">{% trans "Aucun rapport disponible." %}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

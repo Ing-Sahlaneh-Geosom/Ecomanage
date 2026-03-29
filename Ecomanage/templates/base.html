@@ -379,9 +379,9 @@ body, .main-content, .content, .page-content {
          📋 {% trans "Promotions" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuPromotion">
-        <a href="">- {% trans "Étudiants en attente d'une décision" %}</a>
-        <a href="">- {% trans "Évaluer l'élève pour la promotion" %}</a>
-        <a href="">- {% trans "Afficher la décision finale" %}</a>
+        <a href="{% url 'promotion:promotion_liste_attente' %}">- {% trans "Étudiants en attente d'une décision" %}</a>
+        <a href="{% url 'promotion:promotion_liste_evaluation' %}">- {% trans "Évaluer l'élève pour la promotion" %}</a>
+        <a href="{% url 'promotion:promotion_liste_decisions_finales' %}">- {% trans "Afficher la décision finale" %}</a>
         <a href="">- {% trans "Élève diplômé" %}</a>
         <a href="">- {% trans "Voir les élèves en promotion" %}</a>
         <a href="">- {% trans "Promouvoir les élèves en attente" %}</a>
@@ -501,9 +501,10 @@ body, .main-content, .content, .page-content {
         <a href="">- {% trans "Rapport des orientations" %}</a>
       </div>
    
-       
+
        <a class="{% if current == 'messagerie_home' %}active{% endif %}" href="{% url 'messagerie_home'%}">✉️{% trans  "Messagerie" %}</a>
        
+       <a class="{% if current == 'rapport_centre' %}active{% endif %}" href="{% url 'rapport_centre'%}">✉️{% trans  "Rapport" %}</a>
     
 
     <a class="{% if current == 'Les_Utlisateur' %}active{% endif %}" href="{% url 'Les_Utlisateur' %}">👥 {% trans "Utilisateurs" %}</a>

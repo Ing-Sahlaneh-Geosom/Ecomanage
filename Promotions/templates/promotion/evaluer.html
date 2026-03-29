@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block main %}
+
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="mb-1 text-dark">{% trans "Évaluer l'élève pour la promotion" %}</h4>
+    <div class="text-muted">
+      {{ promotion.eleve.nom }} — {{ promotion.classe_actuelle.nom }} — {{ promotion.annee_scolaire.nom }}
+    </div>
+  </div>
+  <a href="{% url 'promotion:promotion_liste_attente' %}" class="btn btn-outline-secondary">
+    {% trans "Retour à la liste" %}
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">{% trans "Moyenne annuelle" %}</div>
+        <h4 class="mb-0">{{ promotion.moyenne_annuelle|floatformat:2 }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">{% trans "Total absences" %}</div>
+        <h4 class="mb-0">{{ promotion.total_absences }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">{% trans "Décision proposée" %}</div>
+        <div class="mt-1">
+          {% if promotion.decision_proposee == "admis" %}
+            <span class="badge bg-success">{% trans "Admis" %}</span>
+          {% elif promotion.decision_proposee == "autorise" %}
+            <span class="badge bg-info text-dark">{% trans "Autorisé(e)" %}</span>
+          {% elif promotion.decision_proposee == "oriente" %}
+            <span class="badge bg-primary">{% trans "Orienté(e)" %}</span>
+          {% elif promotion.decision_proposee == "redouble" %}
+            <span class="badge bg-warning text-dark">{% trans "Redouble" %}</span>
+          {% elif promotion.decision_proposee == "diplome" %}
+            <span class="badge bg-dark">{% trans "Diplômé(e)" %}</span>
+          {% elif promotion.decision_proposee == "exclu" %}
+            <span class="badge bg-danger">{% trans "Exclu(e)" %}</span>
+          {% else %}
+            <span class="badge bg-secondary">{{ promotion.get_decision_proposee_display }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">{% trans "État" %}</div>
+        <h5 class="mb-0">{{ promotion.get_etat_display }}</h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if form.non_field_errors %}
+  <div class="alert alert-danger">
+    {{ form.non_field_errors }}
+  </div>
+{% endif %}
+
+<form method="post" class="mb-4">
+  {% csrf_token %}
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <strong>{% trans "Évaluation" %}</strong>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="id_prochaine_classe" class="form-label">
+            {% trans "Prochaine classe" %}
+          </label>
+          <select name="prochaine_classe" id="id_prochaine_classe" class="form-select">
+            <option value="">{% trans "--------- " %}</option>
+            {% for classe in form.fields.prochaine_classe.queryset %}
+              <option
+                value="{{ classe.pk }}"
+                data-niveau-id="{{ classe.niveau_id }}"
+                data-a-specialite="{% if classe.a_specialite %}1{% else %}0{% endif %}"
+                data-fixed-specialite-id="{% if classe.specialite_id %}{{ classe.specialite_id }}{% endif %}"
+                data-fixed-specialite-name="{% if classe.specialite_id %}{{ classe.specialite.nom }}{% endif %}"
+                {% if form.prochaine_classe.value|stringformat:"s" == classe.pk|stringformat:"s" %}
+                  selected
+                {% endif %}
+              >
+                {{ classe.nom }}{% if classe.specialite_id %} — {{ classe.specialite.nom }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+          {% if form.prochaine_classe.errors %}
+            <div class="text-danger small mt-1">{{ form.prochaine_classe.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6" id="specialite-wrapper" style="display:none;">
+          <label for="id_prochaine_specialite" class="form-label">
+            {% trans "Prochaine spécialité" %}
+          </label>
+          <select name="prochaine_specialite" id="id_prochaine_specialite" class="form-select">
+            <option value="">{% trans "--------- " %}</option>
+            {% for sp in form.fields.prochaine_specialite.queryset %}
+              <option
+                value="{{ sp.pk }}"
+                data-niveau-id="{{ sp.niveau_id }}"
+                {% if form.prochaine_specialite.value|stringformat:"s" == sp.pk|stringformat:"s" %}
+                  selected
+                {% endif %}
+              >
+                {{ sp.nom }}
+              </option>
+            {% endfor %}
+          </select>
+          <div class="form-text" id="specialite-help"></div>
+          {% if form.prochaine_specialite.errors %}
+            <div class="text-danger small mt-1">{{ form.prochaine_specialite.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-12">
+          {{ form.commentaire.label_tag }}
+          {{ form.commentaire }}
+          {% if form.commentaire.errors %}
+            <div class="text-danger small mt-1">{{ form.commentaire.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2 flex-wrap">
+        <button type="submit" name="evaluer_auto" class="btn btn-primary">
+          {% trans "Évaluer automatiquement" %}
+        </button>
+        <button type="submit" name="enregistrer_evaluation" class="btn btn-outline-primary">
+          {% trans "Enregistrer l'évaluation" %}
+        </button>
+        <a href="{% url 'promotion:promotion_valider_decision' promotion.pk %}" class="btn btn-success">
+          {% trans "Passer à la validation" %}
+        </a>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-header">
+    <strong>{% trans "Notes de l'élève" %}</strong>
+  </div>
+  <div class="card-body table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead>
+        <tr>
+          <th>{% trans "Matière" %}</th>
+          <th>{% trans "Devoir" %}</th>
+          <th>{% trans "Trimestre" %}</th>
+          <th>{% trans "Note" %}</th>
+          <th>{% trans "Coefficient" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for n in notes %}
+          <tr>
+            <td>{{ n.matiere.nom }}</td>
+            <td>{{ n.devoir.nom|default:"-" }}</td>
+            <td>{{ n.get_trimestre_display }}</td>
+            <td>{{ n.note }}</td>
+            <td>{{ n.coefficient }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted">
+              {% trans "Aucune note enregistrée." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header">
+    <strong>{% trans "Absences récentes" %}</strong>
+  </div>
+  <div class="card-body table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead>
+        <tr>
+          <th>{% trans "Date" %}</th>
+          <th>{% trans "Statut" %}</th>
+          <th>{% trans "Motif" %}</th>
+          <th>{% trans "Justifiée" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in absences %}
+          <tr>
+            <td>{{ a.date|date:"d/m/Y" }}</td>
+            <td>{{ a.get_statut_display }}</td>
+            <td>{{ a.motif|default:"-" }}</td>
+            <td>{% if a.justifiee %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-center text-muted">
+              {% trans "Aucune absence enregistrée." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const classeSelect = document.getElementById("id_prochaine_classe");
+  const specialiteWrapper = document.getElementById("specialite-wrapper");
+  const specialiteSelect = document.getElementById("id_prochaine_specialite");
+  const specialiteHelp = document.getElementById("specialite-help");
+
+  if (!classeSelect || !specialiteWrapper || !specialiteSelect) return;
+
+  const allSpecialiteOptions = Array.from(specialiteSelect.querySelectorAll("option"));
+
+  function resetSpecialiteOptions() {
+    specialiteSelect.innerHTML = "";
+    allSpecialiteOptions.forEach(opt => {
+      specialiteSelect.appendChild(opt.cloneNode(true));
+    });
+  }
+
+  function hideSpecialite() {
+    specialiteWrapper.style.display = "none";
+    specialiteSelect.value = "";
+    specialiteHelp.textContent = "";
+  }
+
+  function showSpecialite() {
+    specialiteWrapper.style.display = "";
+  }
+
+  function filterSpecialitesByNiveau(niveauId) {
+    resetSpecialiteOptions();
+
+    Array.from(specialiteSelect.options).forEach((opt) => {
+      if (!opt.value) return;
+      const optNiveau = opt.getAttribute("data-niveau-id");
+      if (String(optNiveau) !== String(niveauId)) {
+        opt.remove();
+      }
+    });
+  }
+
+  function toggleSpecialite() {
+    const selectedOption = classeSelect.options[classeSelect.selectedIndex];
+
+    if (!selectedOption || !selectedOption.value) {
+      hideSpecialite();
+      return;
+    }
+
+    const niveauId = selectedOption.getAttribute("data-niveau-id");
+    const aSpecialite = selectedOption.getAttribute("data-a-specialite") === "1";
+    const fixedSpecialiteId = selectedOption.getAttribute("data-fixed-specialite-id");
+    const fixedSpecialiteName = selectedOption.getAttribute("data-fixed-specialite-name");
+
+    if (fixedSpecialiteId) {
+      resetSpecialiteOptions();
+      specialiteSelect.value = fixedSpecialiteId;
+      showSpecialite();
+      specialiteSelect.closest(".col-md-6").style.opacity = "0.75";
+      specialiteSelect.setAttribute("readonly", "readonly");
+      specialiteSelect.setAttribute("disabled", "disabled");
+      specialiteHelp.textContent = fixedSpecialiteName
+        ? "{{ _('Spécialité liée automatiquement à la classe :')|escapejs }} " + fixedSpecialiteName
+        : "{{ _('Spécialité liée automatiquement à la classe.')|escapejs }}";
+      return;
+    }
+
+    specialiteSelect.removeAttribute("disabled");
+    specialiteSelect.removeAttribute("readonly");
+    specialiteSelect.closest(".col-md-6").style.opacity = "1";
+
+    if (!aSpecialite) {
+      hideSpecialite();
+      return;
+    }
+
+    filterSpecialitesByNiveau(niveauId);
+
+    const availableOptions = Array.from(specialiteSelect.options).filter(opt => opt.value);
+    if (availableOptions.length === 0) {
+      hideSpecialite();
+      return;
+    }
+
+    showSpecialite();
+    specialiteHelp.textContent = "{{ _('Choisissez une spécialité pour la classe cible.')|escapejs }}";
+  }
+
+  classeSelect.addEventListener("change", toggleSpecialite);
+  toggleSpecialite();
+});
+</script>
+
+{% endblock %}

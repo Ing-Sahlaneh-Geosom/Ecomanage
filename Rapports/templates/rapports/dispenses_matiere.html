@@ -1,0 +1,39 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block report_table %}
+<div class="table-wrap table-hover table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Élève" %}</th>
+                <th>{% trans "Classe" %}</th>
+                <th>{% trans "Matière" %}</th>
+                <th>{% trans "Période" %}</th>
+                <th>{% trans "Valeur" %}</th>
+                <th>{% trans "Motif" %}</th>
+                <th>{% trans "Date création" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.eleve.nom }}</td>
+                <td>{{ row.eleve.classe.nom|default:"-" }}</td>
+                <td>{{ row.matiere.nom }}</td>
+                <td>{{ row.periode.nom }}</td>
+                <td>{{ row.valeur }}</td>
+                <td>{{ row.motif|default:"-" }}</td>
+                <td>{{ row.created_at|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="report-empty">{% trans "Aucune donnée trouvée." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

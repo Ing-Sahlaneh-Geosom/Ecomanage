@@ -1,0 +1,45 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block report_table %}
+<div class="table-wrap table-hover table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Professeur" %}</th>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Heure début" %}</th>
+                <th>{% trans "Heure fin" %}</th>
+                <th>{% trans "Statut" %}</th>
+                <th>{% trans "Motif" %}</th>
+                <th>{% trans "Justifiée" %}</th>
+                <th>{% trans "Pièce" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.professeur.nom_conplet }}</td>
+                <td>{{ row.date|date:"d/m/Y" }}</td>
+                <td>{{ row.h_debut|default:"-" }}</td>
+                <td>{{ row.h_fin|default:"-" }}</td>
+                <td>{{ row.get_statut_display }}</td>
+                <td>{{ row.motif|default:"-" }}</td>
+                <td>{% if row.justifiee %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</td>
+                <td>
+                    {% if row.piece %}
+                        <a href="{{ row.piece.url }}" target="_blank">{% trans "Voir" %}</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="report-empty">{% trans "Aucune donnée trouvée." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -186,7 +186,6 @@ class Specialite(models.Model):
         return self.nom
 
 
-
 class Classe(models.Model):
     nom = models.CharField(max_length=50)  # ex: 6EME1, TSE, 1ERE S
 
@@ -194,6 +193,12 @@ class Classe(models.Model):
         Niveau,
         on_delete=models.PROTECT,
         related_name='classes'
+    )
+
+    # ✅ NOUVEAU : ordre de la classe dans son niveau
+    ordre = models.PositiveIntegerField(
+        default=1,
+        help_text=_("Ordre de la classe dans le niveau (ex: 1, 2, 3...)")
     )
 
     a_specialite = models.BooleanField(default=False)
@@ -205,12 +210,11 @@ class Classe(models.Model):
         blank=True
     )
 
-    
-
     ecole = models.ForeignKey(
         Ecole,
         on_delete=models.CASCADE,
-        null=True, blank=True
+        null=True,
+        blank=True
     )
 
     actif = models.BooleanField(default=True)
@@ -219,16 +223,13 @@ class Classe(models.Model):
 
     class Meta:
         unique_together = ('nom', 'ecole')
-        ordering = ['niveau', 'nom']
+        ordering = ['niveau__ordre', 'ordre', 'nom']
 
     def __str__(self):
         return f"{self.nom} - {self.niveau}"
 
-
     def get_absolute_url(self):
-        return reverse('Detaille_d_une_classe' , kwargs={"pk": self.id})
-
-
+        return reverse('Detaille_d_une_classe', kwargs={"pk": self.id})
 
 
 
@@ -241,8 +242,13 @@ class Eleve(models.Model):
     
     SEXE = (('M', _('musculin')), ('F', _('feminin')))
     STATUS = (
+        ("EN_COURS", _("En cours")),
         ("ADMIS", _("Admis")),
         ("REDOUBLE", _("Redouble")),
+        ("AUTORISE", _("Autorisé(e)")),
+        ("ORIENTE", _("Orienté(e)")),
+        ("DIPLOME", _("Diplômé(e)")),
+        ("EXCLU", _("Exclu(e)")),
     )
     identifiant = models.CharField(max_length=20, blank=True, null=True)
     date_inscription = models.DateField(default=timezone.localdate)
@@ -263,8 +269,7 @@ class Eleve(models.Model):
     parent = models.CharField(max_length=200)
     telephone_parent = models.CharField(max_length=70, blank=True)
     email_parent = models.EmailField(null=True, blank=True)
-    status = models.CharField(max_length=120,choices=STATUS)
-
+    status = models.CharField(max_length=120, choices=STATUS, default="EN_COURS")
 
     
     parent_user = models.ForeignKey("User", null=True, blank=True, on_delete=models.CASCADE, related_name="enfants")
@@ -1020,6 +1025,424 @@ class DecisionAbsence(models.Model):
 
     def __str__(self):
         return f"{self.max_abs} => {self.get_statut_display()}"
+    
+
+
+from decimal import Decimal, ROUND_HALF_UP
+
+
+class PromotionEtat(models.TextChoices):
+    EN_ATTENTE = "en_attente", _("En attente")
+    EVALUE = "evalue", _("Évalué")
+    VALIDE = "valide", _("Validé")
+    EXECUTE = "execute", _("Exécuté")
+
+
+class PromotionDecisionCode(models.TextChoices):
+    ATTENTE = "attente", _("En attente")
+    ADMIS = "admis", _("Admis")
+    REDOUBLE = "redouble", _("Redouble")
+    AUTORISE = "autorise", _("Autorisé(e)")
+    ORIENTE = "oriente", _("Orienté(e)")
+    DIPLOME = "diplome", _("Diplômé(e)")
+    EXCLU = "exclu", _("Exclu(e)")
+
+
+class PromotionEleve(models.Model):
+    ecole = models.ForeignKey("Ecole", on_delete=models.CASCADE, related_name="promotions_eleves")
+    annee_scolaire = models.ForeignKey("AnneeScolaire", on_delete=models.CASCADE, related_name="promotions_eleves")
+
+    eleve = models.ForeignKey("Eleve", on_delete=models.CASCADE, related_name="promotions")
+
+    niveau_actuel = models.ForeignKey(
+        "Niveau",
+        on_delete=models.PROTECT,
+        related_name="promotions_niveau_actuel",
+        null=True,
+        blank=True
+    )
+    classe_actuelle = models.ForeignKey(
+        "Classe",
+        on_delete=models.PROTECT,
+        related_name="promotions_classe_actuelle",
+        null=True,
+        blank=True
+    )
+
+    moyenne_annuelle = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    total_absences = models.PositiveIntegerField(default=0)
+    total_retards = models.PositiveIntegerField(default=0)
+
+    decision_proposee = models.CharField(
+        max_length=20,
+        choices=PromotionDecisionCode.choices,
+        default=PromotionDecisionCode.ATTENTE
+    )
+    decision_finale = models.CharField(
+        max_length=20,
+        choices=PromotionDecisionCode.choices,
+        default=PromotionDecisionCode.ATTENTE
+    )
+
+    # optionnel : si admin choisit une décision personnalisée depuis DecisionPromotion
+    decision_personnalisee = models.ForeignKey(
+        "DecisionPromotion",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promotions_personnalisees"
+    )
+
+    etat = models.CharField(
+        max_length=20,
+        choices=PromotionEtat.choices,
+        default=PromotionEtat.EN_ATTENTE
+    )
+
+    prochaine_niveau = models.ForeignKey(
+        "Niveau",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promotions_niveau_cible"
+    )
+    prochaine_classe = models.ForeignKey(
+        "Classe",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promotions_classe_cible"
+    )
+    prochaine_specialite = models.ForeignKey(
+        "Specialite",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promotions_specialite_cible"
+    )
+
+    commentaire = models.TextField(blank=True)
+
+    evalue_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promotions_evaluees"
+    )
+    valide_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promotions_validees"
+    )
+    execute_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promotions_executees"
+    )
+
+    date_evaluation = models.DateTimeField(null=True, blank=True)
+    date_validation = models.DateTimeField(null=True, blank=True)
+    date_execution = models.DateTimeField(null=True, blank=True)
+
+    est_diplome = models.BooleanField(default=False)
+    est_traite = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["classe_actuelle__nom", "eleve__nom"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ecole", "annee_scolaire", "eleve"],
+                name="uniq_promotion_eleve_par_ecole_annee"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.eleve} - {self.annee_scolaire} - {self.get_decision_finale_display()}"
+
+    def save(self, *args, **kwargs):
+   
+        if not self.classe_actuelle_id and self.eleve_id and self.eleve.classe_id:
+            self.classe_actuelle = self.eleve.classe
+
+        if not self.niveau_actuel_id and self.classe_actuelle_id:
+            self.niveau_actuel = self.classe_actuelle.niveau
+
+  
+        if self.classe_actuelle_id and not self.prochaine_classe_id:
+            from .promotion_utils import get_prochaine_classe_par_defaut
+
+            decision = self.decision_finale or self.decision_proposee
+            default_classe = get_prochaine_classe_par_defaut(
+                classe_actuelle=self.classe_actuelle,
+                decision=decision,
+            )
+
+        if default_classe:
+            self.prochaine_classe = default_classe
+
+            # spécialité auto seulement si la classe existe vraiment
+            if getattr(default_classe, "specialite_id", None):
+                self.prochaine_specialite = default_classe.specialite
+            else:
+                self.prochaine_specialite = None
+
+        
+        if self.prochaine_classe_id and self.prochaine_classe:
+            self.prochaine_niveau = self.prochaine_classe.niveau
+
+            if getattr(self.prochaine_classe, "specialite_id", None):
+                self.prochaine_specialite = self.prochaine_classe.specialite
+            elif not self.prochaine_classe.a_specialite:
+                self.prochaine_specialite = None
+        else:
+            self.prochaine_niveau = None
+            self.prochaine_specialite = None
+
+        super().save(*args, **kwargs)
+
+
+    def calculer_total_absences(self):
+        return Absence.objects.filter(
+            eleve=self.eleve,
+            annee_scolaire=self.annee_scolaire,
+            ecole=self.ecole,
+            statut="absence"
+        ).count()
+
+    def calculer_total_retards(self):
+        return Absence.objects.filter(
+            eleve=self.eleve,
+            annee_scolaire=self.annee_scolaire,
+            ecole=self.ecole,
+            statut="retard"
+        ).count()
+
+    def calculer_moyenne_annuelle(self):
+        notes = Note.objects.filter(
+            eleve=self.eleve,
+            annee_scolaire=self.annee_scolaire,
+            ecole=self.ecole
+        ).select_related("devoir")
+
+        total_points = Decimal("0.00")
+        total_coef = 0
+
+        for n in notes:
+            coef = int(n.coefficient or 1)
+            note_brute = Decimal(str(n.note))
+
+            # normalisation sur 20 si devoir.points != 20
+            points_devoir = Decimal("20")
+            if n.devoir_id and getattr(n.devoir, "points", None):
+                points_devoir = Decimal(str(n.devoir.points))
+
+            if points_devoir > 0 and points_devoir != Decimal("20"):
+                note_sur_20 = (note_brute * Decimal("20")) / points_devoir
+            else:
+                note_sur_20 = note_brute
+
+            if note_sur_20 > Decimal("20"):
+                note_sur_20 = Decimal("20")
+
+            total_points += note_sur_20 * coef
+            total_coef += coef
+
+        if total_coef == 0:
+            return Decimal("0.00")
+
+        moyenne = (total_points / Decimal(str(total_coef))).quantize(
+            Decimal("0.01"),
+            rounding=ROUND_HALF_UP
+        )
+        return moyenne
+
+    def proposer_decision(self, user=None):
+        self.total_absences = self.calculer_total_absences()
+        self.total_retards = self.calculer_total_retards()
+        self.moyenne_annuelle = self.calculer_moyenne_annuelle()
+
+        # 1) priorité à la règle d'absence si elle existe
+        regle_abs = DecisionAbsence.objects.filter(
+            ecole=self.ecole,
+            annee_scolaire=self.annee_scolaire,
+            actif=True,
+            max_abs__lte=self.total_absences
+        ).order_by("-max_abs").first()
+
+        map_absence = {
+            "R": PromotionDecisionCode.REDOUBLE,
+            "F": PromotionDecisionCode.ADMIS,
+            "A": PromotionDecisionCode.AUTORISE,
+            "E": PromotionDecisionCode.EXCLU,
+        }
+
+        if regle_abs:
+            self.decision_proposee = map_absence.get(
+                regle_abs.statut,
+                PromotionDecisionCode.ATTENTE
+            )
+        else:
+            # 2) sinon, décision selon config moyenne
+            cfg = ConfigMoyenne.objects.filter(
+                ecole=self.ecole,
+                annee_scolaire=self.annee_scolaire,
+                niveau=self.niveau_actuel,
+                actif=True,
+                moyenne_de__lte=self.moyenne_annuelle,
+                moyenne_a__gte=self.moyenne_annuelle
+            ).order_by("moyenne_de").first()
+
+            if cfg:
+                self.decision_proposee = cfg.status
+            else:
+                self.decision_proposee = PromotionDecisionCode.ATTENTE
+
+        self.etat = PromotionEtat.EVALUE
+        self.date_evaluation = timezone.now()
+        self.evalue_par = user
+        self.save()
+
+        return self.decision_proposee
+
+    def valider_decision(self, user=None, decision=None, commentaire=""):
+        self.decision_finale = decision or self.decision_proposee or PromotionDecisionCode.ATTENTE
+        self.commentaire = commentaire or self.commentaire
+        self.valide_par = user
+        self.date_validation = timezone.now()
+        self.etat = PromotionEtat.VALIDE
+        self.est_diplome = self.decision_finale == PromotionDecisionCode.DIPLOME
+        self.save()
+
+    def executer_promotion(self, user=None):
+        if self.decision_finale == PromotionDecisionCode.ATTENTE:
+            raise ValueError("Impossible d'exécuter une promotion sans décision finale.")
+
+        ancienne_classe = self.eleve.classe
+        ancien_niveau = ancienne_classe.niveau if ancienne_classe else None
+
+        # mise à jour du statut élève
+        map_status_eleve = {
+            PromotionDecisionCode.ADMIS: "ADMIS",
+            PromotionDecisionCode.REDOUBLE: "REDOUBLE",
+            PromotionDecisionCode.AUTORISE: "AUTORISE",
+            PromotionDecisionCode.ORIENTE: "ORIENTE",
+            PromotionDecisionCode.DIPLOME: "DIPLOME",
+            PromotionDecisionCode.EXCLU: "EXCLU",
+        }
+
+        # changement de classe seulement si logique de passage
+        if self.decision_finale in [
+            PromotionDecisionCode.ADMIS,
+            PromotionDecisionCode.AUTORISE,
+            PromotionDecisionCode.ORIENTE,
+        ] and self.prochaine_classe_id:
+            self.eleve.classe = self.prochaine_classe
+
+        if self.decision_finale in map_status_eleve:
+            self.eleve.status = map_status_eleve[self.decision_finale]
+
+        self.eleve.save()
+
+        HistoriqueChangementClasse.objects.create(
+            ecole=self.ecole,
+            annee_scolaire=self.annee_scolaire,
+            eleve=self.eleve,
+            ancienne_niveau=ancien_niveau,
+            ancienne_classe=ancienne_classe,
+            nouvelle_niveau=self.eleve.classe.niveau if self.eleve.classe else None,
+            nouvelle_classe=self.eleve.classe,
+            decision=self.decision_finale,
+            source="promotion",
+            motif=self.commentaire or f"Promotion exécutée : {self.get_decision_finale_display()}",
+            cree_par=user,
+            promotion=self
+        )
+
+        self.execute_par = user
+        self.date_execution = timezone.now()
+        self.etat = PromotionEtat.EXECUTE
+        self.est_traite = True
+        self.save()
+
+
+class HistoriqueChangementClasse(models.Model):
+    SOURCE_CHOICES = (
+        ("promotion", _("Promotion")),
+        ("orientation", _("Orientation")),
+        ("manuel", _("Manuel")),
+    )
+
+    ecole = models.ForeignKey("Ecole", on_delete=models.CASCADE, related_name="historiques_changement_classe")
+    annee_scolaire = models.ForeignKey("AnneeScolaire", on_delete=models.CASCADE, related_name="historiques_changement_classe")
+
+    eleve = models.ForeignKey("Eleve", on_delete=models.CASCADE, related_name="historiques_changement_classe")
+
+    ancienne_niveau = models.ForeignKey(
+        "Niveau",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="anciens_niveaux_changement"
+    )
+    ancienne_classe = models.ForeignKey(
+        "Classe",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="anciennes_classes_changement"
+    )
+
+    nouvelle_niveau = models.ForeignKey(
+        "Niveau",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="nouveaux_niveaux_changement"
+    )
+    nouvelle_classe = models.ForeignKey(
+        "Classe",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="nouvelles_classes_changement"
+    )
+
+    decision = models.CharField(max_length=20, choices=PromotionDecisionCode.choices, default=PromotionDecisionCode.ATTENTE)
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default="manuel")
+
+    motif = models.TextField(blank=True)
+
+    cree_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="changements_classe_crees"
+    )
+
+    promotion = models.ForeignKey(
+        "PromotionEleve",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="historiques"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.eleve} : {self.ancienne_classe} -> {self.nouvelle_classe}"
 
 
 # =========================

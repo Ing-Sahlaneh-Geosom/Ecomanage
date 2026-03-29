@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'Paiment',
     'Messagerie',
     'Administration',
+    'Rapports',
+    'Promotions',
 
 ]
 

@@ -1,0 +1,46 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block summary %}
+<div class="summary-boxes">
+    <div class="summary-box">
+        <h4>{% trans "Total payé" %}</h4>
+        <p>{{ total_paye }}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block report_table %}
+<div class="table-wrap table-hover table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Élève" %}</th>
+                <th>{% trans "Classe" %}</th>
+                <th>{% trans "Type paiement" %}</th>
+                <th>{% trans "Montant" %}</th>
+                <th>{% trans "Date paiement" %}</th>
+                <th>{% trans "Période" %}</th>
+                <th>{% trans "Moyen" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.eleve.nom }}</td>
+                <td>{{ row.eleve.classe.nom|default:"-" }}</td>
+                <td>{{ row.type_paiement.nom }}</td>
+                <td>{{ row.montant }}</td>
+                <td>{{ row.date_paiement|date:"d/m/Y" }}</td>
+                <td>{{ row.periode }}</td>
+                <td>{{ row.moyen|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="report-empty">{% trans "Aucune donnée trouvée." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block summary %}
+<div class="summary-boxes">
+    <div class="summary-box"><h4>{% trans "Total" %}</h4><p>{{ resume.total|default:0 }}</p></div>
+    <div class="summary-box"><h4>{% trans "Présents" %}</h4><p>{{ resume.presents|default:0 }}</p></div>
+    <div class="summary-box"><h4>{% trans "Absences" %}</h4><p>{{ resume.absences|default:0 }}</p></div>
+    <div class="summary-box"><h4>{% trans "Retards" %}</h4><p>{{ resume.retards|default:0 }}</p></div>
+</div>
+{% endblock %}
+
+{% block report_table %}
+<div class="table-wrap table-responsive table-hover">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Élève" %}</th>
+                <th>{% trans "Classe" %}</th>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Heure début" %}</th>
+                <th>{% trans "Heure fin" %}</th>
+                <th>{% trans "Statut" %}</th>
+                <th>{% trans "Motif" %}</th>
+                <th>{% trans "Justifiée" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.eleve.nom }}</td>
+                <td>{{ row.eleve.classe.nom|default:"-" }}</td>
+                <td>{{ row.date|date:"d/m/Y" }}</td>
+                <td>{{ row.h_debut|default:"-" }}</td>
+                <td>{{ row.h_fin|default:"-" }}</td>
+                <td>
+                    {% if row.statut == "present" %}
+                        <span class="badge badge-success">{{ row.get_statut_display }}</span>
+                    {% elif row.statut == "absence" %}
+                        <span class="badge badge-danger">{{ row.get_statut_display }}</span>
+                    {% else %}
+                        <span class="badge badge-warning">{{ row.get_statut_display }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ row.motif|default:"-" }}</td>
+                <td>{% if row.justifiee %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="report-empty">{% trans "Aucune donnée trouvée." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block summary %}
+<div style="display: flex; justify-content: space-between; margin: 3rem;" class="summary-boxes">
+    <div class="summary-box"><h4>{% trans "Total dû" %}</h4><p>{{ total_du }}</p></div>
+    <div class="summary-box"><h4>{% trans "Total payé" %}</h4><p>{{ total_paye }}</p></div>
+    <div class="summary-box"><h4>{% trans "Reste" %}</h4><p>{{ total_reste }}</p></div>
+</div>
+{% endblock %}
+
+{% block report_table %}
+<div class="table-wrap table-responsive table-hover">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Élève" %}</th>
+                <th>{% trans "Classe" %}</th>
+                <th>{% trans "Type de frais" %}</th>
+                <th>{% trans "Montant dû" %}</th>
+                <th>{% trans "Montant payé" %}</th>
+                <th>{% trans "Reste" %}</th>
+                <th>{% trans "Statut" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.obj.eleve.nom }}</td>
+                <td>{{ row.obj.eleve.classe.nom|default:"-" }}</td>
+                <td>{{ row.obj.type_paiement.nom }}</td>
+                <td>{{ row.montant_du }}</td>
+                <td>{{ row.montant_paye }}</td>
+                <td>{{ row.reste }}</td>
+                <td>
+                    {% if row.reste <= 0 %}
+                        <span class="badge badge-success">{% trans "Payé" %}</span>
+                    {% else %}
+                        <span class="badge badge-danger">{% trans "Impayé" %}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="report-empty">{% trans "Aucune donnée trouvée." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

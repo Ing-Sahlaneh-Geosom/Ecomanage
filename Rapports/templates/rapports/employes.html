@@ -1,0 +1,55 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block summary %}
+<div style="display: flex; justify-content: space-between; margin: 3rem;" class="summary-boxes">
+    <div class="summary-box"><h4>{% trans "Total employés" %}</h4><p>{{ resume.total|default:0 }}</p></div>
+    <div class="summary-box"><h4>{% trans "Actifs" %}</h4><p>{{ resume.actifs|default:0 }}</p></div>
+    <div class="summary-box"><h4>{% trans "Inactifs" %}</h4><p>{{ resume.inactifs|default:0 }}</p></div>
+    <div class="summary-box"><h4>{% trans "Hommes" %}</h4><p>{{ resume.hommes|default:0 }}</p></div>
+    <div class="summary-box"><h4>{% trans "Femmes" %}</h4><p>{{ resume.femmes|default:0 }}</p></div>
+</div>
+{% endblock %}
+
+{% block report_table %}
+<div class="table-wrap table-responsive table-hover">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Matricule" %}</th>
+                <th>{% trans "Nom complet" %}</th>
+                <th>{% trans "Sexe" %}</th>
+                <th>{% trans "Fonction" %}</th>
+                <th>{% trans "Bureau" %}</th>
+                <th>{% trans "Date embauche" %}</th>
+                <th>{% trans "Heures de travail" %}</th>
+                <th>{% trans "Statut" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.matricule }}</td>
+                <td>{{ row.nom_complet }}</td>
+                <td>{{ row.get_sexe_display|default:row.sexe }}</td>
+                <td>{{ row.get_fonction_display|default:row.fonction }}</td>
+                <td>{{ row.bureau|default:"-" }}</td>
+                <td>{{ row.date_embauche|default:"-" }}</td>
+                <td>{{ row.working_hours }}</td>
+                <td>
+                    {% if row.statut == "active" %}
+                        <span class="badge badge-success">{{ row.get_statut_display }}</span>
+                    {% else %}
+                        <span class="badge badge-danger">{{ row.get_statut_display }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="report-empty">{% trans "Aucune donnée trouvée." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

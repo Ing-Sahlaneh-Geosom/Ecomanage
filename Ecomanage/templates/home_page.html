@@ -1,243 +1,580 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
-{% block title %} DashPort {% endblock %}
-    {% block main %}
-    
+{% block title %}{% trans "Tableau de bord" %}{% endblock %}
+
+{% block main %}
+<style>
+  .school-dashboard {
+    color: #1f2937;
+  }
+
+  .school-dashboard .ss-page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    color: #111827;
+  }
+
+  .school-dashboard .ss-kpi-card,
+  .school-dashboard .ss-panel,
+  .school-dashboard .ss-chart-card,
+  .school-dashboard .ss-mini-card,
+  .school-dashboard .ss-simple-card {
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  .school-dashboard .ss-kpi-card {
+    padding: 1rem 1.25rem;
+    min-height: 108px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .school-dashboard .ss-kpi-label {
+    font-size: .95rem;
+    color: #374151;
+    margin-bottom: .55rem;
+    font-weight: 600;
+  }
+
+  .school-dashboard .ss-kpi-value {
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: #1d4ed8;
+  }
+
+  .school-dashboard .ss-panel {
+    overflow: hidden;
+  }
+
+  .school-dashboard .ss-panel-header {
+    background: #a8d08d;
+    color: #111827;
+    font-weight: 600;
+    padding: .85rem 1rem;
+    border-bottom: 1px solid #96c47a;
+  }
+
+  .school-dashboard .ss-panel-body {
+    padding: .8rem 1rem;
+    min-height: 132px;
+  }
+
+  .school-dashboard .ss-feed-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .6rem 0;
+    border-bottom: 1px solid #eef0f3;
+    font-size: .92rem;
+  }
+
+  .school-dashboard .ss-feed-item:last-child {
+    border-bottom: 0;
+  }
+
+  .school-dashboard .ss-feed-primary {
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .school-dashboard .ss-feed-secondary {
+    display: block;
+    font-size: .8rem;
+    color: #6b7280;
+    margin-top: .15rem;
+  }
+
+  .school-dashboard .ss-feed-date {
+    white-space: nowrap;
+    text-align: end;
+    color: #6b7280;
+    font-size: .82rem;
+  }
+
+  .school-dashboard .ss-chart-card {
+    padding: 1rem 1rem .75rem;
+    min-height: 205px;
+  }
+
+  .school-dashboard .ss-chart-title {
+    font-size: 1.15rem;
+    color: #2563eb;
+    font-weight: 700;
+    margin-bottom: .75rem;
+  }
+
+  .school-dashboard .ss-chart-wrap {
+    position: relative;
+    height: 170px;
+  }
+
+  .school-dashboard .ss-section-subtitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #374151;
+    margin: 1.4rem 0 .8rem;
+  }
+
+  .school-dashboard .ss-mini-card {
+    padding: .9rem 1rem;
+    height: 100%;
+  }
+
+  .school-dashboard .ss-mini-label {
+    font-size: .85rem;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: .35rem;
+  }
+
+  .school-dashboard .ss-mini-value {
+    font-size: 1.2rem;
+    color: #111827;
+    font-weight: 700;
+  }
+
+  .school-dashboard .ss-empty {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: .92rem;
+  }
+
+  .school-dashboard .ss-simple-card {
+    padding: 1rem;
+    height: 100%;
+  }
+
+  .school-dashboard .ss-simple-card h6 {
+    font-weight: 700;
+    margin-bottom: .9rem;
+  }
+
+  .school-dashboard .ss-simple-list-item {
+    padding: .55rem 0;
+    border-bottom: 1px solid #eef0f3;
+    font-size: .92rem;
+  }
+
+  .school-dashboard .ss-simple-list-item:last-child {
+    border-bottom: 0;
+  }
+
+  .school-dashboard .ss-table thead th {
+    background: #eaf2ff;
+    color: #1f2937;
+    font-weight: 700;
+    font-size: .9rem;
+  }
+
+  .school-dashboard .ss-badge {
+    display: inline-block;
+    padding: .2rem .55rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 700;
+  }
+
+  @media (max-width: 991.98px) {
+    .school-dashboard .ss-page-title {
+      font-size: 1.6rem;
+    }
+
+    .school-dashboard .ss-chart-wrap {
+      height: 220px;
+    }
+  }
+</style>
+
+<div class="school-dashboard">
 {% if mode == "parent" %}
-  <h5 class="mb-3">
-    <span class="text-primary">Parent :</span> {{ user.nom_complet|default:user.username }}
-  </h5>
+  <h1 class="ss-page-title">{% trans "Tableau de bord parent" %}</h1>
 
-  <div class="card mb-4">
-    <div class="card-body">
-      <h6 class="fw-bold mb-3">Mes enfants</h6>
-
-      {% if enfants %}
-        <div class="table-responsive">
-          <table class="table table-sm table-striped">
-            <thead class="table-primary">
-              <tr>
-                <th>Nom</th>
-                <th>Classe</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for e in enfants %}
-              <tr>
-                <td>{{ e.nom }}</td>
-                <td>{{ e.classe }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="text-muted">Aucun enfant lié à ce compte.</div>
-      {% endif %}
+  <div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-kpi-card">
+        <div class="ss-kpi-label">{% trans "Mes enfants" %}</div>
+        <div class="ss-kpi-value">{{ total_enfants }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-kpi-card">
+        <div class="ss-kpi-label">{% trans "Absences récentes" %}</div>
+        <div class="ss-kpi-value">{{ total_absences_parent }}</div>
+      </div>
     </div>
   </div>
 
   <div class="row g-3">
     <div class="col-lg-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <h6 class="fw-bold">Paiements récents</h6>
-          {% for p in paiements %}
-            <div class="d-flex justify-content-between border-bottom py-2 small">
-              <span>{{ p.eleve }}</span>
-              <span>{{ p.total }} | {{ p.date_operation|date:"d/m/Y" }}</span>
-            </div>
-          {% empty %}
-            <div class="text-muted small">Aucun paiement.</div>
-          {% endfor %}
-        </div>
+      <div class="ss-simple-card">
+        <h6>{% trans "Mes enfants" %}</h6>
+        {% for e in enfants %}
+          <div class="ss-simple-list-item">
+            <div class="fw-semibold">{{ e.nom }}</div>
+            <div class="text-muted small">{{ e.classe|default:"-" }}</div>
+          </div>
+        {% empty %}
+          <div class="ss-empty">{% trans "Aucun enfant lié à ce compte." %}</div>
+        {% endfor %}
       </div>
     </div>
 
     <div class="col-lg-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <h6 class="fw-bold">Absences récentes</h6>
-          {% for a in apsences %}
-            <div class="border-bottom py-2 small">
-              <div class="fw-semibold">{{ a.eleve }}</div>
-              <div class="text-muted">{{ a.date|date:"d/m/Y" }} | {{ a.get_statut_display }}</div>
-            </div>
-          {% empty %}
-            <div class="text-muted small">Aucune absence.</div>
-          {% endfor %}
-        </div>
+      <div class="ss-simple-card">
+        <h6>{% trans "Paiements récents" %}</h6>
+        {% for p in paiements %}
+          <div class="ss-simple-list-item d-flex justify-content-between gap-2">
+            <span>
+              <strong>{{ p.type_paiement }}</strong><br>
+              <span class="text-muted small">{{ p.eleve }}</span>
+            </span>
+            <span class="text-end small">
+              {{ p.montant|floatformat:2 }}<br>
+              <span class="text-muted">{{ p.date_paiement|date:"d/m/Y" }}</span>
+            </span>
+          </div>
+        {% empty %}
+          <div class="ss-empty">{% trans "Aucun paiement." %}</div>
+        {% endfor %}
       </div>
     </div>
 
     <div class="col-lg-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <h6 class="fw-bold">Notes récentes</h6>
-          {% for n in notes %}
-            <div class="d-flex justify-content-between border-bottom py-2 small">
-              <span>{{ n.matiere }}</span>
-              <span class="fw-bold">{{ n.note }}</span>
-            </div>
-          {% empty %}
-            <div class="text-muted small">Aucune note.</div>
-          {% endfor %}
-        </div>
+      <div class="ss-simple-card mb-3">
+        <h6>{% trans "Absences récentes" %}</h6>
+        {% for a in apsences %}
+          <div class="ss-simple-list-item">
+            <strong>{{ a.eleve }}</strong>
+            <div class="text-muted small">{{ a.date|date:"d/m/Y" }}</div>
+          </div>
+        {% empty %}
+          <div class="ss-empty">{% trans "Aucune absence." %}</div>
+        {% endfor %}
+      </div>
+
+      <div class="ss-simple-card">
+        <h6>{% trans "Notes récentes" %}</h6>
+        {% for n in notes %}
+          <div class="ss-simple-list-item d-flex justify-content-between gap-2">
+            <span>{{ n.matiere }}</span>
+            <span class="fw-bold">{{ n.note|floatformat:2 }}</span>
+          </div>
+        {% empty %}
+          <div class="ss-empty">{% trans "Aucune note." %}</div>
+        {% endfor %}
       </div>
     </div>
   </div>
-
-
 
 {% elif mode == "Prof" %}
+  <h1 class="ss-page-title">{% trans "Tableau de bord professeur" %}</h1>
 
-
-
- <div class="cards">
-    <div class="card">
-      <h3>Nombres des classes </h3>
-      <p>{{ classes.count }}</p>
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="ss-kpi-card">
+        <div class="ss-kpi-label">{% trans "Nombre de classes" %}</div>
+        <div class="ss-kpi-value">{{ total_classes_prof }}</div>
+      </div>
     </div>
-    <div class="card">
-      <h3>Nombres des heures/semaine </h3>
-      <p>{{ classes.count }}</p>
+    <div class="col-md-4">
+      <div class="ss-kpi-card">
+        <div class="ss-kpi-label">{% trans "Nombre d'élèves" %}</div>
+        <div class="ss-kpi-value">{{ total_eleves_prof }}</div>
+      </div>
     </div>
-    <div class="card">
-      <h3>???????</h3>
-      <p>? idees</p>
-     
-      
+    <div class="col-md-4">
+      <div class="ss-kpi-card">
+        <div class="ss-kpi-label">{% trans "Heures / semaine" %}</div>
+        <div class="ss-kpi-value">{{ total_heures_prof }}</div>
+      </div>
     </div>
   </div>
 
-<div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="table-primary">
-      <tr>
-        <th onclick="sortTable(0)">Id</th>
-        <th onclick="sortTable(1)">Nom</th>
-          <th onclick="sortTable(2)">Annee scolaire </th>
-        <th>Nombres d'eleves</th>
-        <th>Detaille</th>
-        <th>Modifier</th>
-        <th>Supprimer</th>
-      </tr>
-    </thead>
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="ss-simple-card">
+        <h6>{% trans "Mes classes" %}</h6>
+        <div class="table-responsive">
+          <table class="table table-hover ss-table align-middle mb-0">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>{% trans "Classe" %}</th>
+                <th>{% trans "Niveau" %}</th>
+                <th>{% trans "Élèves" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for classe in classes %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ classe.nom }}</td>
+                  <td>{{ classe.niveau }}</td>
+                  <td>{{ classe.eleves.count }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">{% trans "Aucune classe trouvée." %}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-    <tbody>
-      {% for classe in classes %}
-      <tr>
-        <td>{{ classe.id}}</td>
-        <td>{{ classe.nom }}</td>
-        <td>{{ classe.annee_scolaire}}</td>
-        <td>{{ classe.eleves.count }}</td>
-        <td><a href="{% url 'Detaille_d_une_classe' classe.pk %}" class="btn btn-sm btn-outline-primary">Voir</a></td>
-        <td><a href="{% url 'ModifierDesClasses' classe.pk %}" class="btn btn-sm btn-outline-success">Modifier</a></td>
-        <td><a href="{% url 'SupprimerDesClasses' classe.pk %}" class="btn btn-sm btn-outline-danger">Supprimer</a></td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="5">Aucune Classes trouve.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-
-
-
-
-
-
-   
-
-
+    <div class="col-lg-5">
+      <div class="ss-simple-card">
+        <h6>{% trans "Aperçu emploi du temps" %}</h6>
+        {% for item in emplois_prof %}
+          <div class="ss-simple-list-item">
+            <strong>{{ item.classe }}</strong>
+            <div class="text-muted small">{{ item.jour }} · {{ item.heure_debut|time:"H:i" }} - {{ item.heure_fin|time:"H:i" }}</div>
+            <div class="text-muted small">{{ item.matiere }}{% if item.salle %} · {{ item.salle }}{% endif %}</div>
+          </div>
+        {% empty %}
+          <div class="ss-empty">{% trans "Aucun horaire disponible." %}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 
 {% elif mode == "admin" %}
-<h1 style="color: black;">{% trans "Tableau de bord" %}</h1>
+  <h1 class="ss-page-title">{% trans "Tableau de bord" %}</h1>
 
-<div class="cards">
-  <div class="card">
-    <h3>{% trans "Étudiants" %}</h3>
-    <p>{{ total_eleves }}</p>
-  </div>
-
-  <div class="card">
-    <h3>{% trans "Utilisateurs" %}</h3>
-    <p>{{ utilisateur.count }}</p>
-  </div>
-
-  <div class="card">
-    <h3>{% trans "Revenus total / an" %}</h3>
-    <p>{{ Total_montant }} (fr)</p>
-  </div>
-</div>
-
-  <div class="charts">
-  <div class="chart-container">
-    <h3 class="text-primary">
-      <span style="font-size: 22px;">📊</span> {% trans "Absences par mois" %}
-    </h3>
-    <canvas id="absencesChart_{{ mode }}"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <h3 class="text-primary">
-      <span style="font-size: 22px;">📊</span> {% trans "Revenus par mois" %}
-    </h3>
-    <canvas id="paiementsChart_{{ mode }}"></canvas>
-  </div>
-</div>
-<div class="cards mt-5">
-  <div class="card">
-    <h3>{% trans "Paiements récents" %}</h3>
-    <ul>
-      {% for p in paiments_recents %}
-      <div style="display: flex; justify-content: space-around;" class="eleve mt-3">
-    
-         <span> <a href="">{{ p.eleve}}</a> <br>
-         <span style="font-size: small;">{{ p.total}}</span></span>
-         <span style="font-size: small;">{{ p.date_operation}}</span>
+  <div class="row g-3 mb-4">
+    <div class="col-lg-4">
+      <div class="ss-kpi-card">
+        <div class="ss-kpi-label">{% trans "Étudiants" %}</div>
+        <div class="ss-kpi-value">{{ total_eleves }}</div>
       </div>
-      {% endfor %}
-    </ul>
-  </div>
-  <div class="card">
-    <h3>{% trans "Absences récentes" %} </h3>
-     <ul>
-      {% for absence in absenceRecent %}
-      <div style="display: flex; justify-content: space-around;" class="eleve mt-3">
-         <span><a href="{% url 'AbsenceDetaille' absence.pk %}"> {{ absence.eleve}} </a> <br>
-         <span style="font-size: x-small;">{{absence.eleve.classe}}</span></span>
-         <span class="mx-3" style="font-size: small;">{{ absence.date}}</span>
-        
-
+    </div>
+    <div class="col-lg-4">
+      <div class="ss-kpi-card">
+        <div class="ss-kpi-label">{% trans "Utilisateurs" %}</div>
+        <div class="ss-kpi-value">{{ utilisateur.count }}</div>
       </div>
-      {% endfor %}
-    </ul>
+    </div>
+    <div class="col-lg-4">
+      <div class="ss-kpi-card">
+        <div class="ss-kpi-label">{% trans "Revenus total / an" %}</div>
+        <div class="ss-kpi-value">{{ Total_montant|floatformat:2 }} (fr)</div>
+      </div>
+    </div>
   </div>
-</div>
+
+  <div class="row g-4 align-items-start">
+    <div class="col-lg-4">
+      <div class="ss-panel mb-4">
+        <div class="ss-panel-header">{% trans "Les dernières absences enregistrées" %}</div>
+        <div class="ss-panel-body">
+          {% for absence in absenceRecent %}
+            <div class="ss-feed-item">
+              <div>
+                <span class="ss-feed-primary">{{ absence.eleve }}</span>
+                <span class="ss-feed-secondary">{{ absence.eleve.classe|default:"-" }}</span>
+              </div>
+              <div class="ss-feed-date">{{ absence.date|date:"d/m/Y" }}</div>
+            </div>
+          {% empty %}
+            <div class="ss-empty">{% trans "Aucune absence enregistrée." %}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="ss-panel mb-4">
+        <div class="ss-panel-header">{% trans "Les derniers paiements effectués" %}</div>
+        <div class="ss-panel-body">
+          {% for p in paiments_recents %}
+            <div class="ss-feed-item">
+              <div>
+                <span class="ss-feed-primary">{{ p.eleve }}</span>
+                <span class="ss-feed-secondary">{{ p.total|floatformat:2 }} {{ p.devise }}</span>
+              </div>
+              <div class="ss-feed-date">{{ p.date_operation|date:"d/m/Y H:i" }}</div>
+            </div>
+          {% empty %}
+            <div class="ss-empty">{% trans "Aucun paiement trouvé." %}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="ss-panel">
+        <div class="ss-panel-header">{% trans "Les derniers utilisateurs connectés" %}</div>
+        <div class="ss-panel-body">
+          {% for u in users_recents %}
+            <div class="ss-feed-item">
+              <div>
+                <span class="ss-feed-primary">{{ u.nom_complet|default:u.username }}</span>
+                <span class="ss-feed-secondary">{{ u.get_role_display|default:"Utilisateur" }}</span>
+              </div>
+              <div class="ss-feed-date">{{ u.last_login|date:"d/m/Y H:i" }}</div>
+            </div>
+          {% empty %}
+            <div class="ss-empty">{% trans "Aucune connexion récente." %}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="ss-chart-card mb-4">
+        <div class="ss-chart-title">📊 {% trans "Absences par mois" %}</div>
+        <div class="ss-chart-wrap">
+          <canvas id="absencesChartAdmin"></canvas>
+        </div>
+      </div>
+
+      <div class="ss-chart-card">
+        <div class="ss-chart-title">📊 {% trans "Revenus par mois" %}</div>
+        <div class="ss-chart-wrap">
+          <canvas id="paiementsChartAdmin"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h5 class="ss-section-subtitle">{% trans "Informations complémentaires" %}</h5>
+  <div class="row g-3">
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Classes actives" %}</div>
+        <div class="ss-mini-value">{{ total_classes }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Professeurs" %}</div>
+        <div class="ss-mini-value">{{ total_professeurs }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Parents" %}</div>
+        <div class="ss-mini-value">{{ total_parents }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Niveaux" %}</div>
+        <div class="ss-mini-value">{{ total_niveaux }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Messages" %}</div>
+        <div class="ss-mini-value">{{ total_messages }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Convocations" %}</div>
+        <div class="ss-mini-value">{{ total_convocations }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Violences / Dégradations" %}</div>
+        <div class="ss-mini-value">{{ total_violences }} / {{ total_degradations }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Bâtiments / Salles" %}</div>
+        <div class="ss-mini-value">{{ total_batiments }} / {{ total_salles }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Absences professeurs" %}</div>
+        <div class="ss-mini-value">{{ total_abs_prof }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Absences employés" %}</div>
+        <div class="ss-mini-value">{{ total_abs_employes }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="ss-mini-card">
+        <div class="ss-mini-label">{% trans "Employés actifs" %}</div>
+        <div class="ss-mini-value">{{ total_employes }}</div>
+      </div>
+    </div>
+  </div>
 
 {% else %}
-
-
-<div class="container">
-  <h1>Bienvenue utilisateur <span class="text-primary" style="font-family: sans-serif; font-size: medium;">{{ user.nom_complet }} </span></h1>
-  <p>Veuillez demander a votre direction de vous donner votre role !</p>
+  <div class="ss-simple-card">
+    <h4>{% trans "Bienvenue" %} <span class="text-primary">{{ user.nom_complet|default:user.username }}</span></h4>
+    <p class="mb-0">{% trans "Veuillez demander à votre direction de vous attribuer un rôle." %}</p>
+  </div>
+{% endif %}
 </div>
 
-{% endif %}
-  
-  
+{% if mode == "admin" %}
 <script>
- 
+  const absCanvas = document.getElementById('absencesChartAdmin');
+  const payCanvas = document.getElementById('paiementsChartAdmin');
 
- let ctx = document.getElementById('absencesChart_{{ mode }}');
- let ctxpay = document.getElementById('paiementsChart_{{ mode }}');
+  if (absCanvas) {
+    new Chart(absCanvas, {
+      type: 'bar',
+      data: {
+        labels: {{ mois_abs|safe }},
+        datasets: [{
+          label: "{% trans 'Absences' %}",
+          data: {{ totaux_abs|safe }},
+          backgroundColor: '#6fa2e4',
+          borderColor: '#2563eb',
+          borderWidth: 1,
+          borderRadius: 0,
+          maxBarThickness: 48
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e5e7eb'
+            },
+            ticks: {
+              precision: 0
+            }
+          },
+          x: {
+            grid: {
+              color: '#f3f4f6'
+            }
+          }
+        }
+      }
+    });
+  }
 
-  // 📊 Graphique Absences
-  if (ctxpay) {
-    new Chart(ctxpay, {
+  if (payCanvas) {
+    new Chart(payCanvas, {
       type: 'line',
       data: {
         labels: {{ mois_abs|safe }},
@@ -245,36 +582,39 @@
           label: "{% trans 'Paiements' %}",
           data: {{ totaux_paie|safe }},
           fill: true,
-          backgroundColor: '#6fa2e4',
-          borderColor: 'blue',
-          borderWidth: 1,
-          tension: 0.3
+          backgroundColor: 'rgba(111, 162, 228, 0.55)',
+          borderColor: '#2563eb',
+          borderWidth: 2,
+          tension: 0.25,
+          pointRadius: 3,
+          pointHoverRadius: 4
         }]
       },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e5e7eb'
+            }
+          },
+          x: {
+            grid: {
+              color: '#f3f4f6'
+            }
+          }
+        }
+      }
     });
   }
-
-  // 📊 Graphique Paiements
-  if (ctx) {
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: {{ mois_abs|safe }},
-        datasets: [{
-          label: "{% trans 'Absences' %}",
-          data: {{ totaux_abs|safe }},
-          fill: false,
-          backgroundColor: '#6fa2e4',
-          borderColor: 'blue',
-          borderWidth: 1
-        }]
-      },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
-    });
-  }
-  
-
 </script>
-
-    {% endblock %}
+{% endif %}
+{% endblock %}

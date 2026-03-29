@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block main %}
+
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="mb-1 text-dark">{% trans "Afficher la décision finale" %}</h4>
+    <div class="text-muted">
+      {% trans "Total" %} : {{ total }}
+      {% if annee_scolaire_selectionnee %}
+        — {{ annee_scolaire_selectionnee.nom }}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4 shadow-sm">
+  <div class="card-header">
+    <strong>{% trans "Filtres" %}</strong>
+  </div>
+  <div class="card-body">
+    <form method="get">
+      <div class="row g-3">
+        <div class="col-md-3">
+          {{ form.q.label_tag }}
+          {{ form.q }}
+        </div>
+        <div class="col-md-3">
+          {{ form.annee_scolaire.label_tag }}
+          {{ form.annee_scolaire }}
+        </div>
+        <div class="col-md-2">
+          {{ form.niveau.label_tag }}
+          {{ form.niveau }}
+        </div>
+        <div class="col-md-2">
+          {{ form.classe.label_tag }}
+          {{ form.classe }}
+        </div>
+        <div class="col-md-2">
+          {{ form.decision.label_tag }}
+          {{ form.decision }}
+        </div>
+        <div class="col-md-2">
+          {{ form.etat.label_tag }}
+          {{ form.etat }}
+        </div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          {% trans "Filtrer" %}
+        </button>
+        <a href="{% url 'promotion:promotion_liste_decisions_finales' %}" class="btn btn-outline-secondary">
+          {% trans "Réinitialiser" %}
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>{% trans "Élève" %}</th>
+          <th>{% trans "Année scolaire" %}</th>
+          <th>{% trans "Niveau" %}</th>
+          <th>{% trans "Classe actuelle" %}</th>
+          <th>{% trans "Décision finale" %}</th>
+          <th>{% trans "Prochaine classe" %}</th>
+          <th>{% trans "Spécialité" %}</th>
+          <th>{% trans "État" %}</th>
+          <th>{% trans "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in promotions %}
+          <tr>
+            <td>
+              <strong>{{ p.eleve.nom }}</strong><br>
+              <small class="text-muted">{{ p.eleve.identifiant }}</small>
+            </td>
+            <td>{{ p.annee_scolaire.nom }}</td>
+            <td>{{ p.niveau_actuel.nom|default:"-" }}</td>
+            <td>{{ p.classe_actuelle.nom|default:"-" }}</td>
+            <td>
+              {% if p.decision_finale == "admis" %}
+                <span class="badge bg-success">{% trans "Admis" %}</span>
+              {% elif p.decision_finale == "autorise" %}
+                <span class="badge bg-info text-dark">{% trans "Autorisé(e)" %}</span>
+              {% elif p.decision_finale == "oriente" %}
+                <span class="badge bg-primary">{% trans "Orienté(e)" %}</span>
+              {% elif p.decision_finale == "redouble" %}
+                <span class="badge bg-warning text-dark">{% trans "Redouble" %}</span>
+              {% elif p.decision_finale == "diplome" %}
+                <span class="badge bg-dark">{% trans "Diplômé(e)" %}</span>
+              {% elif p.decision_finale == "exclu" %}
+                <span class="badge bg-danger">{% trans "Exclu(e)" %}</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ p.get_decision_finale_display }}</span>
+              {% endif %}
+            </td>
+            <td>{{ p.prochaine_classe.nom|default:"-" }}</td>
+            <td>{{ p.prochaine_specialite.nom|default:"-" }}</td>
+            <td>{{ p.get_etat_display }}</td>
+            <td>
+              <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'promotion:promotion_afficher_decision_finale' p.pk %}" class="btn btn-sm btn-outline-dark">
+                  {% trans "Afficher" %}
+                </a>
+
+                <a href="{% url 'promotion:promotion_valider_decision' p.pk %}" class="btn btn-sm btn-outline-success">
+                  {% trans "Modifier" %}
+                </a>
+
+                {% if p.etat == "valide" %}
+                  <form method="post" action="{% url 'promotion:promotion_executer' p.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-primary">
+                      {% trans "Exécuter" %}
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="9" class="text-center text-muted">
+              {% trans "Aucune décision finale trouvée." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.querySelector('form[method="get"]');
+  const annee = document.getElementById("id_annee_scolaire");
+  const niveau = document.getElementById("id_niveau");
+  const classe = document.getElementById("id_classe");
+
+  if (!form || !niveau || !classe) return;
+
+  function toggleStates() {
+    const hasNiveau = !!niveau.value;
+    classe.disabled = !hasNiveau;
+
+    if (!hasNiveau) {
+      classe.value = "";
+    }
+  }
+
+  if (annee) {
+    annee.addEventListener("change", function () {
+      form.submit();
+    });
+  }
+
+  niveau.addEventListener("change", function () {
+    classe.value = "";
+    form.submit();
+  });
+
+  toggleStates();
+});
+</script>
+
+{% endblock %}

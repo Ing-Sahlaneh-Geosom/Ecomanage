@@ -1,0 +1,43 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block report_table %}
+<div class="table-wrap table-responsive table-hover">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Identifiant" %}</th>
+                <th>{% trans "Nom" %}</th>
+                <th>{% trans "Classe" %}</th>
+                <th>{% trans "Niveau" %}</th>
+                <th>{% trans "Sexe" %}</th>
+                <th>{% trans "Date naissance" %}</th>
+                <th>{% trans "Parent" %}</th>
+                <th>{% trans "Téléphone parent" %}</th>
+                <th>{% trans "Statut" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.identifiant }}</td>
+                <td>{{ row.nom }}</td>
+                <td>{{ row.classe.nom|default:"-" }}</td>
+                <td>{{ row.classe.niveau.nom|default:"-" }}</td>
+                <td>{{ row.get_Sexe_display|default:row.Sexe }}</td>
+                <td>{{ row.date_naissancce }}</td>
+                <td>{{ row.parent }}</td>
+                <td>{{ row.telephone_parent }}</td>
+                <td>{{ row.status }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="report-empty">{% trans "Aucune donnée trouvée." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

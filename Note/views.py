@@ -664,23 +664,17 @@ def notes_gestion(request):
         "notes": qs[:800],
     })
 
-from decimal import Decimal, InvalidOperation
+
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import render
 
-from Ecole_admin.models import (
-    Classe,
-    Devoir,
-    Eleve,
-    Niveau,
-    Note,
-    PeriodeScolaire,
-    Proffeseur,
-)
+from Ecole_admin.models import Classe, Devoir, Eleve, Niveau, Note, PeriodeScolaire, Proffeseur
+
 
 @login_required
 def note_saisie_setup(request):
@@ -689,11 +683,18 @@ def note_saisie_setup(request):
 
     ecole, annee = _ctx_school(request)
 
-    niveau_id = (request.GET.get("niveau") or "").strip()
-    classe_id = (request.GET.get("classe") or "").strip()
-    prof_id = (request.GET.get("professeur") or "").strip()
-    periode_id = (request.GET.get("periode") or "").strip()
-    action = (request.GET.get("action") or "").strip()
+    if request.method == "POST":
+        niveau_id = (request.POST.get("niveau") or "").strip()
+        classe_id = (request.POST.get("classe") or "").strip()
+        prof_id = (request.POST.get("professeur") or "").strip()
+        periode_id = (request.POST.get("periode") or "").strip()
+        action = (request.POST.get("action") or "").strip()
+    else:
+        niveau_id = (request.GET.get("niveau") or "").strip()
+        classe_id = (request.GET.get("classe") or "").strip()
+        prof_id = (request.GET.get("professeur") or "").strip()
+        periode_id = (request.GET.get("periode") or "").strip()
+        action = (request.GET.get("action") or "").strip()
 
     niveaux = Niveau.objects.filter(
         ecole=ecole,
@@ -709,7 +710,6 @@ def note_saisie_setup(request):
     professeur_selected = None
     periode_selected = None
 
-    # 1) niveau
     if niveau_id:
         try:
             niveau_selected = Niveau.objects.get(
@@ -725,7 +725,6 @@ def note_saisie_setup(request):
         except Niveau.DoesNotExist:
             niveau_selected = None
 
-    # 2) classe
     if classe_id and niveau_selected:
         try:
             classe_selected = Classe.objects.get(
@@ -747,7 +746,6 @@ def note_saisie_setup(request):
         except Classe.DoesNotExist:
             classe_selected = None
 
-    # 3) professeur
     if prof_id and classe_selected:
         try:
             professeur_selected = Proffeseur.objects.get(
@@ -760,9 +758,6 @@ def note_saisie_setup(request):
             if _is_prof(request.user) and professeur_selected.user_id != request.user.id:
                 return HttpResponse("Accès refusé", status=403)
 
-            # IMPORTANT :
-            # On ne filtre PAS par est_active=True ici
-            # On prend uniquement les périodes qui ont déjà des devoirs
             periodes = PeriodeScolaire.objects.filter(
                 ecole=ecole,
                 annee_scolaire=annee,
@@ -776,7 +771,6 @@ def note_saisie_setup(request):
         except Proffeseur.DoesNotExist:
             professeur_selected = None
 
-    # 4) période
     if periode_id and professeur_selected:
         try:
             periode_selected = PeriodeScolaire.objects.get(
@@ -787,32 +781,152 @@ def note_saisie_setup(request):
         except PeriodeScolaire.DoesNotExist:
             periode_selected = None
 
-    # 5) continuer
-    if action == "continue":
-        if not niveau_selected:
-            messages.error(request, "Veuillez sélectionner un niveau.")
-            return redirect("note_saisie_setup")
+    devoirs = []
+    eleves = []
+    notes_map = {}
+    rows = []
 
-        if not classe_selected:
-            messages.error(request, "Veuillez sélectionner une classe.")
-            return redirect("note_saisie_setup")
+    filters_ok = all([
+        niveau_selected,
+        classe_selected,
+        professeur_selected,
+        periode_selected,
+    ])
 
-        if not professeur_selected:
-            messages.error(request, "Veuillez sélectionner un professeur.")
-            return redirect("note_saisie_setup")
-
-        if not periode_selected:
-            messages.error(request, "Veuillez sélectionner un trimestre.")
-            return redirect("note_saisie_setup")
-
-        return redirect(
-            "note_saisie",
-            classe_id=classe_selected.id,
-            prof_id=professeur_selected.id,
-            periode_id=periode_selected.id,
+    if filters_ok:
+        devoirs = list(
+            Devoir.objects.filter(
+                ecole=ecole,
+                annee_scolaire=annee,
+                niveau=niveau_selected,
+                professeur=professeur_selected,
+                classes=classe_selected,
+                periode=periode_selected,
+            )
+            .select_related("matiere", "periode", "niveau", "professeur")
+            .distinct()
+            .order_by("matiere__nom", "nom")
         )
 
-    return render(request, "note_saisie_setup.html", {
+        eleves = list(
+            Eleve.objects.filter(
+                ecole=ecole,
+                annee_scolaire=annee,
+                classe=classe_selected
+            ).order_by("nom")
+        )
+
+        notes_existantes = Note.objects.filter(
+            ecole=ecole,
+            annee_scolaire=annee,
+            eleve__in=eleves,
+            devoir__in=devoirs,
+        ).select_related("devoir", "eleve")
+
+        notes_map = {(n.eleve_id, n.devoir_id): n for n in notes_existantes}
+
+    if request.method == "POST" and action == "save" and filters_ok and devoirs:
+        with transaction.atomic():
+            for eleve in eleves:
+                for devoir in devoirs:
+                    key_note = f"note_{eleve.id}_{devoir.id}"
+                    val_note = (request.POST.get(key_note) or "").strip()
+
+                    if val_note == "":
+                        continue
+
+                    try:
+                        note_brute = Decimal(val_note.replace(",", "."))
+                    except (InvalidOperation, ValueError):
+                        continue
+
+                    if note_brute < 0:
+                        note_brute = Decimal("0")
+
+                    tri = periode_to_trimestre(devoir.periode)
+
+                    obj = notes_map.get((eleve.id, devoir.id))
+                    if obj:
+                        obj.note = note_brute
+                        obj.coefficient = devoir.coefficient
+                        obj.matiere = devoir.matiere
+                        obj.user = request.user
+                        obj.trimestre = tri
+                        obj.save()
+                    else:
+                        obj = Note.objects.create(
+                            user=request.user,
+                            eleve=eleve,
+                            matiere=devoir.matiere,
+                            devoir=devoir,
+                            trimestre=tri,
+                            note=note_brute,
+                            coefficient=devoir.coefficient,
+                            annee_scolaire=annee,
+                            ecole=ecole,
+                        )
+                        notes_map[(eleve.id, devoir.id)] = obj
+
+        messages.success(request, "Notes enregistrées avec succès.")
+
+        notes_existantes = Note.objects.filter(
+            ecole=ecole,
+            annee_scolaire=annee,
+            eleve__in=eleves,
+            devoir__in=devoirs,
+        ).select_related("devoir", "eleve")
+        notes_map = {(n.eleve_id, n.devoir_id): n for n in notes_existantes}
+
+    if filters_ok and devoirs:
+        for eleve in eleves:
+            cellules = []
+            total_notes_sur_20 = Decimal("0")
+            nb_notes = 0
+
+            for devoir in devoirs:
+                note_obj = notes_map.get((eleve.id, devoir.id))
+                coef_diviseur = Decimal(str(devoir.coefficient or 1))
+
+                if coef_diviseur <= 0:
+                    coef_diviseur = Decimal("1")
+
+                if note_obj:
+                    note_brute = Decimal(str(note_obj.note))
+                    note_value = format(note_brute, "f").rstrip("0").rstrip(".")
+
+                    note_sur_20 = (note_brute / coef_diviseur).quantize(
+                        Decimal("0.01"),
+                        rounding=ROUND_HALF_UP
+                    )
+
+                    if note_sur_20 > 20:
+                        note_sur_20 = Decimal("20")
+
+                    total_notes_sur_20 += note_sur_20
+                    nb_notes += 1
+                else:
+                    note_value = ""
+
+                cellules.append({
+                    "devoir": devoir,
+                    "note": note_value,
+                    "coef_diviseur": format(coef_diviseur, "f").rstrip("0").rstrip("."),
+                })
+
+            moyenne = ""
+            if nb_notes > 0:
+                moyenne = (total_notes_sur_20 / Decimal(str(nb_notes))).quantize(
+                    Decimal("0.01"),
+                    rounding=ROUND_HALF_UP
+                )
+
+            rows.append({
+                "eleve": eleve,
+                "cellules": cellules,
+                "moyenne": moyenne,
+            })
+
+    context = {
         "niveaux": niveaux,
         "classes": classes,
         "professeurs": professeurs,
@@ -821,8 +935,11 @@ def note_saisie_setup(request):
         "classe_selected": classe_selected,
         "professeur_selected": professeur_selected,
         "periode_selected": periode_selected,
-    })
-
+        "filters_ok": filters_ok,
+        "devoirs": devoirs,
+        "rows": rows,
+    }
+    return render(request, "note_saisie_setup.html", context)
 
 @login_required
 def note_saisie(request, classe_id, prof_id, periode_id):

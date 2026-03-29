@@ -1,0 +1,52 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block summary %}
+<div class="mb-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="text-muted small">{% trans "Moyenne générale" %}</div>
+            <div class="fw-bold fs-2 text-dark">{{ moyenne_generale }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block report_table %}
+<div class="table-wrap table-hover table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Élève" %}</th>
+                <th>{% trans "Classe" %}</th>
+                <th>{% trans "Matière" %}</th>
+                <th>{% trans "Devoir" %}</th>
+                <th>{% trans "Trimestre" %}</th>
+                <th>{% trans "Note" %}</th>
+                <th>{% trans "Coefficient" %}</th>
+                <th>{% trans "Note pondérée" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.eleve.nom }}</td>
+                <td>{{ row.eleve.classe.nom|default:"-" }}</td>
+                <td>{{ row.matiere.nom }}</td>
+                <td>{{ row.devoir.nom|default:"-" }}</td>
+                <td>{{ row.get_trimestre_display }}</td>
+                <td>{{ row.note }}</td>
+                <td>{{ row.coefficient }}</td>
+                <td>{{ row.note_ponderee }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="report-empty">{% trans "Aucune donnée trouvée." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

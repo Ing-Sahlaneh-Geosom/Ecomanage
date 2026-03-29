@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+
+
+<style>
+  .report-back-link {
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .report-back-link:hover {
+    text-decoration: underline;
+  }
+
+  .report-table-wrap table th,
+  .report-table-wrap table td {
+    color: inherit !important;
+  }
+
+  .report-empty {
+    text-align: center;
+  }
+
+  .rtl-arrow {
+    display: inline-block;
+  }
+
+  html[dir="rtl"] .rtl-arrow {
+    transform: scaleX(-1);
+  }
+</style>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-light">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <a href="{% url 'rapport_centre' %}" class="report-back-link text-primary">
+        <span class="rtl-arrow">←</span> {% trans "Retour" %}
+      </a>
+
+      <h2 class="h3 m-0 text-dark text-center flex-grow-1">{{ report_title }}</h2>
+
+      <div style="width:72px;"></div>
+    </div>
+
+    {% if report_subtitle %}
+      <div class="text-muted mt-2 text-center">{{ report_subtitle }}</div>
+    {% endif %}
+  </div>
+
+  <div class="card-body">
+    <form method="get" class="mb-4">
+      <div class="row g-3">
+        <div class="col-lg-2 col-md-4 col-sm-6">
+          <select name="annee" class="form-select">
+            <option value="">{% trans "Toutes les années" %}</option>
+            {% for a in annees %}
+              <option value="{{ a.id }}" {% if selected_annee and selected_annee.id == a.id %}selected{% endif %}>
+                {{ a.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6">
+          <select name="niveau" class="form-select">
+            <option value="">{% trans "Tous les niveaux" %}</option>
+            {% for n in niveaux %}
+              <option value="{{ n.id }}" {% if filters.niveau_id == n.id|stringformat:'s' %}selected{% endif %}>
+                {{ n.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6">
+          <select name="classe" class="form-select">
+            <option value="">{% trans "Toutes les classes" %}</option>
+            {% for c in classes %}
+              <option value="{{ c.id }}" {% if filters.classe_id == c.id|stringformat:'s' %}selected{% endif %}>
+                {{ c.nom }}{% if c.niveau %} — {{ c.niveau.nom }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+       
+
+        <div class="col-lg-2 col-md-4 col-sm-6">
+          <select name="periode" class="form-select">
+            <option value="">{% trans "Toutes les périodes" %}</option>
+            {% for p in periodes %}
+              <option value="{{ p.id }}" {% if filters.periode_id == p.id|stringformat:'s' %}selected{% endif %}>
+                {{ p.nom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6">
+          <input type="date" name="date_debut" value="{{ filters.date_debut }}" class="form-control">
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6">
+          <input type="date" name="date_fin" value="{{ filters.date_fin }}" class="form-control">
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6">
+          <input
+            type="text"
+            name="q"
+            value="{{ filters.q }}"
+            class="form-control"
+            placeholder="{% trans 'Recherche...' %}"
+          >
+        </div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2 flex-wrap">
+        <button type="submit" class="btn btn-primary">{% trans "Filtrer" %}</button>
+        <a href="?" class="btn btn-light border">{% trans "Réinitialiser" %}</a>
+        <button type="button" class="btn btn-success" onclick="window.print()">{% trans "Imprimer" %}</button>
+        {% block extra_actions %}{% endblock %}
+      </div>
+    </form>
+
+    {% block summary %}{% endblock %}
+
+    <div class="report-table-wrap">
+      {% block report_table %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

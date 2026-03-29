@@ -7,7 +7,7 @@
     body{ background:#f4f6f9; }
     .wrap{ max-width:1100px; margin:0 auto; padding:18px; }
     .cardx{ background:#fff; border:1px solid #e9edf2; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
-    .headerx{ padding:16px 18px; border-bottom:1px solid #e9edf2; }
+    .headerx{ padding:16px 18px; border-bottom:1px solid black; }
     .headerx h4{ margin:0; font-weight:800; }
     .required:after{ content:" *"; color:#d00; }
 
@@ -121,8 +121,11 @@
   <div class="wrap">
     <div class="cardx">
 
-      <div class="headerx no-print">
-        <h4>{% trans "Certificat de scolarité" %}</h4>
+      <div style="display: flex; justify-content: center;" class="headerx no-print">
+        <a style="text-decoration: none; margin-right: 5rem;" href="javascript:history.back()" class="text-primary">
+          <span class="rtl-arrow">←</span> {% trans "Retour" %}
+        </a>
+        <h4 style="color: #111;" class="text-center">{% trans "Certificat de scolarité" %}</h4>
       </div>
 
       <!-- FILTRES -->

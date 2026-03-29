@@ -1,54 +1,86 @@
 import json
-from bdb import effective
+from datetime import datetime, date
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
 from django.db.models.functions import ExtractMonth
-from django.http import HttpResponse
 from django.shortcuts import render
-from Ecole_admin.models import Eleve, User, Absence, Paiment, Note, Proffeseur, Classe , RecuCaisse
-from datetime import datetime
-from django.contrib.auth.mixins import LoginRequiredMixin
+
+from Ecole_admin.models import (
+    Absence,
+    Batiment,
+    Classe,
+    ConvocationParent,
+    Degradation,
+    Eleve,
+    Employe,
+    EmployeAbsence,
+    EmploiDuTemps,
+    Message,
+    Niveau,
+    Note,
+    Paiment,
+    Proffeseur,
+    ProfesseurAbsence,
+    RecuCaisse,
+    Salle,
+    User,
+    Violence,
+)
 from Ecole_admin.utils.utils import get_annee_active
 
 
-@login_required(login_url='Connection')
+@login_required(login_url="Connection")
 def page_acceuil(request):
     user = request.user
     ecole = user.ecole
     annee_scolaire = get_annee_active(request)
-
     role = (user.role or "").lower().strip()
 
     # =========================
     # ✅ PARENT DASHBOARD
     # =========================
     if role == "parent":
-        # Les enfants du parent: Eleve.parent_user -> User parent
-        enfants = Eleve.objects.filter(
-            parent_user=user,
-            ecole=ecole,
-            annee_scolaire=annee_scolaire
-        ).select_related("classe")
+        enfants = (
+            Eleve.objects.filter(
+                parent_user=user,
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+            )
+            .select_related("classe")
+            .order_by("nom")
+        )
 
-        # stats simples
-        absences = Absence.objects.filter(
-            eleve__in=enfants,
-            ecole=ecole,
-            annee_scolaire=annee_scolaire
-        ).order_by("-date")[:10]
+        absences = (
+            Absence.objects.filter(
+                eleve__in=enfants,
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+                statut="absence",
+            )
+            .select_related("eleve")
+            .order_by("-date")[:8]
+        )
 
-        paiements = Paiment.objects.filter(
-            eleve__in=enfants,
-            ecole=ecole,
-            annee_scolaire=annee_scolaire
-        ).order_by("-date_paiement")[:10]
+        paiements = (
+            Paiment.objects.filter(
+                eleve__in=enfants,
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+            )
+            .select_related("eleve", "type_paiement")
+            .order_by("-date_paiement")[:8]
+        )
 
-        notes = Note.objects.filter(
-            eleve__in=enfants,
-            ecole=ecole,
-            annee_scolaire=annee_scolaire
-        ).order_by("-id")[:10]
+        notes = (
+            Note.objects.filter(
+                eleve__in=enfants,
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+            )
+            .select_related("eleve", "matiere")
+            .order_by("-id")[:8]
+        )
 
         context = {
             "mode": "parent",
@@ -56,6 +88,8 @@ def page_acceuil(request):
             "apsences": absences,
             "paiements": paiements,
             "notes": notes,
+            "total_enfants": enfants.count(),
+            "total_absences_parent": absences.count(),
         }
         return render(request, "home_page.html", context)
 
@@ -63,24 +97,51 @@ def page_acceuil(request):
     # ✅ PROF DASHBOARD
     # =========================
     if role == "proffesseur":
-        # si tu as bien prof.user -> User
-        prof = getattr(user, "proffeseur", None)
+        prof = getattr(user, "profil_prof", None)
 
         classes = Classe.objects.none()
         eleves = Eleve.objects.none()
+        emplois = EmploiDuTemps.objects.none()
+        total_heures = 0
 
         if prof:
-            classes = Classe.objects.filter(professeurs=prof, ecole=ecole).distinct()
-            eleves = Eleve.objects.filter(
-                classe__in=classes,
+            classes = (
+                Classe.objects.filter(professeurs=prof, ecole=ecole)
+                .select_related("niveau")
+                .distinct()
+            )
+            eleves = (
+                Eleve.objects.filter(
+                    classe__in=classes,
+                    ecole=ecole,
+                    annee_scolaire=annee_scolaire,
+                )
+                .select_related("classe")
+                .distinct()
+            )
+            emplois = EmploiDuTemps.objects.filter(
+                professeur=prof,
                 ecole=ecole,
-                annee_scolaire=annee_scolaire
-            ).distinct()
+                annee_scolaire=annee_scolaire,
+            ).select_related("classe", "matiere", "salle")
+
+            total_heures = sum(
+                (
+                    datetime.combine(date.min, item.heure_fin)
+                    - datetime.combine(date.min, item.heure_debut)
+                ).seconds
+                / 3600
+                for item in emplois
+            )
 
         context = {
             "mode": "Prof",
             "classes": classes,
             "eleves": eleves,
+            "emplois_prof": emplois[:8],
+            "total_classes_prof": classes.count(),
+            "total_eleves_prof": eleves.count(),
+            "total_heures_prof": round(total_heures, 1),
         }
         return render(request, "home_page.html", context)
 
@@ -88,59 +149,148 @@ def page_acceuil(request):
     # ✅ ADMIN / SECRETAIRE DASHBOARD
     # =========================
     if role in ["admin", "secretaire"]:
-        mois_noms = ["janv","fevr","mars","avr","mai","juin","juil","aout","sept","oct","nov","dec"]
-        absence_par_mois = [0] * 12
-        paiement_par_mois = [0] * 12
-
         annee_actuelle = datetime.now().year
+        mois_noms = [
+            "janv",
+            "févr",
+            "mars",
+            "avr",
+            "mai",
+            "juin",
+            "juil",
+            "août",
+            "sept",
+            "oct",
+            "nov",
+            "déc",
+        ]
 
-        abs_qs = Absence.objects.filter(
-            ecole=ecole,
-            annee_scolaire=annee_scolaire,
-            date__year=annee_actuelle
+        absences_agregees = (
+            Absence.objects.filter(
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+                statut="absence",
+                date__year=annee_actuelle,
+            )
+            .annotate(month=ExtractMonth("date"))
+            .values("month")
+            .annotate(total=Count("id"))
+            .order_by("month")
         )
-        for a in abs_qs:
-            absence_par_mois[a.date.month - 1] += 1
 
-        pay_qs = RecuCaisse.objects.filter(
-            ecole=ecole,
-            annee_scolaire=annee_scolaire,
-            date_operation__year=annee_actuelle
+        paiements_agreges = (
+            RecuCaisse.objects.filter(
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+                statut="valide",
+                date_operation__year=annee_actuelle,
+            )
+            .annotate(month=ExtractMonth("date_operation"))
+            .values("month")
+            .annotate(total=Sum("total"))
+            .order_by("month")
         )
-        for p in pay_qs:
-            paiement_par_mois[p.date_operation.month - 1] += float(p.total)
+
+        absence_map = {item["month"]: int(item["total"] or 0) for item in absences_agregees}
+        paiement_map = {item["month"]: float(item["total"] or 0) for item in paiements_agreges}
+
+        totaux_abs = [absence_map.get(index, 0) for index in range(1, 13)]
+        totaux_paie = [paiement_map.get(index, 0) for index in range(1, 13)]
 
         eleves = Eleve.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire)
-        total_eleves = eleves.count()
+        utilisateurs = User.objects.filter(ecole=ecole)
+        classes = Classe.objects.filter(ecole=ecole, actif=True)
+        niveaux = Niveau.objects.filter(ecole=ecole, actif=True)
+        professeurs = Proffeseur.objects.filter(ecole=ecole, actif=True)
+        employes = Employe.objects.filter(ecole=ecole, statut="active")
+        batiments = Batiment.objects.filter(ecole=ecole, actif=True)
+        salles = Salle.objects.filter(ecole=ecole)
 
-        total_montant = RecuCaisse.objects.filter(
+        total_montant = (
+            RecuCaisse.objects.filter(
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+                statut="valide",
+            ).aggregate(total=Sum("total"))["total"]
+            or 0
+        )
+
+        absences_recentes = (
+            Absence.objects.filter(
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+                statut="absence",
+            )
+            .select_related("eleve", "eleve__classe")
+            .order_by("-date", "-date_creation")[:5]
+        )
+
+        paiements_recents = (
+            RecuCaisse.objects.filter(
+                ecole=ecole,
+                annee_scolaire=annee_scolaire,
+                statut="valide",
+            )
+            .select_related("eleve")
+            .order_by("-date_operation")[:5]
+        )
+
+        utilisateurs_recents = (
+            utilisateurs.exclude(last_login__isnull=True)
+            .order_by("-last_login")[:5]
+        )
+
+        total_parents = utilisateurs.filter(role="parent").count()
+        total_messages = Message.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire).count()
+        total_convocations = ConvocationParent.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire).count()
+        total_violences = Violence.objects.filter(date__year=annee_actuelle).count()
+        total_degradations = Degradation.objects.filter(date__year=annee_actuelle).count()
+        total_abs_prof = ProfesseurAbsence.objects.filter(
             ecole=ecole,
-            annee_scolaire=annee_scolaire
-        ).aggregate(Sum("total"))["total__sum"] or 0
-
-        utilisateur = user.__class__.objects.filter(ecole=ecole)  # User.objects
-        absenceRecent = Absence.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire).order_by("-date")[:5]
-        paiements_recents = RecuCaisse.objects.filter(ecole=ecole, annee_scolaire=annee_scolaire).order_by("-date_operation")[:5]
+            annee_scolaire=annee_scolaire,
+            statut="absence",
+            date__year=annee_actuelle,
+        ).count()
+        total_abs_employes = EmployeAbsence.objects.filter(
+            ecole=ecole,
+            annee_scolaire=annee_scolaire,
+            statut="absence",
+            date__year=annee_actuelle,
+        ).count()
 
         context = {
             "mode": "admin",
-            "mois_abs": json.dumps(mois_noms),
-            "totaux_abs": json.dumps([int(x) for x in absence_par_mois]),
-            "totaux_paie": json.dumps(paiement_par_mois),
+            "mois_abs": json.dumps(mois_noms, ensure_ascii=False),
+            "totaux_abs": json.dumps(totaux_abs),
+            "totaux_paie": json.dumps(totaux_paie),
             "eleves": eleves,
-            "utilisateur": utilisateur,
-            "absenceRecent": absenceRecent,
-            "total_eleves": total_eleves,
+            "utilisateur": utilisateurs,
+            "total_eleves": eleves.count(),
             "Total_montant": total_montant,
-            "paiments_recents": paiements_recents
+            "paiments_recents": paiements_recents,
+            "absenceRecent": absences_recentes,
+            "users_recents": utilisateurs_recents,
+            "total_classes": classes.count(),
+            "total_professeurs": professeurs.count(),
+            "total_parents": total_parents,
+            "total_niveaux": niveaux.count(),
+            "total_employes": employes.count(),
+            "total_messages": total_messages,
+            "total_convocations": total_convocations,
+            "total_violences": total_violences,
+            "total_degradations": total_degradations,
+            "total_abs_prof": total_abs_prof,
+            "total_abs_employes": total_abs_employes,
+            "total_batiments": batiments.count(),
+            "total_salles": salles.count(),
         }
         return render(request, "home_page.html", context)
 
     # =========================
     # ✅ DEFAULT
     # =========================
-    context = {"mode": "user"}
-    return render(request, "home_page.html", context)
+    return render(request, "home_page.html", {"mode": "user"})
+
 
 # from django.http import HttpResponse
 # from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image

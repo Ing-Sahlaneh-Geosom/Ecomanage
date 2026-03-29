@@ -2540,3 +2540,304 @@ msgstr "كلمة المرور"
 
 msgid "Confirmation du mot de passe"
 msgstr "تأكيد كلمة المرور"
+
+msgid "Choisissez d'abord le niveau, puis la classe, ensuite le professeur et enfin le trimestre."
+msgstr "اختر أولاً المستوى، ثم الفصل، ثم الأستاذ، وأخيراً الفصل الدراسي."
+
+msgid "Remplissez seulement les devoirs voulus et laissez les autres champs vides."
+msgstr "املأ فقط الفروض المطلوبة واترك الحقول الأخرى فارغة."
+
+msgid "Enregistrer les notes"
+msgstr "حفظ العلامات"
+
+msgid "Barème"
+msgstr "الدرجة الكاملة"
+
+msgid "Aucun devoir trouvé pour ce professeur dans cette classe et ce trimestre."
+msgstr "لم يتم العثور على أي فرض لهذا الأستاذ في هذا الفصل وهذا الفصل الدراسي."
+
+msgid "Rapport Centre"
+msgstr "مركز التقارير"
+
+msgid "Nom du rapport"
+msgstr "اسم التقرير"
+
+msgid "Aucun rapport disponible."
+msgstr "لا يوجد أي تقرير متاح."
+
+msgid "Académique"
+msgstr "أكاديمي"
+
+msgid "Présence / Absences"
+msgstr "الحضور / الغياب"
+
+msgid "Finance / Gestionnaire"
+msgstr "المالية / الإدارة"
+
+msgid "Discipline"
+msgstr "الانضباط"
+
+msgid "Organisation / Administration"
+msgstr "التنظيم / الإدارة"
+
+
+
+
+
+msgid "Liste des élèves par classe"
+msgstr "قائمة الطلاب حسب القسم"
+
+msgid "Effectif par niveau / classe"
+msgstr "عدد الطلاب حسب المستوى / القسم"
+
+msgid "Résumé des notes par classe"
+msgstr "ملخص العلامات حسب القسم"
+
+msgid "Devoirs par professeur"
+msgstr "الفروض حسب الأستاذ"
+
+msgid "Dispenses par matière"
+msgstr "الإعفاءات حسب المادة"
+
+msgid "Absences des élèves"
+msgstr "غيابات الطلاب"
+
+msgid "Absences des professeurs"
+msgstr "غيابات الأساتذة"
+
+msgid "Absences des employés"
+msgstr "غيابات الموظفين"
+
+msgid "Paiements des élèves"
+msgstr "مدفوعات الطلاب"
+
+msgid "Frais dus / soldes"
+msgstr "الرسوم المستحقة / الأرصدة"
+
+msgid "Reçus de caisse"
+msgstr "إيصالات الصندوق"
+
+msgid "Convocations des parents"
+msgstr "استدعاءات أولياء الأمور"
+
+
+
+
+msgid "Cas de violence"
+msgstr "حالات العنف"
+
+
+msgid "Liste des employés"
+msgstr "قائمة الموظفين"
+
+msgid "Emploi du temps par classe"
+msgstr "جدول الحصص حسب القسم"
+
+msgid "Ressources pédagogiques"
+msgstr "الموارد التربوية"
+
+msgid "Bâtiments et salles"
+msgstr "المباني والقاعات"
+
+msgid "Identifiant"
+msgstr "المعرّف"
+
+msgid "Téléphone parent"
+msgstr "هاتف ولي الأمر"
+
+msgid "Rapport liste des élèves par classe"
+msgstr "تقرير قائمة الطلاب حسب القسم"
+
+msgid "Rapport effectif par niveau et classe"
+msgstr "تقرير عدد الطلاب حسب المستوى والقسم"
+
+msgid "Rapport résumé des notes par classe"
+msgstr "تقرير ملخص العلامات حسب القسم"
+
+msgid "Rapport devoirs par professeur"
+msgstr "تقرير الفروض حسب الأستاذ"
+
+msgid "Rapport dispenses par matière"
+msgstr "تقرير الإعفاءات حسب المادة"
+
+msgid "Rapport absences des élèves"
+msgstr "تقرير غيابات الطلاب"
+
+msgid "Rapport absences des professeurs"
+msgstr "تقرير غيابات الأساتذة"
+
+msgid "Rapport absences des employés"
+msgstr "تقرير غيابات الموظفين"
+
+msgid "Rapport paiements des élèves"
+msgstr "تقرير مدفوعات الطلاب"
+
+msgid "Rapport frais dus / soldes"
+msgstr "تقرير الرسوم المستحقة / الأرصدة"
+
+msgid "Rapport reçus de caisse"
+msgstr "تقرير إيصالات الصندوق"
+
+msgid "Rapport convocations des parents"
+msgstr "تقرير استدعاءات أولياء الأمور"
+
+msgid "Rapport dégradations"
+msgstr "تقرير التخريبات"
+
+msgid "Rapport cas de violence"
+msgstr "تقرير حالات العنف"
+
+msgid "Rapport liste des employés"
+msgstr "تقرير قائمة الموظفين"
+
+msgid "Rapport emploi du temps par classe"
+msgstr "تقرير جدول الحصص حسب القسم"
+
+msgid "Rapport ressources pédagogiques"
+msgstr "تقرير الموارد التربوية"
+
+msgid "Rapport bâtiments et salles"
+msgstr "تقرير المباني والقاعات"
+
+msgid "Tous les niveaux"
+msgstr "جميع المستويات"
+
+msgid "Toutes les classes"
+msgstr "جميع الأقسام"
+
+msgid "Toutes les périodes"
+msgstr "جميع الفترات"
+
+msgid "Recherche..."
+msgstr "بحث..."
+
+
+msgid "Total garçons"
+msgstr "مجموع الذكور"
+
+msgid "Total filles"
+msgstr "مجموع الإناث"
+
+msgid "Total général"
+msgstr "المجموع العام"
+
+msgid "Moyenne générale"
+msgstr "المعدل العام"
+
+msgid "Note pondérée"
+msgstr "العلامة الموزونة"
+
+msgid "Trimestre"
+msgstr "الفصل الدراسي"
+
+msgid "Date création"
+msgstr "تاريخ الإنشاء"
+
+msgid "Pièce"
+msgstr "المرفق"
+
+msgid "Aucune donnée trouvée."
+msgstr "لم يتم العثور على أي بيانات."
+
+msgid "Total payé"
+msgstr "إجمالي المدفوع"
+
+msgid "Type paiement"
+msgstr "نوع الدفع"
+
+msgid "Date paiement"
+msgstr "تاريخ الدفع"
+
+msgid "Moyen"
+msgstr "الوسيلة"
+
+msgid "Total dû"
+msgstr "إجمالي المستحق"
+
+msgid "Montant dû"
+msgstr "المبلغ المستحق"
+
+msgid "Montant payé"
+msgstr "المبلغ المدفوع"
+
+msgid "Date opération"
+msgstr "تاريخ العملية"
+
+msgid "Total reçus"
+msgstr "إجمالي الإيصالات"
+
+msgid "Numéro"
+msgstr "الرقم"
+
+msgid "Date convocation"
+msgstr "تاريخ الاستدعاء"
+
+msgid "Créé par"
+msgstr "تم الإنشاء بواسطة"
+
+msgid "Forme agression"
+msgstr "نوع الاعتداء"
+
+
+msgid "Moyens résolution"
+msgstr "وسائل الحل"
+
+msgid "Total employés"
+msgstr "إجمالي الموظفين"
+
+msgid "Actifs"
+msgstr "نشطون"
+
+msgid "Inactifs"
+msgstr "غير نشطين"
+
+msgid "Hommes"
+msgstr "رجال"
+
+msgid "Femmes"
+msgstr "نساء"
+
+msgid "Date embauche"
+msgstr "تاريخ التوظيف"
+
+msgid "Heures de travail"
+msgstr "ساعات العمل"
+
+msgid "Description salle"
+msgstr "وصف القاعة"
+
+msgid "Classes actives"
+msgstr "الفصول النشطة"
+
+msgid "Bâtiments / Salles"
+msgstr "المباني / القاعات"
+
+msgid "Violences / Dégradations"
+msgstr "العنف / الأضرار"
+
+msgid "Convocations"
+msgstr "الاستدعاءات"
+
+msgid "Absences professeurs"
+msgstr "غيابات الأساتذة"
+
+msgid "Employés actifs"
+msgstr "الموظفون النشطون"
+
+msgid "Informations complémentaires"
+msgstr "معلومات إضافية"
+
+msgid "Les derniers utilisateurs connectés"
+msgstr "آخر المستخدمين المتصلين"
+
+msgid "Les derniers paiements effectués"
+msgstr "آخر المدفوعات المنجزة"
+
+msgid "Les dernières absences enregistrées"
+msgstr "آخر الغيابات المسجلة"
+
+msgid "Aucune absence enregistrée."
+msgstr "لا توجد أي غيابات مسجلة."
+
+msgid "Étudiants"
+msgstr "الطلاب"

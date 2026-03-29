@@ -18,5 +18,9 @@ urlpatterns = [
     path('PaimentAdmin/', include('Paiment.urls')),
     path('MessagerieAdmin/', include('Messagerie.urls')),
     path('Administration/', include('Administration.urls')), 
+    path('Rapport/', include('Rapports.urls')), 
+    path('Promotions/', include('Promotions.urls')), 
+
+
 ] + static(settings.MEDIA_URL , document_root=settings.MEDIA_ROOT)
 

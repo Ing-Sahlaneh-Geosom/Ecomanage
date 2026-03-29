@@ -1,0 +1,47 @@
+{% extends "rapports/base_report.html" %}
+{% load i18n %}
+
+{% block report_table %}
+<div class="table-wrap table-hover table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Devoir" %}</th>
+                <th>{% trans "Professeur" %}</th>
+                <th>{% trans "Matière" %}</th>
+                <th>{% trans "Niveau" %}</th>
+                <th>{% trans "Classes" %}</th>
+                <th>{% trans "Période" %}</th>
+                <th>{% trans "Points" %}</th>
+                <th>{% trans "Coefficient" %}</th>
+                <th>{% trans "Date création" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.nom }}</td>
+                <td>{{ row.professeur.nom_conplet }}</td>
+                <td>{{ row.matiere.nom }}</td>
+                <td>{{ row.niveau.nom }}</td>
+                <td>
+                    {% for c in row.classes.all %}
+                        {{ c.nom }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}-{% endfor %}
+                </td>
+                <td>{{ row.periode.nom }}</td>
+                <td>{{ row.points }}</td>
+                <td>{{ row.coefficient }}</td>
+                <td>{{ row.date_creation|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="report-empty">{% trans "Aucune donnée trouvée." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

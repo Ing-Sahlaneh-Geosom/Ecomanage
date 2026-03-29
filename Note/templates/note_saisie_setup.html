@@ -3,17 +3,118 @@
 {% block main %}
 {% include "_taps.html" %}
 
-<h4 class="mb-2 text-dark">{% trans "Saisie des notes" %}</h4>
-<div class="text-muted mb-3">
-  {% trans "Choisissez d'abord le niveau, puis la classe, ensuite le professeur et enfin le trimestre." %}
+<style>
+  .note-header-card {
+    background: linear-gradient(135deg, #5ca8f5 0%, #77b6f7 100%);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+  }
+
+  .note-header-card .subtext {
+    color: rgba(255,255,255,0.92);
+  }
+
+  .note-main-card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  }
+
+  .table-note thead tr:first-child th {
+    background: #d8e9f9;
+    color: #13406b;
+    border-color: #c9dff3;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 700;
+  }
+
+  .table-note thead tr:nth-child(2) th {
+    background: #edf5fd;
+    color: #2a5379;
+    border-color: #dbeaf8;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .table-note tbody td {
+    vertical-align: middle;
+  }
+
+  .table-note tbody tr:nth-child(even) {
+    background: #fbfdff;
+  }
+
+  .eleve-col {
+    min-width: 260px;
+  }
+
+  .matricule-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #eef6ff;
+    color: #1f5f99;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .devoir-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f3d6e;
+  }
+
+  .devoir-meta {
+    font-size: 12px;
+    color: #4d6b88;
+    line-height: 1.35;
+    margin-top: 4px;
+  }
+
+  .input-note {
+    min-width: 88px;
+    text-align: center;
+  }
+
+  .filter-card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  }
+
+  .btn-filter {
+    min-width: 140px;
+  }
+
+  .btn-save-notes {
+    background: #1f9d55;
+    border-color: #1f9d55;
+    padding: 10px 28px;
+    font-weight: 600;
+    border-radius: 10px;
+  }
+
+  .btn-save-notes:hover {
+    background: #198754;
+    border-color: #198754;
+  }
+</style>
+
+<div class="mb-3">
+  <h4 class="mb-1 text-dark">{% trans "Saisie des notes" %}</h4>
+  <div class="text-muted">
+    {% trans "Choisissez d'abord le niveau, puis la classe, ensuite le professeur et enfin le trimestre." %}
+  </div>
 </div>
 
-<div class="card shadow-sm border-0">
+<div class="card filter-card mb-3">
   <div class="card-body">
-    <form method="get" id="setupForm">
-      <div class="row g-3">
+    <form method="get" id="filterForm">
+      <div class="row g-3 align-items-end">
         <div class="col-md-3">
-          <label class="form-label fw-semibold" for="id_niveau">{% trans "Niveau" %}</label>
+          <label for="id_niveau" class="form-label fw-semibold">{% trans "Niveau" %}</label>
           <select name="niveau" id="id_niveau" class="form-select">
             <option value="">{% trans "Sélectionner..." %}</option>
             {% for niveau in niveaux %}
@@ -25,7 +126,7 @@
         </div>
 
         <div class="col-md-3">
-          <label class="form-label fw-semibold" for="id_classe">{% trans "Classe" %}</label>
+          <label for="id_classe" class="form-label fw-semibold">{% trans "Classe" %}</label>
           <select name="classe" id="id_classe" class="form-select">
             <option value="">{% trans "Sélectionner..." %}</option>
             {% for classe in classes %}
@@ -37,7 +138,7 @@
         </div>
 
         <div class="col-md-3">
-          <label class="form-label fw-semibold" for="id_professeur">{% trans "Professeur" %}</label>
+          <label for="id_professeur" class="form-label fw-semibold">{% trans "Professeur" %}</label>
           <select name="professeur" id="id_professeur" class="form-select">
             <option value="">{% trans "Sélectionner..." %}</option>
             {% for prof in professeurs %}
@@ -48,8 +149,8 @@
           </select>
         </div>
 
-        <div class="col-md-3">
-          <label class="form-label fw-semibold" for="id_periode">{% trans "Trimestre" %}</label>
+        <div class="col-md-2">
+          <label for="id_periode" class="form-label fw-semibold">{% trans "Trimestre" %}</label>
           <select name="periode" id="id_periode" class="form-select">
             <option value="">{% trans "Sélectionner..." %}</option>
             {% for p in periodes %}
@@ -59,53 +160,253 @@
             {% endfor %}
           </select>
         </div>
-      </div>
 
-      <div class="d-flex justify-content-center mt-4">
-        <button type="submit" class="btn btn-primary px-4" name="action" value="continue" id="btnContinue">
-          {% trans "Continuer" %}
-        </button>
+        <div class="col-md-1 d-grid">
+          <button type="submit" class="btn btn-primary btn-filter">
+            {% trans "Filtrer" %}
+          </button>
+        </div>
       </div>
     </form>
   </div>
 </div>
 
+{% if filters_ok %}
+  <div class="card note-header-card shadow-sm mb-3">
+    <div class="card-body text-center">
+      <h4 class="mb-2">{% trans "Saisie des notes" %}</h4>
+      <div class="subtext mb-1">
+        <strong>{% trans "Niveau" %} :</strong> {{ niveau_selected.nom }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>{% trans "Classe" %} :</strong> {{ classe_selected.nom }}
+      </div>
+      <div class="subtext mb-1">
+        <strong>{% trans "Professeur" %} :</strong> {{ professeur_selected.nom_conplet }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>{% trans "Trimestre" %} :</strong> {{ periode_selected.nom }}
+      </div>
+      <div class="subtext">
+        {% trans "Le système calcule automatiquement la moyenne sur 20 à partir des notes saisies." %}
+      </div>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save">
+    <input type="hidden" name="niveau" value="{{ niveau_selected.id }}">
+    <input type="hidden" name="classe" value="{{ classe_selected.id }}">
+    <input type="hidden" name="professeur" value="{{ professeur_selected.id }}">
+    <input type="hidden" name="periode" value="{{ periode_selected.id }}">
+
+    <div class="card note-main-card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-note align-middle mb-0">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width:70px;">{% trans "N°" %}</th>
+                <th rowspan="2" class="eleve-col">{% trans "Élève" %}</th>
+
+                {% for devoir in devoirs %}
+                  <th>
+                    <div class="devoir-title">{{ devoir.nom }}</div>
+                    <div class="devoir-meta">
+                      {{ devoir.matiere.nom }}<br>
+                      {{ devoir.periode.nom }}<br>
+                      {% trans "Coefficient" %} : {{ devoir.coefficient }}<br>
+                      {% trans "Calcul" %} : note ÷ {{ devoir.coefficient }}
+                    </div>
+                  </th>
+                {% endfor %}
+
+                <th rowspan="2">{% trans "Moyenne" %}</th>
+              </tr>
+              <tr>
+                {% for devoir in devoirs %}
+                  <th>{% trans "Note" %}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  <td class="text-center fw-bold">{{ forloop.counter }}</td>
+
+                  <td>
+                    <div class="fw-semibold">{{ row.eleve.nom }}</div>
+                    <div class="matricule-badge">
+                      {% trans "Matricule" %} :
+                      {{ row.eleve.identifiant|default:"-" }}
+                    </div>
+                  </td>
+
+                  {% for cell in row.cellules %}
+                    <td>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        class="form-control input-note js-note-input"
+                        data-row="{{ forloop.parentloop.counter0 }}"
+                        data-coef="{{ cell.coef_diviseur }}"
+                        name="note_{{ row.eleve.id }}_{{ cell.devoir.id }}"
+                        value="{{ cell.note|default_if_none:'' }}"
+                        placeholder="{% trans 'Note brute' %}"
+                      >
+                    </td>
+                  {% endfor %}
+
+                  <td class="text-center">
+                    <span
+                      class="fw-bold js-moyenne-value {% if row.moyenne != '' and row.moyenne < 10 %}text-danger{% elif row.moyenne != '' %}text-success{% endif %}"
+                      data-row="{{ forloop.counter0 }}"
+                    >
+                      {% if row.moyenne != "" %}
+                        {{ row.moyenne }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </span>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="100%" class="text-center text-muted py-4">
+                    {% trans "Aucun élève trouvé dans cette classe." %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-center mt-4">
+          <button type="submit" class="btn btn-success btn-save-notes">
+            {% trans "Enregistrer les notes" %}
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+{% endif %}
+
 <script>
-(function () {
+  (function () {
+    const niveau = document.getElementById("id_niveau");
+    const classe = document.getElementById("id_classe");
+    const professeur = document.getElementById("id_professeur");
 
-  const niveau = document.getElementById("id_niveau");
-  const classe = document.getElementById("id_classe");
-  const professeur = document.getElementById("id_professeur");
+    function reload(params) {
+      const url = new URL(window.location.href);
+      url.search = "";
+      const qs = new URLSearchParams(params);
+      window.location.href = url.pathname + "?" + qs.toString();
+    }
 
-  function reload(params) {
-    const url = new URL(window.location.href);
-    url.search = "";
-    const qs = new URLSearchParams(params);
-    window.location.href = url.pathname + "?" + qs.toString();
-  }
+    if (niveau) {
+      niveau.addEventListener("change", function () {
+        reload({ niveau: niveau.value });
+      });
+    }
 
-  niveau.addEventListener("change", function () {
-    reload({
-      niveau: niveau.value
+    if (classe) {
+      classe.addEventListener("change", function () {
+        reload({
+          niveau: niveau.value,
+          classe: classe.value
+        });
+      });
+    }
+
+    if (professeur) {
+      professeur.addEventListener("change", function () {
+        reload({
+          niveau: niveau.value,
+          classe: classe.value,
+          professeur: professeur.value
+        });
+      });
+    }
+  })();
+
+  (function () {
+    function parseValue(v) {
+      if (v === null || v === undefined || v === "") return null;
+      const n = parseFloat(String(v).replace(",", "."));
+      return Number.isNaN(n) ? null : n;
+    }
+
+    function round2(n) {
+      return Math.round(n * 100) / 100;
+    }
+
+    function formatNumber(n) {
+      const x = round2(n);
+      return Number.isInteger(x) ? String(x) : x.toFixed(2).replace(/\.00$/, "");
+    }
+
+    function updateMoyenne(rowIndex) {
+      const inputs = document.querySelectorAll('.js-note-input[data-row="' + rowIndex + '"]');
+      const moyenneEl = document.querySelector('.js-moyenne-value[data-row="' + rowIndex + '"]');
+
+      let total = 0;
+      let count = 0;
+
+      inputs.forEach(function (input) {
+        const brute = parseValue(input.value);
+        const coef = parseValue(input.dataset.coef) || 1;
+
+        if (brute !== null) {
+          let noteSur20 = brute / coef;
+
+          if (noteSur20 < 0) noteSur20 = 0;
+          if (noteSur20 > 20) noteSur20 = 20;
+
+          total += noteSur20;
+          count += 1;
+        }
+      });
+
+      if (!moyenneEl) return;
+
+      if (count === 0) {
+        moyenneEl.textContent = "-";
+        moyenneEl.classList.remove("text-danger", "text-success");
+        return;
+      }
+
+      const moyenne = total / count;
+      moyenneEl.textContent = formatNumber(moyenne);
+
+      moyenneEl.classList.remove("text-danger", "text-success");
+      if (moyenne < 10) {
+        moyenneEl.classList.add("text-danger");
+      } else {
+        moyenneEl.classList.add("text-success");
+      }
+    }
+
+    const inputs = document.querySelectorAll(".js-note-input");
+
+    inputs.forEach(function (input) {
+      input.addEventListener("input", function () {
+        let brute = parseValue(input.value);
+
+        if (brute !== null && brute < 0) {
+          input.value = 0;
+        }
+
+        updateMoyenne(input.dataset.row);
+      });
     });
-  });
 
-  classe.addEventListener("change", function () {
-    reload({
-      niveau: niveau.value,
-      classe: classe.value
+    const moyenneRows = document.querySelectorAll(".js-moyenne-value");
+    moyenneRows.forEach(function (el) {
+      updateMoyenne(el.dataset.row);
     });
-  });
-
-  professeur.addEventListener("change", function () {
-    reload({
-      niveau: niveau.value,
-      classe: classe.value,
-      professeur: professeur.value
-    });
-  });
-
-})();
+  })();
 </script>
 
 {% endblock %}

@@ -994,3 +994,343 @@ class TypePaiementForm(forms.ModelForm):
             "placeholder": _("Description"),
             "rows": 4,
         })
+
+
+from django import forms
+from django.utils.translation import gettext_lazy as _
+
+from .models import (
+    AnneeScolaire,
+    Classe,
+    DecisionPromotion,
+    Niveau,
+    PromotionDecisionCode,
+    PromotionEleve,
+    PromotionEtat,
+    Specialite,
+)
+from .promotion_utils import (
+    classe_a_specialite_fixee,
+    classe_demande_choix_specialite,
+    get_prochaine_classe_par_defaut,
+    get_queryset_prochaine_classe,
+    get_specialites_queryset_for_classe,
+)
+
+
+class PromotionListeFilterForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label=_("Recherche"),
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": _("Nom ou identifiant de l'élève"),
+        })
+    )
+
+    annee_scolaire = forms.ModelChoiceField(
+        queryset=AnneeScolaire.objects.none(),
+        required=False,
+        label=_("Année scolaire"),
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    niveau = forms.ModelChoiceField(
+        queryset=Niveau.objects.none(),
+        required=False,
+        label=_("Niveau"),
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    classe = forms.ModelChoiceField(
+        queryset=Classe.objects.none(),
+        required=False,
+        label=_("Classe"),
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    decision = forms.ChoiceField(
+        required=False,
+        label=_("Décision"),
+        choices=[("", _("Toutes"))] + list(PromotionDecisionCode.choices),
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    etat = forms.ChoiceField(
+        required=False,
+        label=_("État"),
+        choices=[("", _("Tous"))] + list(PromotionEtat.choices),
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["annee_scolaire"].queryset = AnneeScolaire.objects.order_by("-debut")
+        self.fields["niveau"].queryset = Niveau.objects.none()
+        self.fields["classe"].queryset = Classe.objects.none()
+
+        selected_niveau_id = None
+
+        if self.is_bound:
+            selected_niveau_id = self.data.get(self.add_prefix("niveau")) or None
+        else:
+            niveau_initial = self.initial.get("niveau")
+            if niveau_initial:
+                selected_niveau_id = getattr(niveau_initial, "pk", niveau_initial)
+
+        # ✅ Les niveaux dépendent seulement de l'école
+        if ecole:
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True
+            ).order_by("ordre", "nom")
+
+        # ✅ Les classes dépendent seulement du niveau choisi
+        if ecole and selected_niveau_id:
+            self.fields["classe"].queryset = Classe.objects.filter(
+                ecole=ecole,
+                actif=True,
+                niveau_id=selected_niveau_id
+            ).select_related("niveau").order_by("ordre", "nom")
+class PromotionEvaluationForm(forms.ModelForm):
+    class Meta:
+        model = PromotionEleve
+        fields = [
+            "prochaine_classe",
+            "prochaine_specialite",
+            "commentaire",
+        ]
+        widgets = {
+            "prochaine_classe": forms.Select(attrs={"class": "form-select"}),
+            "prochaine_specialite": forms.Select(attrs={"class": "form-select"}),
+            "commentaire": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 4,
+                "placeholder": _("Commentaire ou observation"),
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        niveau_actuel = kwargs.pop("niveau_actuel", None)  # gardé si besoin futur
+        decision = kwargs.pop("decision", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["prochaine_classe"].required = False
+        self.fields["prochaine_specialite"].required = False
+        self.fields["commentaire"].required = False
+
+        classe_actuelle = getattr(self.instance, "classe_actuelle", None)
+        decision = decision or getattr(self.instance, "decision_proposee", None) or PromotionDecisionCode.ADMIS
+
+        # queryset des classes possibles
+        self.fields["prochaine_classe"].queryset = get_queryset_prochaine_classe(
+            classe_actuelle=classe_actuelle,
+            decision=decision,
+        )
+
+        # valeur par défaut de prochaine classe
+        if not self.is_bound and classe_actuelle and not self.instance.prochaine_classe_id:
+            default_classe = get_prochaine_classe_par_defaut(
+                classe_actuelle=classe_actuelle,
+                decision=decision,
+            )
+            if default_classe:
+                self.fields["prochaine_classe"].initial = default_classe
+
+        selected_classe = self._get_selected_prochaine_classe()
+
+        # gestion intelligente du champ spécialité
+        self.show_specialite = False
+        self.fields["prochaine_specialite"].queryset = Specialite.objects.none()
+
+        if selected_classe:
+            if classe_a_specialite_fixee(selected_classe):
+                self.fields["prochaine_specialite"].initial = selected_classe.specialite
+                self.fields["prochaine_specialite"].widget = forms.HiddenInput()
+            elif classe_demande_choix_specialite(selected_classe):
+                self.show_specialite = True
+                self.fields["prochaine_specialite"].queryset = get_specialites_queryset_for_classe(selected_classe)
+            else:
+                self.fields["prochaine_specialite"].widget = forms.HiddenInput()
+        else:
+            self.fields["prochaine_specialite"].widget = forms.HiddenInput()
+
+        
+
+    def _get_selected_prochaine_classe(self):
+        if self.is_bound:
+            classe_id = self.data.get(self.add_prefix("prochaine_classe"))
+            if classe_id:
+                try:
+                    return Classe.objects.select_related("niveau", "specialite").get(pk=classe_id)
+                except Classe.DoesNotExist:
+                    return None
+
+        if self.instance and self.instance.prochaine_classe_id:
+            return self.instance.prochaine_classe
+
+        initial = self.fields["prochaine_classe"].initial
+        if isinstance(initial, Classe):
+            return initial
+        if initial:
+            try:
+                return Classe.objects.select_related("niveau", "specialite").get(pk=initial)
+            except Classe.DoesNotExist:
+                return None
+
+        return None
+
+    def clean(self):
+        cleaned_data = super().clean()
+        prochaine_classe = cleaned_data.get("prochaine_classe")
+        prochaine_specialite = cleaned_data.get("prochaine_specialite")
+
+        if prochaine_classe:
+            if classe_a_specialite_fixee(prochaine_classe):
+                cleaned_data["prochaine_specialite"] = prochaine_classe.specialite
+            elif classe_demande_choix_specialite(prochaine_classe):
+                if not prochaine_specialite:
+                    raise forms.ValidationError(
+                        _("Veuillez choisir la spécialité pour la classe cible.")
+                    )
+            else:
+                cleaned_data["prochaine_specialite"] = None
+
+        return cleaned_data
+
+
+class PromotionValidationForm(forms.ModelForm):
+    class Meta:
+        model = PromotionEleve
+        fields = [
+            "decision_finale",
+            "decision_personnalisee",
+            "prochaine_classe",
+            "prochaine_specialite",
+            "commentaire",
+        ]
+        widgets = {
+            "decision_finale": forms.Select(attrs={"class": "form-select"}),
+            "decision_personnalisee": forms.Select(attrs={"class": "form-select"}),
+            "prochaine_classe": forms.Select(attrs={"class": "form-select"}),
+            "prochaine_specialite": forms.Select(attrs={"class": "form-select"}),
+            "commentaire": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 4,
+                "placeholder": _("Motif / décision finale / remarque"),
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        niveau_actuel = kwargs.pop("niveau_actuel", None)  # gardé si besoin futur
+        super().__init__(*args, **kwargs)
+
+        self.fields["decision_personnalisee"].required = False
+        self.fields["prochaine_classe"].required = False
+        self.fields["prochaine_specialite"].required = False
+        self.fields["commentaire"].required = False
+
+        self.fields["decision_personnalisee"].queryset = DecisionPromotion.objects.none()
+
+        if self.instance and self.instance.decision_proposee:
+            self.fields["decision_finale"].initial = self.instance.decision_proposee
+
+        if ecole:
+            self.fields["decision_personnalisee"].queryset = DecisionPromotion.objects.filter(
+                ecole=ecole,
+                annee_scolaire=self.instance.annee_scolaire,
+                actif=True
+            ).order_by("decision")
+
+        decision = self._get_selected_decision()
+        classe_actuelle = getattr(self.instance, "classe_actuelle", None)
+
+        self.fields["prochaine_classe"].queryset = get_queryset_prochaine_classe(
+            classe_actuelle=classe_actuelle,
+            decision=decision,
+        )
+
+        if not self.is_bound and classe_actuelle and not self.instance.prochaine_classe_id:
+            default_classe = get_prochaine_classe_par_defaut(
+                classe_actuelle=classe_actuelle,
+                decision=decision,
+            )
+            if default_classe:
+                self.fields["prochaine_classe"].initial = default_classe
+
+        selected_classe = self._get_selected_prochaine_classe()
+
+        self.show_specialite = False
+        self.fields["prochaine_specialite"].queryset = Specialite.objects.none()
+
+        if selected_classe:
+            if classe_a_specialite_fixee(selected_classe):
+                self.fields["prochaine_specialite"].initial = selected_classe.specialite
+                self.fields["prochaine_specialite"].widget = forms.HiddenInput()
+            elif classe_demande_choix_specialite(selected_classe):
+                self.show_specialite = True
+                self.fields["prochaine_specialite"].queryset = get_specialites_queryset_for_classe(selected_classe)
+            else:
+                self.fields["prochaine_specialite"].widget = forms.HiddenInput()
+        else:
+            self.fields["prochaine_specialite"].widget = forms.HiddenInput()
+
+    def _get_selected_decision(self):
+        if self.is_bound:
+            return self.data.get(self.add_prefix("decision_finale"))
+        return self.instance.decision_finale or self.instance.decision_proposee
+
+    def _get_selected_prochaine_classe(self):
+        if self.is_bound:
+            classe_id = self.data.get(self.add_prefix("prochaine_classe"))
+            if classe_id:
+                try:
+                    return Classe.objects.select_related("niveau", "specialite").get(pk=classe_id)
+                except Classe.DoesNotExist:
+                    return None
+
+        if self.instance and self.instance.prochaine_classe_id:
+            return self.instance.prochaine_classe
+
+        initial = self.fields["prochaine_classe"].initial
+        if isinstance(initial, Classe):
+            return initial
+        if initial:
+            try:
+                return Classe.objects.select_related("niveau", "specialite").get(pk=initial)
+            except Classe.DoesNotExist:
+                return None
+
+        return None
+
+    def clean(self):
+        cleaned_data = super().clean()
+        decision_finale = cleaned_data.get("decision_finale")
+        prochaine_classe = cleaned_data.get("prochaine_classe")
+        prochaine_specialite = cleaned_data.get("prochaine_specialite")
+
+        if decision_finale in [
+            PromotionDecisionCode.ADMIS,
+            PromotionDecisionCode.AUTORISE,
+            PromotionDecisionCode.ORIENTE,
+        ] and not prochaine_classe:
+            raise forms.ValidationError(
+                _("Veuillez choisir la prochaine classe pour cette décision.")
+            )
+
+        if prochaine_classe:
+            if classe_a_specialite_fixee(prochaine_classe):
+                cleaned_data["prochaine_specialite"] = prochaine_classe.specialite
+            elif classe_demande_choix_specialite(prochaine_classe):
+                if not prochaine_specialite:
+                    raise forms.ValidationError(
+                        _("Veuillez choisir la spécialité pour la classe cible.")
+                    )
+            else:
+                cleaned_data["prochaine_specialite"] = None
+
+        return cleaned_data
