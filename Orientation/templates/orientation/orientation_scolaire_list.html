@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <h3 class="mb-1 text-dark fw-bold">{% trans "Orientation scolaire" %}</h3>
+                <p class="text-muted mb-0">
+                    {% trans "Gérez les niveaux, les programmes disponibles et leur période de validité." %}
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'programme_orientation_list' %}" class="btn btn-outline-dark">
+                    {% trans "Gérer les programmes" %}
+                </a>
+                <a href="{% url 'orientation_scolaire_create' %}" class="btn btn-primary">
+                    + {% trans "Ajouter" %}
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle orientation-table">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 20%;">{% trans "Niveau" %}</th>
+                        <th style="width: 40%;">{% trans "Programmes disponibles" %}</th>
+                        <th style="width: 20%;">{% trans "Date de validité" %}</th>
+                        <th style="width: 20%;">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <span class="fw-semibold text-dark">
+                                {{ item.niveau.nom|default:"-" }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% with programmes=item.programmes.all %}
+                                {% if programmes %}
+                                    <div class="programme-container">
+                                        {% for programme in programmes %}
+                                            <span class="programme-item">
+                                                {{ forloop.counter }}. {{ programme.nom_affichage }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">{% trans "Aucun programme" %}</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+
+                        <td>
+                            {% if item.date_debut and item.date_fin %}
+                                <span class="fw-semibold text-primary">
+                                    {{ item.date_debut|date:"Y-m-d" }} {% trans "à" %} {{ item.date_fin|date:"Y-m-d" }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'orientation_scolaire_update' item.id %}" class="btn btn-sm btn-outline-primary">
+                                    {% trans "Modifier" %}
+                                </a>
+                                <a href="{% url 'orientation_scolaire_delete' item.id %}" class="btn btn-sm btn-outline-danger">
+                                    {% trans "Supprimer" %}
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            {% trans "Aucune orientation scolaire enregistrée." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.orientation-table th,
+.orientation-table td {
+    vertical-align: middle;
+}
+
+.programme-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.programme-item {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    background: #f8f9fa;
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 14px;
+}
+</style>
+{% endblock %}

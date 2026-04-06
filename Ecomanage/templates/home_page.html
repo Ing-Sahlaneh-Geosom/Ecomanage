@@ -437,10 +437,17 @@
         </div>
       </div>
 
-      <div class="ss-chart-card">
+      <div class="ss-chart-card mb-4">
         <div class="ss-chart-title">📊 {% trans "Revenus par mois" %}</div>
         <div class="ss-chart-wrap">
           <canvas id="paiementsChartAdmin"></canvas>
+        </div>
+      </div>
+
+      <div class="ss-chart-card">
+        <div class="ss-chart-title">📊 {% trans "Effectif par classe" %}</div>
+        <div class="ss-chart-wrap">
+          <canvas id="effectifClasseChart"></canvas>
         </div>
       </div>
     </div>
@@ -528,6 +535,7 @@
 <script>
   const absCanvas = document.getElementById('absencesChartAdmin');
   const payCanvas = document.getElementById('paiementsChartAdmin');
+  const classCanvas = document.getElementById('effectifClasseChart');
 
   if (absCanvas) {
     new Chart(absCanvas, {
@@ -609,6 +617,50 @@
           x: {
             grid: {
               color: '#f3f4f6'
+            }
+          }
+        }
+      }
+    });
+  }
+
+  if (classCanvas) {
+    new Chart(classCanvas, {
+      type: 'bar',
+      data: {
+        labels: {{ classes_labels|safe }},
+        datasets: [{
+          label: "{% trans 'Élèves' %}",
+          data: {{ classes_effectifs|safe }},
+          backgroundColor: '#6fa2e4',
+          borderColor: '#2563eb',
+          borderWidth: 1,
+          borderRadius: 6,
+          maxBarThickness: 42
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e5e7eb'
+            },
+            ticks: {
+              precision: 0
+            }
+          },
+          x: {
+            grid: {
+              display: false
             }
           }
         }

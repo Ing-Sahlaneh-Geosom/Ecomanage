@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="mb-4">
+            <h3 class="fw-bold text-dark mb-1">{{ titre }}</h3>
+            <p class="text-muted mb-0">
+                {% trans "Renseignez le code, le libellé, l'ordre et l'état du programme." %}
+            </p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">{% trans "Code" %}</label>
+                    {{ form.code }}
+                    {% if form.code.errors %}
+                        <div class="text-danger small mt-1">{{ form.code.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">{% trans "Libellé" %}</label>
+                    {{ form.libelle }}
+                    {% if form.libelle.errors %}
+                        <div class="text-danger small mt-1">{{ form.libelle.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">{% trans "Ordre" %}</label>
+                    {{ form.ordre }}
+                    {% if form.ordre.errors %}
+                        <div class="text-danger small mt-1">{{ form.ordre.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6 d-flex align-items-center pt-4">
+                    <div class="form-check">
+                        {{ form.actif }}
+                        <label class="form-check-label ms-2">{% trans "Actif" %}</label>
+                    </div>
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger mt-3">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success">{% trans "Enregistrer" %}</button>
+                <a href="{% url 'programme_orientation_list' %}" class="btn btn-secondary">{% trans "Retour" %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

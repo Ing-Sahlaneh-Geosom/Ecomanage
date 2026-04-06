@@ -381,29 +381,32 @@ body, .main-content, .content, .page-content {
       <div class="collapse submenu" id="menuPromotion">
         <a href="{% url 'promotion:promotion_liste_attente' %}">- {% trans "Étudiants en attente d'une décision" %}</a>
         <a href="{% url 'promotion:promotion_liste_evaluation' %}">- {% trans "Évaluer l'élève pour la promotion" %}</a>
-        <a href="{% url 'promotion:promotion_liste_decisions_finales' %}">- {% trans "Afficher la décision finale" %}</a>
-        <a href="">- {% trans "Élève diplômé" %}</a>
-        <a href="">- {% trans "Voir les élèves en promotion" %}</a>
-        <a href="">- {% trans "Promouvoir les élèves en attente" %}</a>
+        <a href="{% url 'promotion:afficher_decision_finale' %}">- {% trans "Afficher la décision finale" %}</a>
+        <a href="{% url 'promotion:eleve_diplome_list' %}">- {% trans "Élève diplômé" %}</a>
+        <a href="{% url 'promotion:promouvoir_eleves_attente' %}">- {% trans "Promouvoir les élèves en attente" %}</a>
+        <a href="{% url 'promotion:voir_eleves_promotion' %}">- {% trans "Voir les élèves en promotion" %}</a>
         <a href="">- {% trans "Décision d'orientation" %}</a>
-        <a href="">- {% trans "Promotions par classe" %}</a>
-        <a href="">- {% trans "Promotions par niveaux" %}</a>
-        <a href="">- {% trans "Changement de classe d'un élève" %}</a>
+        <a href="{% url 'promotion:promotions_par_classe' %}">- {% trans "Promotions par classe" %}</a>
+        <a href="{% url 'promotion:promotions_par_niveaux' %}">- {% trans "Promotions par niveaux" %}</a>
+        <a href="{% url 'promotion:changement_classe_eleve' %}">- {% trans "Changement de classe d'un élève" %}</a>
       </div>
 
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuOrientation" aria-expanded="false">
         📋 {% trans "Orientation" %} <span class="arrow">▾</span>
       </button>
       <div class="collapse submenu" id="menuOrientation">
-        <a href="">- {% trans "Orientation scolaire" %}</a>
-        <a href="">- {% trans "Fiche de vœux" %}</a>
-        <a href="">- {% trans "Enregistrement des vœux" %}</a>
-        <a href="">- {% trans "Afficher les vœux des élèves" %}</a>
-        <a href="">- {% trans "Orientation finale" %}</a>
-        <a href="">- {% trans "Rapport des orientations" %}</a>
+        <a href="{% url 'orientation_scolaire_list'%}">- {% trans "Orientation scolaire" %}</a>
+        <a href="{% url 'fiche_voeux_list'%}">- {% trans "Fiche de vœux" %}</a>
+        <a href="{% url 'saisie_voeux_orientation'%}">- {% trans "Enregistrement des vœux" %}</a>
+        <a href="{% url 'voeux_eleves_list'%}">- {% trans "Afficher les vœux des élèves" %}</a>
+        <a href="{% url 'orientation_finale_page'%}">- {% trans "Orientation finale" %}</a>
+        <a href="{% url 'rapport_orientation_page'%}">- {% trans "Rapport des orientations" %}</a>
+        <a href="{% url 'decision_eleve_page' %}">- {% trans "Décision élève" %}</a>
+        <a href="{% url 'rapport_decision_finale_page' %}">- {% trans "Rapport de décision finale" %}</a>
+
       </div>
 
-    
+  
 
     {% if current == 'employe_list' or current == 'absences_enseignants' or current == 'suivi_absences_enseignants' or current == 'absences_employes' or current == 'suivi_absences_employes' or current == 'liste_parents' %}
       <button class="btn active" data-bs-toggle="collapse" data-bs-target="#menuAdministrateur" aria-expanded="true">
@@ -474,6 +477,9 @@ body, .main-content, .content, .page-content {
         <a class="{% if current == 'batiments_page' %}active{% endif %}" href="{% url 'batiments_page'%}">- {% trans "Les Batiments" %} </a>
         <a class="{% if current == 'salles_page' %}active{% endif %}" href="{% url 'salles_page'%}">- {% trans "Les salles des batiments" %} </a>
         <a class="{% if current == 'emploi_list' %}active{% endif %}" href="{% url 'emploi_list'%}">- {% trans "Emplois du temps" %}</a>
+        <a class="{% if current == 'programme_orientation_list' %}active{% endif %}" href="{% url 'programme_orientation_list'%}">- Gerrer les programme d'orientation </a>
+
+        
       </div>
     {% else %}
       <button class="btn" data-bs-toggle="collapse" data-bs-target="#menuParametre" aria-expanded="false">
@@ -486,6 +492,7 @@ body, .main-content, .content, .page-content {
         <a href="{% url 'batiments_page'%}">- {% trans "Les Batiments" %} </a>
         <a href="{% url 'salles_page'%}">- {% trans "Les salles des batiments" %} </a>
         <a class="{% if current == 'emploi_list' %}active{% endif %}" href="{% url 'emploi_list'%}">- {% trans "Emplois du temps" %}</a>
+        <a class="{% if current == 'programme_orientation_list' %}active{% endif %}" href="{% url 'programme_orientation_list'%}">- Gerrer les programme d'orientation</a>
 
       </div>
     {% endif %}

@@ -1,174 +1,412 @@
 {% extends "base.html" %}
 {% load i18n %}
+
 {% block main %}
+<style>
+    .decision-final-page .page-title {
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: #1f2d3d;
+        margin-bottom: 1rem;
+    }
 
+    .decision-final-page .main-card,
+    .decision-final-page .sheet-card {
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        background: #fff;
+    }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <h4 class="mb-1 text-dark">{% trans "Afficher la décision finale" %}</h4>
-    <div class="text-muted">
-      {{ promotion.eleve.nom }} — {{ promotion.classe_actuelle.nom|default:"-" }} — {{ promotion.annee_scolaire.nom }}
+    .decision-final-page .form-label {
+        font-size: .92rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: .4rem;
+    }
+
+    .decision-final-page .form-select,
+    .decision-final-page .form-control {
+        height: 46px;
+        border-radius: 12px;
+        border: 1px solid #d8dee6;
+        font-size: .95rem;
+        box-shadow: none !important;
+    }
+
+    .decision-final-page .btn-show {
+        height: 46px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .decision-final-page .sheet-head {
+        display: grid;
+        grid-template-columns: 120px 1fr 260px;
+        gap: 1rem;
+        align-items: start;
+        margin-bottom: 1.25rem;
+    }
+
+    .decision-final-page .logo-box {
+        width: 100px;
+        height: 100px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+    }
+
+    .decision-final-page .logo-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .decision-final-page .school-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1f2d3d;
+    }
+
+    .decision-final-page .sheet-subtitle {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #243447;
+    }
+
+    .decision-final-page .meta-line {
+        font-size: .92rem;
+        color: #475569;
+        margin-bottom: .25rem;
+    }
+
+    .decision-final-page .date-box {
+        text-align: right;
+        font-size: .92rem;
+        color: #475569;
+    }
+
+    .decision-final-page .table-wrap {
+        border: 1px solid #d9e1ea;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+
+    .decision-final-page .table {
+        margin-bottom: 0;
+    }
+
+    .decision-final-page .table thead th {
+        background: #f8fafc;
+        font-size: .9rem;
+        font-weight: 700;
+        color: #1f2d3d;
+        padding: 11px 10px;
+        border-bottom: 1px solid #dbe3ec;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .decision-final-page .table tbody td {
+        font-size: .9rem;
+        color: #334155;
+        padding: 10px;
+        border-top: 1px solid #edf2f7;
+        vertical-align: middle;
+    }
+
+    .decision-final-page .table tfoot td {
+        padding: 12px 10px;
+        font-weight: 700;
+        background: #fafbfd;
+        border-top: 1px solid #dbe3ec;
+    }
+
+    .decision-final-page .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 1rem;
+    }
+
+    .decision-final-page .summary-box {
+        border: 1px solid #e7edf4;
+        border-radius: 14px;
+        background: #f8fafc;
+        padding: 12px;
+    }
+
+    .decision-final-page .summary-label {
+        font-size: .78rem;
+        color: #64748b;
+        margin-bottom: .25rem;
+    }
+
+    .decision-final-page .summary-value {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #1f2d3d;
+    }
+
+    .decision-final-page .comment-box {
+        margin-top: 1rem;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #e7edf4;
+        background: #fafbfd;
+        font-size: .92rem;
+        color: #334155;
+    }
+
+    .decision-final-page .empty-row {
+        text-align: center;
+        color: #7a8794;
+        padding: 2rem 1rem !important;
+    }
+
+    @media (max-width: 1200px) {
+        .decision-final-page .summary-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 992px) {
+        .decision-final-page .sheet-head {
+            grid-template-columns: 1fr;
+        }
+
+        .decision-final-page .date-box {
+            text-align: left;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .decision-final-page .summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
+
+<div class="container-fluid py-3 decision-final-page">
+
+    <div class="page-title">
+        {% trans "Afficher la décision finale" %}
     </div>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'promotion:promotion_valider_decision' promotion.pk %}" class="btn btn-outline-secondary">
-      {% trans "Retour à la validation" %}
-    </a>
-    <a href="{% url 'promotion:promotion_liste_attente' %}" class="btn btn-outline-primary">
-      {% trans "Retour à la liste" %}
-    </a>
-  </div>
+
+    <div class="card main-card mb-4">
+        <div class="card-body p-4">
+         <form method="get" id="filter-form">
+    <div class="row g-4 align-items-end">
+        <div class="col-lg-2 col-md-6">
+            <label class="form-label">{% trans "Année scolaire" %}<span class="text-danger">*</span></label>
+            <select name="annee_scolaire" class="form-select auto-submit">
+                <option value="">{% trans "Sélectionner..." %}</option>
+                {% for item in annees %}
+                    <option value="{{ item.id }}" {% if selected_annee == item.id|stringformat:"s" %}selected{% endif %}>
+                        {{ item.nom }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+            <label class="form-label">{% trans "Période" %}<span class="text-danger">*</span></label>
+            <select name="periode" class="form-select auto-submit">
+                <option value="">{% trans "Sélectionner..." %}</option>
+                {% for item in periodes %}
+                    <option value="{{ item.id }}" {% if selected_periode == item.id|stringformat:"s" %}selected{% endif %}>
+                        {{ item.nom }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+            <label class="form-label">{% trans "Niveaux" %}<span class="text-danger">*</span></label>
+            <select name="niveau" class="form-select auto-submit">
+                <option value="">{% trans "Sélectionner..." %}</option>
+                {% for item in niveaux %}
+                    <option value="{{ item.id }}" {% if selected_niveau == item.id|stringformat:"s" %}selected{% endif %}>
+                        {{ item.nom }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+            <label class="form-label">{% trans "La liste des classes" %}<span class="text-danger">*</span></label>
+            <select name="classe" class="form-select auto-submit">
+                <option value="">{% trans "Sélectionner..." %}</option>
+                {% for item in classes %}
+                    <option value="{{ item.id }}" {% if selected_classe == item.id|stringformat:"s" %}selected{% endif %}>
+                        {{ item.nom }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+            <label class="form-label">{% trans "Élève" %}<span class="text-danger">*</span></label>
+            <select name="eleve" class="form-select">
+                <option value="">{% trans "Sélectionner..." %}</option>
+                {% for item in eleves %}
+                    <option value="{{ item.id }}" {% if selected_eleve == item.id|stringformat:"s" %}selected{% endif %}>
+                        {{ item.nom }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+            <button type="submit" class="btn btn-success w-100 btn-show">
+                {% trans "Afficher" %}
+            </button>
+        </div>
+    </div>
+</form>
+        </div>
+    </div>
+
+    {% if fiche %}
+        <div class="card sheet-card">
+            <div class="card-body p-4">
+
+                <div class="sheet-head">
+                    <div>
+                        <div class="logo-box">
+                            {% if request.user.ecole.logo %}
+                                <img src="{{ request.user.ecole.logo.url }}" alt="Logo">
+                            {% else %}
+                                <span>Logo</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="school-name">{{ request.user.ecole.nom }}</div>
+                        <div class="sheet-subtitle">{% trans "Fiche finale de décision" %}, {{ fiche.periode.nom }}</div>
+
+                        <div class="meta-line">{% trans "Téléphone" %} : {{ request.user.ecole.telephone|default:"-" }}</div>
+                        <div class="meta-line">{% trans "E-mail" %} : {{ request.user.ecole.email|default:"-" }}</div>
+                        <div class="meta-line">{% trans "Année scolaire" %} : {{ fiche.annee.nom }}</div>
+                        <div class="meta-line">{% trans "Matricule" %} : {{ fiche.eleve.identifiant|default:"-" }}</div>
+                        <div class="meta-line">{{ fiche.eleve.nom }}</div>
+                        <div class="meta-line">{% trans "Né(e) le" %} : {{ fiche.eleve.date_naissancce|date:"d/m/Y" }}</div>
+                        <div class="meta-line">{% trans "Classe" %} : {{ fiche.eleve.classe.nom|default:"-" }}</div>
+                    </div>
+
+                    <div class="date-box">
+                        <div><strong>{% trans "Le" %}</strong> : {% now "d-m-Y" %}</div>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">{% trans "Matière" %}</th>
+                                    <th rowspan="2">{% trans "Enseignant" %}</th>
+                                    <th rowspan="2">{% trans "NB Note" %}</th>
+                                    <th rowspan="2">{% trans "Rang" %}</th>
+                                    <th colspan="2">{% trans "Moyennes" %}</th>
+                                    <th rowspan="2">{% trans "Appréciation" %}</th>
+                                </tr>
+                                <tr>
+                                    <th>{% trans "Élève" %}</th>
+                                    <th>{% trans "Classe" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in fiche.rows %}
+                                    <tr>
+                                        <td>{{ row.matiere }}</td>
+                                        <td>{{ row.enseignant }}</td>
+                                        <td class="text-center">{{ row.nb_note }}</td>
+                                        <td class="text-center">{{ row.rang }}</td>
+                                        <td class="text-center">{{ row.moyenne_eleve }}</td>
+                                        <td class="text-center">{{ row.moyenne_classe }}</td>
+                                        <td>{{ row.appreciation }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="empty-row">
+                                            {% trans "Aucune note à afficher" %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4">{% trans "Moyenne Générale" %}</td>
+                                    <td colspan="3">{{ fiche.moyenne_generale }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <form method="post" class="mt-4">
+    {% csrf_token %}
+
+    <input type="hidden" name="annee_scolaire" value="{{ selected_annee }}">
+    <input type="hidden" name="periode" value="{{ selected_periode }}">
+    <input type="hidden" name="niveau" value="{{ selected_niveau }}">
+    <input type="hidden" name="classe" value="{{ selected_classe }}">
+    <input type="hidden" name="eleve" value="{{ selected_eleve }}">
+
+    <div class="row g-4 align-items-end">
+        <div class="col-lg-5 col-md-6">
+            <label class="form-label">{% trans "Décision enregistrée" %} <span class="text-danger">*</span></label>
+            <select name="decision_personnalisee" class="form-select">
+                <option value="">{% trans "Sélectionner..." %}</option>
+                {% for item in decisions %}
+                    <option value="{{ item.id }}"
+                        {% if fiche.promotion and fiche.promotion.decision_personnalisee_id == item.id %}selected{% endif %}>
+                        {{ item.decision }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-lg-5 col-md-6">
+            <label class="form-label">{% trans "Commentaire" %}</label>
+            <input type="text"
+                   name="commentaire"
+                   class="form-control"
+                   value="{% if fiche.promotion %}{{ fiche.promotion.commentaire }}{% endif %}"
+                   placeholder="{% trans 'Commentaire optionnel' %}">
+        </div>
+
+        <div class="col-lg-2 col-md-12">
+            <button type="submit" class="btn btn-primary w-100 btn-show">
+                {% trans "Enregistrer" %}
+            </button>
+        </div>
+    </div>
+</form>
+
+            </div>
+        </div>
+    {% endif %}
 </div>
 
-<div class="row g-3 mb-4">
-  <div class="col-md-3">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-muted small">{% trans "Moyenne annuelle" %}</div>
-        <h4 class="mb-0">{{ promotion.moyenne_annuelle|floatformat:2 }}</h4>
-      </div>
-    </div>
-  </div>
+<script>
 
-  <div class="col-md-3">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-muted small">{% trans "Décision proposée" %}</div>
-        <div class="mt-1">
-          {% if promotion.decision_proposee == "admis" %}
-            <span class="badge bg-success">{% trans "Admis" %}</span>
-          {% elif promotion.decision_proposee == "autorise" %}
-            <span class="badge bg-info text-dark">{% trans "Autorisé(e)" %}</span>
-          {% elif promotion.decision_proposee == "oriente" %}
-            <span class="badge bg-primary">{% trans "Orienté(e)" %}</span>
-          {% elif promotion.decision_proposee == "redouble" %}
-            <span class="badge bg-warning text-dark">{% trans "Redouble" %}</span>
-          {% elif promotion.decision_proposee == "diplome" %}
-            <span class="badge bg-dark">{% trans "Diplômé(e)" %}</span>
-          {% elif promotion.decision_proposee == "exclu" %}
-            <span class="badge bg-danger">{% trans "Exclu(e)" %}</span>
-          {% else %}
-            <span class="badge bg-secondary">{{ promotion.get_decision_proposee_display }}</span>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="col-md-3">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-muted small">{% trans "Décision finale" %}</div>
-        <div class="mt-1">
-          {% if promotion.decision_finale == "admis" %}
-            <span class="badge bg-success">{% trans "Admis" %}</span>
-          {% elif promotion.decision_finale == "autorise" %}
-            <span class="badge bg-info text-dark">{% trans "Autorisé(e)" %}</span>
-          {% elif promotion.decision_finale == "oriente" %}
-            <span class="badge bg-primary">{% trans "Orienté(e)" %}</span>
-          {% elif promotion.decision_finale == "redouble" %}
-            <span class="badge bg-warning text-dark">{% trans "Redouble" %}</span>
-          {% elif promotion.decision_finale == "diplome" %}
-            <span class="badge bg-dark">{% trans "Diplômé(e)" %}</span>
-          {% elif promotion.decision_finale == "exclu" %}
-            <span class="badge bg-danger">{% trans "Exclu(e)" %}</span>
-          {% else %}
-            <span class="badge bg-secondary">{{ promotion.get_decision_finale_display }}</span>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".auto-submit").forEach(function (el) {
+        el.addEventListener("change", function () {
+            document.getElementById("filter-form").submit();
+        });
+    });
+});
 
-  <div class="col-md-3">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-muted small">{% trans "État actuel" %}</div>
-        <h5 class="mb-0">{{ promotion.get_etat_display }}</h5>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div class="card shadow-sm mb-4">
-  <div class="card-header">
-    <strong>{% trans "Informations de décision" %}</strong>
-  </div>
-  <div class="card-body">
-    <div class="row g-4">
-      <div class="col-md-6">
-        <div class="mb-3">
-          <label class="form-label fw-bold">{% trans "Élève" %}</label>
-          <div>{{ promotion.eleve.nom }}</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">{% trans "Année scolaire" %}</label>
-          <div>{{ promotion.annee_scolaire.nom }}</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">{% trans "Classe actuelle" %}</label>
-          <div>{{ promotion.classe_actuelle.nom|default:"-" }}</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">{% trans "Niveau actuel" %}</label>
-          <div>{{ promotion.niveau_actuel.nom|default:"-" }}</div>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <div class="mb-3">
-          <label class="form-label fw-bold">{% trans "Prochaine classe" %}</label>
-          <div>{{ promotion.prochaine_classe.nom|default:"-" }}</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">{% trans "Prochain niveau" %}</label>
-          <div>{{ promotion.prochaine_niveau.nom|default:"-" }}</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">{% trans "Prochaine spécialité" %}</label>
-          <div>{{ promotion.prochaine_specialite.nom|default:"-" }}</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">{% trans "Décision personnalisée" %}</label>
-          <div>{{ promotion.decision_personnalisee.decision|default:"-" }}</div>
-        </div>
-      </div>
-    </div>
-
-    <hr>
-
-    <div class="mb-3">
-      <label class="form-label fw-bold">{% trans "Commentaire" %}</label>
-      <div>{{ promotion.commentaire|default:"-"|linebreaksbr }}</div>
-    </div>
-  </div>
-</div>
-
-<div class="card shadow-sm">
-  <div class="card-header">
-    <strong>{% trans "Traçabilité" %}</strong>
-  </div>
-  <div class="card-body">
-    <div class="row g-4">
-      <div class="col-md-4">
-        <label class="form-label fw-bold">{% trans "Évalué par" %}</label>
-        <div>{{ promotion.evalue_par.nom_complet|default:promotion.evalue_par.username|default:"-" }}</div>
-        <small class="text-muted">{{ promotion.date_evaluation|date:"d/m/Y H:i"|default:"-" }}</small>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label fw-bold">{% trans "Validé par" %}</label>
-        <div>{{ promotion.valide_par.nom_complet|default:promotion.valide_par.username|default:"-" }}</div>
-        <small class="text-muted">{{ promotion.date_validation|date:"d/m/Y H:i"|default:"-" }}</small>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label fw-bold">{% trans "Exécuté par" %}</label>
-        <div>{{ promotion.execute_par.nom_complet|default:promotion.execute_par.username|default:"-" }}</div>
-        <small class="text-muted">{{ promotion.date_execution|date:"d/m/Y H:i"|default:"-" }}</small>
-      </div>
-    </div>
-  </div>
-</div>
-
+</script>
 {% endblock %}

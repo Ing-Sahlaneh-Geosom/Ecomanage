@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <h3 class="fw-bold text-dark mb-3">{% trans "Supprimer un programme d'orientation" %}</h3>
+
+        <p class="mb-4">
+            {% blocktrans with code=obj.code %}Voulez-vous vraiment supprimer le programme {{ code }} ?{% endblocktrans %}
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">{% trans "Oui, supprimer" %}</button>
+            <a href="{% url 'programme_orientation_list' %}" class="btn btn-secondary">{% trans "Annuler" %}</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

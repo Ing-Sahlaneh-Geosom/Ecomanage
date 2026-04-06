@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">{% trans "Détail des voeux de l'élève" %}</h3>
+                <p class="text-muted mb-0">
+                    {% trans "Consultez les choix enregistrés pour cet élève dans la période d'orientation active." %}
+                </p>
+            </div>
+
+            <a href="javascript:history.back()" class="btn btn-secondary">
+                {% trans "Retour" %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Matricule" %}</div>
+                <div class="fw-semibold">{{ eleve.identifiant }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Nom" %}</div>
+                <div class="fw-semibold">{{ eleve.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Classe" %}</div>
+                <div class="fw-semibold">{{ eleve.classe.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Période active" %}</div>
+                <div class="fw-semibold">
+                    {{ orientation.date_debut|date:"Y-m-d" }} {% trans "à" %} {{ orientation.date_fin|date:"Y-m-d" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <h5 class="mb-3">{% trans "Liste des programmes proposés" %}</h5>
+
+        <div class="row">
+            {% for programme in programmes %}
+            <div class="col-md-6 col-xl-4 mb-3">
+                <div class="programme-box {% if programme.id in selected_ids %}selected-programme{% endif %}">
+                    <div class="fw-semibold mb-1">{{ programme.code }}</div>
+                    <div class="text-muted small">
+                        {{ programme.libelle|default:"-" }}
+                    </div>
+
+                    <div class="mt-2">
+                        {% if programme.id in selected_ids %}
+                            <span class="badge bg-success">{% trans "Choisi" %}</span>
+                        {% else %}
+                            <span class="badge bg-light text-dark border">{% trans "Non choisi" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.programme-box {
+    border: 1px solid #dcdcdc;
+    border-radius: 12px;
+    padding: 16px;
+    background: #f8f9fa;
+    height: 100%;
+}
+
+.selected-programme {
+    border-color: #198754;
+    background: #eefaf2;
+}
+</style>
+{% endblock %}

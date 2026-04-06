@@ -1168,14 +1168,14 @@ class PromotionEleve(models.Model):
         return f"{self.eleve} - {self.annee_scolaire} - {self.get_decision_finale_display()}"
 
     def save(self, *args, **kwargs):
-   
+        default_classe = None
+
         if not self.classe_actuelle_id and self.eleve_id and self.eleve.classe_id:
             self.classe_actuelle = self.eleve.classe
 
         if not self.niveau_actuel_id and self.classe_actuelle_id:
             self.niveau_actuel = self.classe_actuelle.niveau
 
-  
         if self.classe_actuelle_id and not self.prochaine_classe_id:
             from .promotion_utils import get_prochaine_classe_par_defaut
 
@@ -1188,26 +1188,23 @@ class PromotionEleve(models.Model):
         if default_classe:
             self.prochaine_classe = default_classe
 
-            # spécialité auto seulement si la classe existe vraiment
             if getattr(default_classe, "specialite_id", None):
                 self.prochaine_specialite = default_classe.specialite
             else:
                 self.prochaine_specialite = None
 
-        
         if self.prochaine_classe_id and self.prochaine_classe:
             self.prochaine_niveau = self.prochaine_classe.niveau
 
-            if getattr(self.prochaine_classe, "specialite_id", None):
-                self.prochaine_specialite = self.prochaine_classe.specialite
-            elif not self.prochaine_classe.a_specialite:
-                self.prochaine_specialite = None
+        if getattr(self.prochaine_classe, "specialite_id", None):
+            self.prochaine_specialite = self.prochaine_classe.specialite
+        elif not self.prochaine_classe.a_specialite:
+            self.prochaine_specialite = None
         else:
             self.prochaine_niveau = None
             self.prochaine_specialite = None
 
         super().save(*args, **kwargs)
-
 
     def calculer_total_absences(self):
         return Absence.objects.filter(
@@ -1853,3 +1850,363 @@ class Salle(models.Model):
     def __str__(self):
         return f"{self.nom} - {self.batiment} (étage {self.etage})"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+class ProgrammeOrientation(models.Model):
+    code = models.CharField(
+        max_length=30,
+        verbose_name=_("Code"),
+        help_text=_("Exemple : ES, S, L, GFM, OGRH, IAG")
+    )
+    libelle = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        verbose_name=_("Libellé")
+    )
+    ordre = models.PositiveIntegerField(
+        default=1,
+        verbose_name=_("Ordre")
+    )
+    actif = models.BooleanField(
+        default=True,
+        verbose_name=_("Actif")
+    )
+
+    ecole = models.ForeignKey(
+        "Ecole",
+        on_delete=models.CASCADE,
+        related_name="programmes_orientation",
+        verbose_name=_("École")
+    )
+
+    class Meta:
+        ordering = ["ordre", "code"]
+        verbose_name = _("Programme d'orientation")
+        verbose_name_plural = _("Programmes d'orientation")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ecole", "code"],
+                name="uniq_programme_orientation_ecole_code"
+            )
+        ]
+
+    def __str__(self):
+        if self.libelle:
+            return f"{self.code} - {self.libelle}"
+        return self.code
+
+    @property
+    def nom_affichage(self):
+        return self.code.strip().upper()
+    
+
+
+
+
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
+
+class OrientationScolaire(models.Model):
+    niveau = models.ForeignKey(
+        "Niveau",
+        on_delete=models.PROTECT,
+        related_name="orientations_scolaires",
+        verbose_name=_("Niveau")
+    )
+    programmes = models.ManyToManyField(
+        "ProgrammeOrientation",
+        related_name="orientations_scolaires",
+        blank=True,
+        verbose_name=_("Programmes")
+    )
+
+    date_debut = models.DateField(verbose_name=_("Date de début"))
+    date_fin = models.DateField(verbose_name=_("Date de fin"))
+
+    annee_scolaire = models.ForeignKey(
+        "AnneeScolaire",
+        on_delete=models.CASCADE,
+        verbose_name=_("Année scolaire")
+    )
+    ecole = models.ForeignKey(
+        "Ecole",
+        on_delete=models.CASCADE,
+        verbose_name=_("École")
+    )
+
+    actif = models.BooleanField(default=True, verbose_name=_("Actif"))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["niveau__ordre", "niveau__nom"]
+        verbose_name = _("Orientation scolaire")
+        verbose_name_plural = _("Orientations scolaires")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ecole", "annee_scolaire", "niveau"],
+                name="uniq_orientation_scolaire_ecole_annee_niveau"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.niveau} | {self.annee_scolaire}"
+
+    def clean(self):
+        if self.date_fin and self.date_debut and self.date_fin < self.date_debut:
+            raise ValidationError(_("La date de fin doit être supérieure ou égale à la date de début."))
+
+    @property
+    def periode_validite(self):
+        if self.date_debut and self.date_fin:
+            return f"{self.date_debut:%Y-%m-%d} à {self.date_fin:%Y-%m-%d}"
+        return ""
+
+    def programmes_affichage(self):
+        items = self.programmes.order_by("ordre", "code")
+        return [f"{idx}. {p.nom_affichage}" for idx, p in enumerate(items, start=1)]
+    
+
+
+
+from django.db import models
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+
+
+class VoeuOrientationEleve(models.Model):
+    eleve = models.ForeignKey(
+        "Eleve",
+        on_delete=models.CASCADE,
+        related_name="voeux_orientation",
+        verbose_name=_("Élève")
+    )
+    orientation = models.ForeignKey(
+        "OrientationScolaire",
+        on_delete=models.CASCADE,
+        related_name="voeux_eleves",
+        verbose_name=_("Orientation scolaire")
+    )
+
+    cree_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="voeux_orientation_crees",
+        verbose_name=_("Créé par")
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Vœu d'orientation élève")
+        verbose_name_plural = _("Vœux d'orientation élèves")
+        ordering = ["eleve__nom"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["eleve", "orientation"],
+                name="uniq_voeu_orientation_par_eleve_orientation"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.eleve} | {self.orientation}"
+
+
+class VoeuOrientationChoix(models.Model):
+    voeu = models.ForeignKey(
+        "VoeuOrientationEleve",
+        on_delete=models.CASCADE,
+        related_name="choix",
+        verbose_name=_("Vœu")
+    )
+    programme = models.ForeignKey(
+        "ProgrammeOrientation",
+        on_delete=models.CASCADE,
+        related_name="choix_voeux",
+        verbose_name=_("Programme")
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Choix de vœu")
+        verbose_name_plural = _("Choix de vœux")
+        ordering = ["programme__ordre", "programme__code"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["voeu", "programme"],
+                name="uniq_choix_par_voeu_programme"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.voeu.eleve} | {self.programme.code}"
+
+
+from django.db import models
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+
+
+class OrientationFinaleEleve(models.Model):
+    eleve = models.ForeignKey(
+        "Eleve",
+        on_delete=models.CASCADE,
+        related_name="orientations_finales",
+        verbose_name=_("Élève")
+    )
+    orientation = models.ForeignKey(
+        "OrientationScolaire",
+        on_delete=models.CASCADE,
+        related_name="orientations_finales_eleves",
+        verbose_name=_("Orientation scolaire")
+    )
+    programme_final = models.ForeignKey(
+        "ProgrammeOrientation",
+        on_delete=models.PROTECT,
+        related_name="orientations_finales",
+        verbose_name=_("Programme final")
+    )
+
+    remarque = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name=_("Remarque")
+    )
+
+    cree_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orientations_finales_creees",
+        verbose_name=_("Créé par")
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Orientation finale élève")
+        verbose_name_plural = _("Orientations finales élèves")
+        ordering = ["eleve__nom"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["eleve", "orientation"],
+                name="uniq_orientation_finale_par_eleve_orientation"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.eleve} -> {self.programme_final}"
+    
+
+
+
+
+from django.db import models
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+
+
+class DecisionFinaleEleve(models.Model):
+    eleve = models.ForeignKey(
+        "Eleve",
+        on_delete=models.CASCADE,
+        related_name="decisions_finales",
+        verbose_name=_("Élève")
+    )
+    orientation = models.ForeignKey(
+        "OrientationScolaire",
+        on_delete=models.CASCADE,
+        related_name="decisions_finales_eleves",
+        verbose_name=_("Orientation scolaire")
+    )
+    orientation_finale = models.ForeignKey(
+        "OrientationFinaleEleve",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="decisions_administratives",
+        verbose_name=_("Orientation finale")
+    )
+    decision = models.ForeignKey(
+        "DecisionPromotion",
+        on_delete=models.PROTECT,
+        related_name="decisions_eleves",
+        verbose_name=_("Décision")
+    )
+
+    moyenne_annuelle = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name=_("Moyenne annuelle")
+    )
+
+    remarque = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name=_("Remarque")
+    )
+
+    cree_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="decisions_finales_creees",
+        verbose_name=_("Créé par")
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Décision finale élève")
+        verbose_name_plural = _("Décisions finales élèves")
+        ordering = ["eleve__nom"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["eleve", "orientation"],
+                name="uniq_decision_finale_par_eleve_orientation"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.eleve} -> {self.decision}"

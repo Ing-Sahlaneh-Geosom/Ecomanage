@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import EleveDiplomeListView , PromouvoirElevesEnAttenteView , VoirElevesEnPromotionListView , PromotionsParClasseView , PromotionsParNiveauxView , ChangementClasseEleveView , AfficherDecisionFinaleView
 
 app_name = "promotion"
 
@@ -38,5 +39,40 @@ urlpatterns = [
         "promotion/<int:pk>/executer/",
         views.promotion_executer,
         name="promotion_executer"
+    ),
+    path(
+        "promotions/eleves-diplomes/",
+        EleveDiplomeListView.as_view(),
+        name="eleve_diplome_list",
+    ),
+    path(
+        "promotions/promouvoir-eleves-attente/",
+        PromouvoirElevesEnAttenteView.as_view(),
+        name="promouvoir_eleves_attente",
+    ),
+    path(
+        "promotions/voir-eleves-en-promotion/",
+        VoirElevesEnPromotionListView.as_view(),
+        name="voir_eleves_promotion",
+    ),
+    path(
+        "promotions/promotions-par-classe/",
+        PromotionsParClasseView.as_view(),
+        name="promotions_par_classe",
+    ),
+    path(
+        "promotions/promotions-par-niveaux/",
+        PromotionsParNiveauxView.as_view(),
+        name="promotions_par_niveaux",
+    ),
+    path(
+        "promotions/changement-classe-eleve/",
+        ChangementClasseEleveView.as_view(),
+        name="changement_classe_eleve",
+    ),
+    path(
+        "promotions/afficher-decision-finale/",
+        AfficherDecisionFinaleView.as_view(),
+        name="afficher_decision_finale",
     ),
 ]

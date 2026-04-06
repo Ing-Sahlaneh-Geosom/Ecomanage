@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<style>
+    .promo-level-page .page-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #1f2d3d;
+        margin-bottom: 1.1rem;
+    }
+
+    .promo-level-page .main-card {
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        background: #fff;
+    }
+
+    .promo-level-page .section-title {
+        font-size: 1.12rem;
+        font-weight: 700;
+        color: #243447;
+        margin-bottom: .8rem;
+        text-align: center;
+    }
+
+    .promo-level-page .form-label {
+        font-size: .92rem;
+        font-weight: 600;
+        color: #3b4958;
+        margin-bottom: .4rem;
+    }
+
+    .promo-level-page .form-select,
+    .promo-level-page .form-control {
+        height: 46px;
+        border-radius: 12px;
+        border: 1px solid #d8dee6;
+        font-size: .95rem;
+        box-shadow: none !important;
+    }
+
+    .promo-level-page .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .promo-level-page .toolbar-left {
+        font-size: 1rem;
+        color: #5d6b79;
+        font-weight: 500;
+    }
+
+    .promo-level-page .toolbar-right {
+        display: flex;
+        align-items: end;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .promo-level-page .search-box {
+        min-width: 280px;
+    }
+
+    .promo-level-page .btn-run {
+        border-radius: 12px;
+        padding: .78rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .promo-level-page .table-wrap {
+        border: 1px solid #edf1f5;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .promo-level-page .table {
+        margin-bottom: 0;
+    }
+
+    .promo-level-page .table thead th {
+        background: #fafbfd;
+        font-size: .9rem;
+        font-weight: 700;
+        color: #25313f;
+        border-bottom: 1px solid #e9edf2;
+        padding: 13px 12px;
+        white-space: nowrap;
+    }
+
+    .promo-level-page .table tbody td {
+        font-size: .92rem;
+        color: #334155;
+        padding: 13px 12px;
+        border-top: 1px solid #f1f4f7;
+        vertical-align: middle;
+    }
+
+    .promo-level-page .status-badge {
+        display: inline-block;
+        padding: .32rem .65rem;
+        border-radius: 999px;
+        font-size: .8rem;
+        font-weight: 600;
+    }
+
+    .promo-level-page .status-ready {
+        background: #e8f7ee;
+        color: #1f7a45;
+    }
+
+    .promo-level-page .status-waiting {
+        background: #fff3e6;
+        color: #ad6800;
+    }
+
+    .promo-level-page .status-done {
+        background: #e8f0ff;
+        color: #2457c5;
+    }
+
+    .promo-level-page .status-diploma {
+        background: #eef8ff;
+        color: #0b6aa2;
+    }
+
+    .promo-level-page .empty-row {
+        text-align: center;
+        color: #7a8794;
+        padding: 2rem 1rem !important;
+    }
+</style>
+
+<div class="container-fluid py-3 promo-level-page">
+
+    <div class="page-title">
+        {% trans "Promotions par niveaux" %}
+    </div>
+
+    <div class="card main-card">
+        <div class="card-body p-4 p-lg-5">
+
+            <!-- FILTRES -->
+            <form method="get" id="form-filtre">
+                <div class="row g-4 align-items-end mb-4">
+                    <div class="col-lg-6 col-md-6">
+                        <label class="form-label">
+                            {% trans "Année scolaire source" %} <span class="text-danger">*</span>
+                        </label>
+                        <select name="annee_source" class="form-select auto-submit">
+                            <option value="">{% trans "Sélectionner..." %}</option>
+                            {% for annee in annees %}
+                                <option value="{{ annee.id }}" {% if annee_source and annee_source.id == annee.id %}selected{% endif %}>
+                                    {{ annee.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6">
+                        <label class="form-label">
+                            {% trans "Niveau source" %} <span class="text-danger">*</span>
+                        </label>
+                        <select name="niveau_source" class="form-select auto-submit">
+                            <option value="">{% trans "Sélectionner..." %}</option>
+                            {% for niveau in niveaux %}
+                                <option value="{{ niveau.id }}" {% if niveau_source and niveau_source.id == niveau.id %}selected{% endif %}>
+                                    {{ niveau.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    {% trans "Promotion par niveau" %}
+                </div>
+
+                <div class="row g-4 align-items-end">
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">
+                            {% trans "Année scolaire suivante" %}
+                        </label>
+                        <select name="annee_cible" class="form-select auto-submit">
+                            <option value="">{% trans "Sélectionner..." %}</option>
+                            {% for annee in annees_cibles %}
+                                <option value="{{ annee.id }}" {% if annee_cible and annee_cible.id == annee.id %}selected{% endif %}>
+                                    {{ annee.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">
+                            {% trans "Niveau suivant" %}
+                        </label>
+                        <select name="niveau_cible" class="form-select auto-submit">
+                            <option value="">{% trans "Sélectionner..." %}</option>
+                            {% for niveau in niveaux_cibles %}
+                                <option value="{{ niveau.id }}" {% if niveau_cible and niveau_cible.id == niveau.id %}selected{% endif %}>
+                                    {{ niveau.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">
+                            {% trans "Date d'exécution" %}
+                        </label>
+                        <input type="date"
+                               name="date_execution"
+                               value="{{ selected_date_execution }}"
+                               class="form-control">
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">
+                            {% trans "Filtrer" %}
+                        </label>
+                        <button type="submit" class="btn btn-outline-secondary w-100" style="height:46px;">
+                            {% trans "Filtrer" %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- EXECUTION -->
+            <form method="post" id="form-execution">
+                {% csrf_token %}
+
+                <input type="hidden" name="annee_source" value="{% if annee_source %}{{ annee_source.id }}{% endif %}">
+                <input type="hidden" name="niveau_source" value="{% if niveau_source %}{{ niveau_source.id }}{% endif %}">
+                <input type="hidden" name="annee_cible" value="{% if annee_cible %}{{ annee_cible.id }}{% endif %}">
+                <input type="hidden" name="niveau_cible" value="{% if niveau_cible %}{{ niveau_cible.id }}{% endif %}">
+                <input type="hidden" name="date_execution" value="{{ selected_date_execution }}">
+                <input type="hidden" name="q" value="{{ selected_q }}">
+
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        {{ rows|length }} {% trans "élève(s) trouvé(s)" %}
+                    </div>
+
+                    <div class="toolbar-right">
+                        <div class="search-box">
+                            <label class="form-label mb-1">{% trans "Rechercher ici" %}</label>
+                            <input type="text"
+                                   form="form-filtre"
+                                   name="q"
+                                   value="{{ selected_q }}"
+                                   class="form-control"
+                                   placeholder="{% trans 'Rechercher ici' %}">
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary btn-run"
+                                onclick="return confirm('{% trans "Voulez-vous vraiment exécuter cette promotion ?" %}')">
+                            {% trans "Exécuter la promotion" %}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Matricule" %}</th>
+                                    <th>{% trans "Nom" %}</th>
+                                    <th>{% trans "Classe actuelle" %}</th>
+                                    <th>{% trans "Classe cible proposée" %}</th>
+                                    <th>{% trans "Moyenne" %}</th>
+                                    <th>{% trans "Statut" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in rows %}
+                                    <tr>
+                                        <td>{{ row.eleve.identifiant|default:row.eleve.id }}</td>
+                                        <td>{{ row.eleve.nom }}</td>
+                                        <td>{{ row.eleve.classe.nom|default:"-" }}</td>
+                                        <td>
+                                            {% if row.classe_cible_proposee %}
+                                                {{ row.classe_cible_proposee.nom }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ row.moyenne }}</td>
+                                        <td>
+                                            {% if row.status_code == "ready" %}
+                                                <span class="status-badge status-ready">{{ row.statut }}</span>
+                                            {% elif row.status_code == "done" %}
+                                                <span class="status-badge status-done">{{ row.statut }}</span>
+                                            {% elif row.status_code == "diploma" %}
+                                                <span class="status-badge status-diploma">{{ row.statut }}</span>
+                                            {% else %}
+                                                <span class="status-badge status-waiting">{{ row.statut }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="empty-row">
+                                            {% trans "Aucun enregistrement à afficher" %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".auto-submit").forEach(function (el) {
+        el.addEventListener("change", function () {
+            document.getElementById("form-filtre").submit();
+        });
+    });
+});
+</script>
+{% endblock %}

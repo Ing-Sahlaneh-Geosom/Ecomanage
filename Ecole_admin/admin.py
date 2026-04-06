@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Classe, Eleve, Matier, Note, Absence, Paiment, Message, Proffeseur, AnneeScolaire , Ecole , ProfesseurAbsence,  EmploiDuTemps ,EmploiDuTempsSoir , Specialite , Niveau , Ressource , TypePaiement , TarifPaiement , FraisEleve , PaiementFraisEleve , Violence
+from .models import User, Classe, Eleve, Matier, Note, Absence, Paiment, Message, Proffeseur, AnneeScolaire , Ecole , ProfesseurAbsence,  EmploiDuTemps ,EmploiDuTempsSoir , Specialite , Niveau , Ressource , TypePaiement , TarifPaiement , FraisEleve , PaiementFraisEleve , Violence , PromotionEleve , ProgrammeOrientation
 
 
 @admin.register(User)
@@ -81,7 +81,7 @@ class ClasseAdmin(admin.ModelAdmin):
 class EleveAdmin(admin.ModelAdmin):
     list_display = ('identifiant' , 'nom', 'classe', 'user' ,'date_naissancce' , 'ecole' , 'status','annee_scolaire')
     exclude = ['annee_scolaire']
-    list_filter = ('classe',)
+    list_filter = ('classe','annee_scolaire')
     search_fields = ('nom',)
 
 @admin.register(Matier)
@@ -186,3 +186,14 @@ class ViolenceAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     
 
+@admin.register(PromotionEleve)
+class PromotionEleveAdmin(admin.ModelAdmin):
+    list_display = ('eleve','niveau_actuel','classe_actuelle','decision_finale','decision_personnalisee','etat','prochaine_niveau','prochaine_classe','prochaine_specialite','evalue_par','valide_par','execute_par','est_diplome','est_traite',)
+    list_filter = ('created_at',)
+    list_editable = ('est_diplome','est_traite',)
+    
+@admin.register(ProgrammeOrientation)
+class ProgrammeOrientationAdmin(admin.ModelAdmin):
+    list_display = ('code','libelle','ordre','actif')
+    list_filter = ('ecole',)
+    

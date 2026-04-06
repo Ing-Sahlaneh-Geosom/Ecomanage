@@ -2,7 +2,7 @@ import json
 from datetime import datetime, date
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Q
 from django.db.models.functions import ExtractMonth
 from django.shortcuts import render
 
@@ -201,6 +201,19 @@ def page_acceuil(request):
         utilisateurs = User.objects.filter(ecole=ecole)
         classes = Classe.objects.filter(ecole=ecole, actif=True)
         niveaux = Niveau.objects.filter(ecole=ecole, actif=True)
+
+        effectif_par_classe_qs = (
+            Classe.objects.filter(ecole=ecole, actif=True)
+            .annotate(
+                total_eleves=Count(
+                    "eleves",
+                    filter=Q(eleves__annee_scolaire=annee_scolaire, eleves__ecole=ecole),
+                )
+            )
+            .order_by("-total_eleves", "nom")[:10]
+        )
+        classes_labels = [item.nom for item in effectif_par_classe_qs]
+        classes_effectifs = [item.total_eleves for item in effectif_par_classe_qs]
         professeurs = Proffeseur.objects.filter(ecole=ecole, actif=True)
         employes = Employe.objects.filter(ecole=ecole, statut="active")
         batiments = Batiment.objects.filter(ecole=ecole, actif=True)
@@ -283,6 +296,8 @@ def page_acceuil(request):
             "total_abs_employes": total_abs_employes,
             "total_batiments": batiments.count(),
             "total_salles": salles.count(),
+            "classes_labels": json.dumps(classes_labels, ensure_ascii=False),
+            "classes_effectifs": json.dumps(classes_effectifs),
         }
         return render(request, "home_page.html", context)
 
@@ -290,6 +305,7 @@ def page_acceuil(request):
     # ✅ DEFAULT
     # =========================
     return render(request, "home_page.html", {"mode": "user"})
+
 
 
 # from django.http import HttpResponse

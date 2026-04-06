@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'Administration',
     'Rapports',
     'Promotions',
+    'Orientation',
 
 ]
 

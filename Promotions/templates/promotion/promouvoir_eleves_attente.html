@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="container-fluid py-3">
+
+    <div class="mb-4">
+        <h4 class="fw-bold text-uppercase text-dark mb-0">
+            {% trans "Promouvoir les élèves en attente" %}
+        </h4>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="text-muted">
+                    {{ promotions|length }} {% trans "élève(s) à traiter" %}
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-dark" id="btn-tout-selectionner">
+                        {% trans "Tout sélectionner" %}
+                    </button>
+                    <button type="submit"
+                            form="form-promotions"
+                            class="btn btn-success"
+                            onclick="return confirm('{% trans "Voulez-vous vraiment exécuter les promotions sélectionnées ?" %}')">
+                        {% trans "Exécuter la promotion" %}
+                    </button>
+                </div>
+            </div>
+
+            <form method="post" id="form-promotions">
+                {% csrf_token %}
+
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">
+                                    <input type="checkbox" id="check-all">
+                                </th>
+                                <th>{% trans "ID" %}</th>
+                                <th>{% trans "Nom" %}</th>
+                                <th>{% trans "La liste des classes" %}</th>
+                                <th>{% trans "Prochaine classe" %}</th>
+                                <th>{% trans "Sexe" %}</th>
+                                <th>{% trans "Date de naissance" %}</th>
+                                <th>{% trans "Décision" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in promotions %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox"
+                                               name="promotion_ids"
+                                               value="{{ item.id }}"
+                                               class="row-check">
+                                    </td>
+
+                                    <td>{{ item.eleve.identifiant|default:item.eleve.id }}</td>
+                                    <td>{{ item.eleve.nom }}</td>
+                                    <td>{{ item.classe_actuelle.nom|default:"-" }}</td>
+
+                                    <td>
+                                        {% if item.est_diplome %}
+                                            <span class="badge bg-success-subtle text-dark border">
+                                                {% trans "Diplômé" %}
+                                            </span>
+                                        {% else %}
+                                            {{ item.prochaine_classe.nom|default:"-" }}
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if item.eleve.Sexe == "M" %}
+                                            {% trans "Masculin" %}
+                                        {% elif item.eleve.Sexe == "F" %}
+                                            {% trans "Féminin" %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ item.eleve.date_naissancce|date:"d/m/Y" }}
+                                    </td>
+
+                                    <td>
+                                        {% if item.decision_personnalisee %}
+                                            {{ item.decision_personnalisee.decision }}
+                                        {% else %}
+                                            {{ item.get_decision_finale_display }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-5 text-muted">
+                                        {% trans "Il n'y a aucun enregistrement à afficher" %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    document.addEventListener("DOMContentLoaded", function () {
+    const checkAll = document.getElementById("check-all");
+    const rowChecks = document.querySelectorAll(".row-check");
+    const btnToutSelectionner = document.getElementById("btn-tout-selectionner");
+
+    function toggleAll(checked) {
+        rowChecks.forEach(function (checkbox) {
+            checkbox.checked = checked;
+        });
+        if (checkAll) {
+            checkAll.checked = checked;
+        }
+    }
+
+    if (checkAll) {
+        checkAll.addEventListener("change", function () {
+            toggleAll(this.checked);
+        });
+    }
+
+    if (btnToutSelectionner) {
+        btnToutSelectionner.addEventListener("click", function () {
+            const tousCoches = Array.from(rowChecks).every(function (checkbox) {
+                return checkbox.checked;
+            });
+            toggleAll(!tousCoches);
+        });
+    }
+});
+</script>
+{% endblock %}

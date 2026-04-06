@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="mb-4">
+            <h3 class="fw-bold text-dark mb-1">{% trans "Suivi des voeux des élèves" %}</h3>
+            <p class="text-muted mb-0">
+                {% trans "Filtrez une classe puis consultez rapidement les choix déjà enregistrés pour chaque élève." %}
+            </p>
+        </div>
+
+        <form method="get" id="filter-form">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{% trans "Année scolaire" %}</label>
+                    {{ form.annee_scolaire }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{% trans "Niveau concerné" %}</label>
+                    {{ form.niveau }}
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">{% trans "Classe" %}</label>
+                    {{ form.classe }}
+                </div>
+
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success w-100">
+                        {% trans "Afficher" %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if orientation and rows %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body py-3">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Année scolaire" %}</div>
+                <div class="fw-semibold">{{ annee_scolaire.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Niveau concerné" %}</div>
+                <div class="fw-semibold">{{ niveau.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Classe" %}</div>
+                <div class="fw-semibold">{{ classe.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Période active" %}</div>
+                <div class="fw-semibold">
+                    {{ orientation.date_debut|date:"Y-m-d" }} {% trans "à" %} {{ orientation.date_fin|date:"Y-m-d" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for row in rows %}
+    <div class="col-md-6 col-xl-4 mb-4">
+        <div class="card border-0 shadow-sm h-100 voeu-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="small text-muted">{% trans "Matricule" %}</div>
+                        <div class="fw-semibold">{{ row.eleve.identifiant }}</div>
+                    </div>
+
+                    {% if row.a_voeux %}
+                        <span class="badge bg-success">{% trans "Déjà renseigné" %}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{% trans "Pas encore saisi" %}</span>
+                    {% endif %}
+                </div>
+
+                <h5 class="mb-2 text-dark">{{ row.eleve.nom }}</h5>
+                <div class="small text-muted mb-3">
+                    {% trans "Sexe" %} : {{ row.eleve.Sexe }}
+                </div>
+
+                <div class="small text-muted mb-2">{% trans "Choix enregistrés" %}</div>
+
+                {% if row.choix_codes %}
+                    <div class="choice-badges mb-3">
+                        {% for code in row.choix_codes %}
+                            <span class="choice-badge">{{ code }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted mb-3">
+                        {% trans "Aucun voeu enregistré" %}
+                    </div>
+                {% endif %}
+
+                <a href="{% url 'voeu_eleve_detail' row.eleve.id orientation.id %}" class="btn btn-outline-primary btn-sm">
+                    {% trans "Consulter le détail" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% elif form.is_bound %}
+<div class="alert alert-warning">
+    {% trans "Aucune donnée de voeux n'a été trouvée pour cette sélection." %}
+</div>
+{% endif %}
+
+<style>
+.voeu-card {
+    border-radius: 14px;
+}
+
+.choice-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.choice-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #f3f4f6;
+    border: 1px solid #dcdcdc;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 13px;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const anneeSelect = document.getElementById("id_annee_scolaire");
+    const niveauSelect = document.getElementById("id_niveau");
+    const classeSelect = document.getElementById("id_classe");
+
+    const currentNiveau = "{{ form.niveau.value|default:'' }}";
+    const currentClasse = "{{ form.classe.value|default:'' }}";
+
+    function resetSelect(selectElement, placeholder) {
+        selectElement.innerHTML = "";
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = placeholder;
+        selectElement.appendChild(option);
+    }
+
+    function loadNiveaux(anneeId, selectedValue = "") {
+        resetSelect(niveauSelect, "---------");
+        resetSelect(classeSelect, "---------");
+
+        if (!anneeId) return;
+
+        fetch("{% url 'ajax_niveaux_orientation' %}?annee_scolaire=" + anneeId)
+            .then(response => response.json())
+            .then(data => {
+                data.results.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.nom;
+                    if (selectedValue && selectedValue == item.id) {
+                        option.selected = true;
+                    }
+                    niveauSelect.appendChild(option);
+                });
+
+                if (selectedValue) {
+                    loadClasses(selectedValue, currentClasse);
+                }
+            });
+    }
+
+    function loadClasses(niveauId, selectedValue = "") {
+        resetSelect(classeSelect, "---------");
+
+        if (!niveauId) return;
+
+        fetch("{% url 'ajax_classes_par_niveau' %}?niveau=" + niveauId)
+            .then(response => response.json())
+            .then(data => {
+                data.results.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.nom;
+                    if (selectedValue && selectedValue == item.id) {
+                        option.selected = true;
+                    }
+                    classeSelect.appendChild(option);
+                });
+            });
+    }
+
+    anneeSelect.addEventListener("change", function () {
+        loadNiveaux(this.value);
+    });
+
+    niveauSelect.addEventListener("change", function () {
+        loadClasses(this.value);
+    });
+
+    if (anneeSelect.value) {
+        loadNiveaux(anneeSelect.value, currentNiveau);
+    }
+});
+</script>
+{% endblock %}

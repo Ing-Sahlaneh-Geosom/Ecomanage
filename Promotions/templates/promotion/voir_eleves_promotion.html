@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="container-fluid py-3">
+
+    <div class="mb-4">
+        <h4 class="fw-bold text-uppercase text-dark mb-0">
+            {% trans "Voir les élèves en promotion" %}
+        </h4>
+        <div class="text-muted mt-1">
+            {% trans "Suivi global des promotions" %}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+
+            <form method="get" class="row g-3 align-items-end mb-4">
+                <div class="col-md-3">
+                    <label class="form-label">{% trans "Rechercher" %}</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ selected_q }}"
+                        class="form-control"
+                        placeholder="{% trans 'Rechercher un élève...' %}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">{% trans "Niveau" %}</label>
+                    <select name="niveau" class="form-select">
+                        <option value="">{% trans "Tous les niveaux" %}</option>
+                        {% for niveau in niveaux %}
+                            <option value="{{ niveau.id }}" {% if selected_niveau == niveau.id|stringformat:"s" %}selected{% endif %}>
+                                {{ niveau.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">{% trans "Classe" %}</label>
+                    <select name="classe" class="form-select">
+                        <option value="">{% trans "Toutes les classes" %}</option>
+                        {% for classe in classes %}
+                            <option value="{{ classe.id }}" {% if selected_classe == classe.id|stringformat:"s" %}selected{% endif %}>
+                                {{ classe.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">{% trans "Année scolaire" %}</label>
+                    <select name="annee_scolaire" class="form-select">
+                        <option value="">{% trans "Toutes les années" %}</option>
+                        {% for annee in annees_scolaires %}
+                            <option value="{{ annee.id }}" {% if selected_annee == annee.id|stringformat:"s" %}selected{% endif %}>
+                                {{ annee.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">{% trans "État" %}</label>
+                    <select name="etat" class="form-select">
+                        <option value="">{% trans "Tous les états" %}</option>
+                        {% for value, label in etat_choices %}
+                            <option value="{{ value }}" {% if selected_etat == value|stringformat:"s" %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success w-100">
+                        {% trans "Filtrer" %}
+                    </button>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Matricule" %}</th>
+                            <th>{% trans "Nom" %}</th>
+                            <th>{% trans "Niveau actuel" %}</th>
+                            <th>{% trans "Classe actuelle" %}</th>
+                            <th>{% trans "Prochaine classe" %}</th>
+                            <th>{% trans "Décision finale" %}</th>
+                            <th>{% trans "État" %}</th>
+                            <th>{% trans "Diplômé" %}</th>
+                            <th>{% trans "Traité" %}</th>
+                            <th>{% trans "Date de validation" %}</th>
+                            <th>{% trans "Date d'exécution" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in promotions %}
+                            <tr>
+                                <td>{{ item.eleve.identifiant|default:item.eleve.id }}</td>
+                                <td>{{ item.eleve.nom }}</td>
+                                <td>{{ item.niveau_actuel.nom|default:"-" }}</td>
+                                <td>{{ item.classe_actuelle.nom|default:"-" }}</td>
+                                <td>{{ item.prochaine_classe.nom|default:"-" }}</td>
+
+                                <td>
+                                    {% if item.decision_personnalisee %}
+                                        {{ item.decision_personnalisee.decision }}
+                                    {% else %}
+                                        {{ item.get_decision_finale_display }}
+                                    {% endif %}
+                                </td>
+
+                                <td>{{ item.get_etat_display }}</td>
+
+                                <td>
+                                    {% if item.est_diplome %}
+                                        {% trans "Oui" %}
+                                    {% else %}
+                                        {% trans "Non" %}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.est_traite %}
+                                        {% trans "Oui" %}
+                                    {% else %}
+                                        {% trans "Non" %}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.date_validation %}
+                                        {{ item.date_validation|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.date_execution %}
+                                        {{ item.date_execution|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="11" class="text-center py-5 text-muted">
+                                    {% trans "Il n'y a aucun enregistrement à afficher" %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <nav class="mt-4">
+                    <ul class="pagination mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.previous_page_number }}&q={{ selected_q }}&niveau={{ selected_niveau }}&classe={{ selected_classe }}&annee_scolaire={{ selected_annee }}&etat={{ selected_etat }}">
+                                    {% trans "Précédent" %}
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.next_page_number }}&q={{ selected_q }}&niveau={{ selected_niveau }}&classe={{ selected_classe }}&annee_scolaire={{ selected_annee }}&etat={{ selected_etat }}">
+                                    {% trans "Suivant" %}
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

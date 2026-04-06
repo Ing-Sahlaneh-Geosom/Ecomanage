@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="container-fluid py-3">
+
+    <div class="mb-3">
+        <h4 class="fw-bold text-uppercase mb-0">{% trans "PROMOTIONS" %}</h4>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-end mb-4">
+                <a href="{% url 'promotion:promotion_liste_attente' %}" class="btn btn-dark px-4 py-2 rounded-3">
+                    {% trans "Élèves sans décision" %}
+                    <span class="ms-2">→</span>
+                </a>
+            </div>
+
+            <form method="get" class="row g-3 align-items-end mb-4">
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">
+                        {% trans "Niveau" %} <span class="text-danger">*</span>
+                    </label>
+                    <select name="niveau" class="form-select form-select-lg">
+                        <option value="">{% trans "Sélectionner..." %}</option>
+                        {% for niveau in niveaux %}
+                            <option value="{{ niveau.id }}" {% if selected_niveau == niveau.id|stringformat:"s" %}selected{% endif %}>
+                                {{ niveau.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">
+                        {% trans "Année scolaire" %} <span class="text-danger">*</span>
+                    </label>
+                    <select name="annee_scolaire" class="form-select form-select-lg">
+                        <option value="">{% trans "Sélectionner..." %}</option>
+                        {% for annee in annees_scolaires %}
+                            <option value="{{ annee.id }}" {% if selected_annee == annee.id|stringformat:"s" %}selected{% endif %}>
+                                {{ annee.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success w-100 btn-lg rounded-3">
+                        {% trans "Filtrer" %}
+                    </button>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr class="text-dark">
+                            <th class="fw-bold">{% trans "Matricule" %}</th>
+                            <th class="fw-bold">{% trans "Nom" %}</th>
+                            <th class="fw-bold">{% trans "Niveau" %}</th>
+                            <th class="fw-bold">{% trans "La liste des classes" %}</th>
+                            <th class="fw-bold">{% trans "Année scolaire" %}</th>
+                            <th class="fw-bold">{% trans "Decision" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in promotions %}
+                            <tr>
+                                <td>{{ item.eleve.identifiant|default:"-" }}</td>
+                                <td>{{ item.eleve.nom }}</td>
+                                <td>{{ item.niveau_actuel.nom|default:"-" }}</td>
+                                <td>{{ item.classe_actuelle.nom|default:"-" }}</td>
+                                <td>{{ item.annee_scolaire.nom }}</td>
+                                <td>
+                                    {% if item.decision_personnalisee %}
+                                        <span class="badge bg-success-subtle text-dark border">
+                                            {{ item.decision_personnalisee.decision }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-success-subtle text-dark border">
+                                            {{ item.get_decision_finale_display }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    {% trans "There are no records to display" %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <nav class="mt-4">
+                    <ul class="pagination mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.previous_page_number }}&niveau={{ selected_niveau }}&annee_scolaire={{ selected_annee }}">
+                                    {% trans "Précédent" %}
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.next_page_number }}&niveau={{ selected_niveau }}&annee_scolaire={{ selected_annee }}">
+                                    {% trans "Suivant" %}
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

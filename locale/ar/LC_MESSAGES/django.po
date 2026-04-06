@@ -2841,3 +2841,291 @@ msgstr "لا توجد أي غيابات مسجلة."
 
 msgid "Étudiants"
 msgstr "الطلاب"
+
+
+msgid "Decision"
+msgstr "القرار"
+
+msgid "There are no records to display"
+msgstr "لا توجد سجلات للعرض"
+
+msgid "PROMOTIONS"
+msgstr "الترقيات"
+
+msgid "Élèves sans décision"
+msgstr "الطلاب بدون قرار"
+
+msgid "Suivi global des promotions"
+msgstr "المتابعة العامة للترقيات"
+
+msgid "Rechercher un élève..."
+msgstr "ابحث عن طالب..."
+
+msgid "Tous les états"
+msgstr "جميع الحالات"
+
+msgid "Toutes les années"
+msgstr "جميع السنوات"
+
+msgid "État"
+msgstr "الحالة"
+
+msgid "Niveau actuel"
+msgstr "المستوى الحالي"
+
+msgid "Classe actuelle"
+msgstr "القسم الحالي"
+
+msgid "Prochaine classe"
+msgstr "القسم القادم"
+
+msgid "Décision finale"
+msgstr "القرار النهائي"
+
+
+msgid "Traité"
+msgstr "تمت المعالجة"
+
+msgid "Date de validation"
+msgstr "تاريخ الاعتماد"
+
+msgid "Date d'exécution"
+msgstr "تاريخ التنفيذ"
+
+msgid "Il n'y a aucun enregistrement à afficher"
+msgstr "لا توجد أي سجلات للعرض"
+
+msgid "Promotions par classes"
+msgstr "الترقيات حسب الأقسام"
+
+msgid "Année scolaire source"
+msgstr "السنة الدراسية المصدر"
+
+msgid "Niveau source"
+msgstr "المستوى المصدر"
+
+msgid "Classe source"
+msgstr "القسم المصدر"
+
+msgid "Bloc destination"
+msgstr "قسم الوجهة"
+
+msgid "Année scolaire suivante"
+msgstr "السنة الدراسية التالية"
+
+msgid "Niveau suivant"
+msgstr "المستوى التالي"
+
+msgid "Classe cible"
+msgstr "القسم الهدف"
+
+msgid "Forcer"
+msgstr "فرض"
+
+msgid "élève(s) trouvé(s)"
+msgstr "عدد الطلاب الموجودين"
+
+msgid "Exécuter la promotion"
+msgstr "تنفيذ الترقية"
+
+msgid "Voulez-vous vraiment exécuter cette promotion ?"
+msgstr "هل تريد فعلاً تنفيذ هذه الترقية؟"
+
+msgid "Veuillez sélectionner l'année, le niveau et la classe source."
+msgstr "يرجى اختيار السنة والمستوى والقسم المصدر."
+
+msgid "Veuillez sélectionner l'année cible et la classe cible."
+msgstr "يرجى اختيار السنة الدراسية الهدف والقسم الهدف."
+
+msgid "Veuillez sélectionner au moins un élève."
+msgstr "يرجى اختيار طالب واحد على الأقل."
+
+msgid "La promotion par classe a été exécutée avec succès pour les élèves sélectionnés."
+msgstr "تم تنفيذ الترقية حسب القسم بنجاح للطلاب المحددين."
+
+msgid "Certains élèves ont été ignorés, car ils étaient déjà traités."
+msgstr "تم تجاهل بعض الطلاب لأنهم كانوا قد عولجوا مسبقًا."
+
+msgid "Prêt"
+msgstr "جاهز"
+
+msgid "En attente"
+msgstr "قيد الانتظار"
+
+msgid "Déjà traité"
+msgstr "تمت معالجته مسبقاً"
+
+msgid "Diplômé"
+msgstr "متخرج"
+
+msgid "Année scolaire active"
+msgstr "السنة الدراسية النشطة"
+
+msgid "De la classe"
+msgstr "من القسم"
+
+msgid "À la classe"
+msgstr "إلى القسم"
+
+msgid "Veuillez sélectionner le niveau, la classe source et la classe cible."
+msgstr "يرجى اختيار المستوى والقسم المصدر والقسم الهدف."
+
+msgid "La classe cible doit être différente de la classe source."
+msgstr "يجب أن يكون القسم الهدف مختلفًا عن القسم المصدر."
+
+msgid "Le changement de classe a été effectué avec succès."
+msgstr "تم تغيير القسم بنجاح."
+
+
+
+
+
+
+msgid "Programme d'orientation"
+msgstr "برنامج التوجيه"
+
+msgid "Programmes d'orientation"
+msgstr "برامج التوجيه"
+
+msgid "Exemple : ES, S, L, GFM, OGRH, IAG"
+msgstr "مثال: ES, S, L, GFM, OGRH, IAG"
+
+msgid "Le code est obligatoire."
+msgstr "الرمز إجباري."
+
+msgid "Le programme d'orientation a été ajouté avec succès."
+msgstr "تمت إضافة برنامج التوجيه بنجاح."
+
+msgid "Le programme d'orientation a été modifié avec succès."
+msgstr "تم تعديل برنامج التوجيه بنجاح."
+
+msgid "Le programme d'orientation a été supprimé avec succès."
+msgstr "تم حذف برنامج التوجيه بنجاح."
+
+msgid "Gérez la liste des programmes utilisés dans l'orientation scolaire."
+msgstr "قم بإدارة قائمة البرامج المستعملة في التوجيه المدرسي."
+
+msgid "Aucun programme d'orientation enregistré."
+msgstr "لا يوجد أي برنامج توجيه مسجل."
+
+msgid "Renseignez le code, le libellé, l'ordre et l'état du programme."
+msgstr "أدخل الرمز، التسمية، الترتيب، وحالة البرنامج."
+
+msgid "Ajouter un programme d'orientation"
+msgstr "إضافة برنامج توجيه"
+
+msgid "Modifier un programme d'orientation"
+msgstr "تعديل برنامج توجيه"
+
+msgid "Supprimer un programme d'orientation"
+msgstr "حذف برنامج توجيه"
+
+msgid "Voulez-vous vraiment supprimer le programme %(code)s ?"
+msgstr "هل تريد فعلا حذف البرنامج %(code)s؟"
+
+
+
+
+msgid "Programmes"
+msgstr "البرامج"
+
+msgid "Orientations scolaires"
+msgstr "التوجيهات المدرسية"
+
+
+
+
+msgid "Fiche de voeux"
+msgstr "استمارة الرغبات"
+
+msgid "Affichez et imprimez les fiches de voeux vierges des élèves."
+msgstr "اعرض واطبع استمارات الرغبات الفارغة الخاصة بالتلاميذ."
+
+msgid "Saisie des préférences d'orientation"
+msgstr "إدخال تفضيلات التوجيه"
+
+msgid "Sélectionnez le contexte scolaire, chargez les élèves, puis cochez les filières retenues pour chacun."
+msgstr "اختر السياق الدراسي، ثم قم بتحميل التلاميذ، وبعد ذلك ضع علامة على المسارات المعتمدة لكل تلميذ."
+
+msgid "Niveau concerné"
+msgstr "المستوى المعني"
+
+msgid "Charger"
+msgstr "تحميل"
+
+msgid "Suivi des voeux des élèves"
+msgstr "متابعة رغبات التلاميذ"
+
+msgid "Filtrez une classe puis consultez rapidement les choix déjà enregistrés pour chaque élève."
+msgstr "قم بتصفية قسم معين ثم اطلع بسرعة على الاختيارات المسجلة لكل تلميذ."
+
+msgid "Déjà renseigné"
+msgstr "تم إدخاله"
+
+msgid "Pas encore saisi"
+msgstr "لم يتم إدخاله بعد"
+
+msgid "Choix enregistrés"
+msgstr "الاختيارات المسجلة"
+
+msgid "Aucun voeu enregistré"
+msgstr "لا توجد رغبات مسجلة"
+
+msgid "Consulter le détail"
+msgstr "عرض التفاصيل"
+
+msgid "Aucune donnée de voeux n'a été trouvée pour cette sélection."
+msgstr "لم يتم العثور على أي بيانات رغبات لهذا الاختيار."
+
+msgid "Détail des voeux de l'élève"
+msgstr "تفاصيل رغبات التلميذ"
+
+msgid "Consultez les choix enregistrés pour cet élève dans la période d'orientation active."
+msgstr "اطلع على الاختيارات المسجلة لهذا التلميذ خلال فترة التوجيه النشطة."
+
+msgid "Liste des programmes proposés"
+msgstr "قائمة البرامج المقترحة"
+
+msgid "Choisi"
+msgstr "تم اختياره"
+
+msgid "Non choisi"
+msgstr "غير مختار"
+
+msgid "Rapport d'orientation"
+msgstr "تقرير التوجيه"
+
+msgid "Consultez la répartition des orientations finales par classe et par filière."
+msgstr "اطلع على توزيع التوجيهات النهائية حسب القسم والشعبة."
+
+msgid "Effectif total"
+msgstr "إجمالي العدد"
+
+msgid "Total orientés"
+msgstr "إجمالي الموجهين"
+
+msgid "Non orientés"
+msgstr "غير الموجهين"
+
+msgid "Période d'orientation"
+msgstr "فترة التوجيه"
+
+msgid "Filière"
+msgstr "الشعبة"
+
+
+
+msgid "Aucune donnée d'orientation finale n'a été trouvée pour cette sélection."
+msgstr "لم يتم العثور على أي بيانات توجيه نهائي لهذا الاختيار."
+
+msgid "Consultez le rapport final des choix des élèves et des décisions de l'administration, puis exportez-le en Excel."
+msgstr "اعرض التقرير النهائي لاختيارات التلاميذ وقرارات الإدارة، ثم قم بتصديره إلى Excel."
+
+msgid "Avec choix saisi"
+msgstr "مع اختيار مسجل"
+
+msgid "Avec décision administrative"
+msgstr "مع قرار إداري"
+
+msgid "Aucune donnée finale n'a été trouvée pour cette sélection."
+msgstr "لم يتم العثور على أي بيانات نهائية لهذا الاختيار."

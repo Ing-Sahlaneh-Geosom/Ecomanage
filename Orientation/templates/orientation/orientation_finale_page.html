@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="mb-4">
+            <h3 class="fw-bold text-dark mb-1">{% trans "Orientation finale" %}</h3>
+            <p class="text-muted mb-0">
+                {% trans "Chargez une classe, consultez les moyennes générales par période, puis attribuez la filière finale de chaque élève." %}
+            </p>
+        </div>
+
+        <form method="get" id="filter-form">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{% trans "Année scolaire" %}</label>
+                    {{ form.annee_scolaire }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{% trans "Niveau concerné" %}</label>
+                    {{ form.niveau }}
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">{% trans "Classe" %}</label>
+                    {{ form.classe }}
+                </div>
+
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success w-100">
+                        {% trans "Charger" %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if orientation and rows %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body py-3">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Année scolaire" %}</div>
+                <div class="fw-semibold">{{ annee_scolaire.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Niveau concerné" %}</div>
+                <div class="fw-semibold">{{ niveau.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Classe" %}</div>
+                <div class="fw-semibold">{{ classe.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Période d'orientation" %}</div>
+                <div class="fw-semibold">
+                    {{ orientation.date_debut|date:"Y-m-d" }} {% trans "à" %} {{ orientation.date_fin|date:"Y-m-d" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="annee_scolaire" value="{{ annee_scolaire.id }}">
+    <input type="hidden" name="niveau" value="{{ niveau.id }}">
+    <input type="hidden" name="classe" value="{{ classe.id }}">
+
+    <div class="row">
+        {% for row in rows %}
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 student-final-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <div class="small text-muted">{% trans "Matricule" %}</div>
+                            <div class="fw-semibold">{{ row.eleve.identifiant }}</div>
+                            <h5 class="mt-2 mb-0 text-dark">{{ row.eleve.nom }}</h5>
+                        </div>
+
+                        {% if row.finale %}
+                            <span class="badge bg-success">{% trans "Déjà orienté" %}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{% trans "En attente" %}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="small text-muted mb-2">{% trans "Moyennes générales par période" %}</div>
+                        <div class="period-wrap">
+                            {% for item in row.moyennes %}
+                            <div class="period-box">
+                                <div class="period-name">{{ item.periode.nom }}</div>
+                                <div class="period-value">
+                                    {% if item.moyenne is not None %}
+                                        {{ item.moyenne }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted mb-2">{% trans "Moyenne annuelle globale" %}</div>
+                        <div class="annual-box">
+                            {% if row.moyenne_annuelle is not None %}
+                                {{ row.moyenne_annuelle }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="small text-muted mb-2">{% trans "Voeux enregistrés" %}</div>
+                        {% if row.choix_codes %}
+                            <div class="wish-wrap">
+                                {% for code in row.choix_codes %}
+                                    <span class="wish-badge">{{ code }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-muted">{% trans "Aucun voeu enregistré" %}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{% trans "Filière retenue" %}</label>
+                        <select class="form-select" name="programme_final_{{ row.eleve.id }}">
+                            <option value="">{% trans "Choisir une filière" %}</option>
+                            {% for programme in programmes %}
+                            <option value="{{ programme.id }}"
+                                {% if row.finale and row.finale.programme_final_id == programme.id %}selected{% endif %}>
+                                {{ programme.code }}{% if programme.libelle %} - {{ programme.libelle }}{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label fw-semibold">{% trans "Observation" %}</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="remarque_{{ row.eleve.id }}"
+                            value="{% if row.finale %}{{ row.finale.remarque }}{% endif %}"
+                            placeholder="{% trans 'Ajouter une remarque si nécessaire' %}"
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">
+            {% trans "Enregistrer l'orientation finale" %}
+        </button>
+    </div>
+</form>
+
+{% elif form.is_bound %}
+<div class="alert alert-warning">
+    {% trans "Aucune orientation active ou aucun élève n'a été trouvé pour cette sélection." %}
+</div>
+{% endif %}
+
+<style>
+.student-final-card {
+    border-radius: 16px;
+}
+
+.period-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.period-box {
+    min-width: 120px;
+    padding: 10px 12px;
+    border: 1px solid #dcdcdc;
+    border-radius: 12px;
+    background: #f8f9fa;
+}
+
+.period-name {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.period-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.wish-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.wish-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #dcdcdc;
+    background: #eef2ff;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.annual-box {
+    display: inline-block;
+    min-width: 120px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #ecfdf3;
+    border: 1px solid #cce8d7;
+    font-size: 20px;
+    font-weight: 700;
+    color: #166534;
+}
+</style>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const anneeSelect = document.getElementById("id_annee_scolaire");
+    const niveauSelect = document.getElementById("id_niveau");
+    const classeSelect = document.getElementById("id_classe");
+
+    const currentNiveau = "{{ form.niveau.value|default:'' }}";
+    const currentClasse = "{{ form.classe.value|default:'' }}";
+
+    function resetSelect(selectElement, placeholder) {
+        selectElement.innerHTML = "";
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = placeholder;
+        selectElement.appendChild(option);
+    }
+
+    function loadNiveaux(anneeId, selectedValue = "") {
+        resetSelect(niveauSelect, "---------");
+        resetSelect(classeSelect, "---------");
+
+        if (!anneeId) return;
+
+        fetch("{% url 'ajax_niveaux_orientation' %}?annee_scolaire=" + anneeId)
+            .then(response => response.json())
+            .then(data => {
+                data.results.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.nom;
+                    if (selectedValue && selectedValue == item.id) {
+                        option.selected = true;
+                    }
+                    niveauSelect.appendChild(option);
+                });
+
+                if (selectedValue) {
+                    loadClasses(selectedValue, currentClasse);
+                }
+            });
+    }
+
+    function loadClasses(niveauId, selectedValue = "") {
+        resetSelect(classeSelect, "---------");
+
+        if (!niveauId) return;
+
+        fetch("{% url 'ajax_classes_par_niveau' %}?niveau=" + niveauId)
+            .then(response => response.json())
+            .then(data => {
+                data.results.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.nom;
+                    if (selectedValue && selectedValue == item.id) {
+                        option.selected = true;
+                    }
+                    classeSelect.appendChild(option);
+                });
+            });
+    }
+
+    anneeSelect.addEventListener("change", function () {
+        loadNiveaux(this.value);
+    });
+
+    niveauSelect.addEventListener("change", function () {
+        loadClasses(this.value);
+    });
+
+    if (anneeSelect.value) {
+        loadNiveaux(anneeSelect.value, currentNiveau);
+    }
+});
+</script>
+{% endblock %}

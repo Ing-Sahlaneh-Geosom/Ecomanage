@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="mb-4">
+            <h3 class="fw-bold text-dark mb-1">{% trans "Rapport d'orientation" %}</h3>
+            <p class="text-muted mb-0">
+                {% trans "Consultez la répartition des orientations finales par classe et par filière." %}
+            </p>
+        </div>
+
+        <form method="get" id="filter-form">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">{% trans "Année scolaire" %}</label>
+                    {{ form.annee_scolaire }}
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">{% trans "Niveau concerné" %}</label>
+                    {{ form.niveau }}
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success w-100">
+                        {% trans "Afficher" %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if orientation and matrix %}
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm summary-card">
+            <div class="card-body">
+                <div class="small text-muted">{% trans "Effectif total" %}</div>
+                <div class="summary-value">{{ total_eleves }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm summary-card">
+            <div class="card-body">
+                <div class="small text-muted">{% trans "Total orientés" %}</div>
+                <div class="summary-value text-success">{{ total_orientes }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm summary-card">
+            <div class="card-body">
+                <div class="small text-muted">{% trans "Non orientés" %}</div>
+                <div class="summary-value text-danger">{{ total_non_orientes }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body py-3">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="small text-muted">{% trans "Année scolaire" %}</div>
+                <div class="fw-semibold">{{ annee_scolaire.nom }}</div>
+            </div>
+            <div class="col-md-4">
+                <div class="small text-muted">{% trans "Niveau concerné" %}</div>
+                <div class="fw-semibold">{{ niveau.nom }}</div>
+            </div>
+            <div class="col-md-4">
+                <div class="small text-muted">{% trans "Période d'orientation" %}</div>
+                <div class="fw-semibold">
+                    {{ orientation.date_debut|date:"Y-m-d" }} {% trans "à" %} {{ orientation.date_fin|date:"Y-m-d" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body table-responsive">
+        <table class="table table-bordered align-middle report-table mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="min-width: 170px;">{% trans "Filière" %}</th>
+                    {% for classe in classes %}
+                        <th class="text-center">{{ classe.nom }}</th>
+                    {% endfor %}
+                    <th class="text-center">{% trans "Total" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in matrix %}
+                <tr>
+                    <td class="fw-semibold">{{ row.programme.code }}</td>
+
+                    {% for item in row.class_counts %}
+                        <td class="text-center">{{ item.count }}</td>
+                    {% endfor %}
+
+                    <td class="text-center fw-bold">{{ row.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+           <tfoot>
+                <tr class="table-light">
+                    <th>{% trans "Total général" %}</th>
+                    {% for item in class_totals %}
+                        <th class="text-center">{{ item.count }}</th>
+                    {% endfor %}
+                    <th class="text-center">{{ total_general }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{% elif form.is_bound %}
+<div class="alert alert-warning">
+    {% trans "Aucune donnée d'orientation finale n'a été trouvée pour cette sélection." %}
+</div>
+{% endif %}
+
+<style>
+.summary-card {
+    border-radius: 14px;
+}
+
+.summary-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 6px;
+}
+
+.report-table th,
+.report-table td {
+    vertical-align: middle;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const anneeSelect = document.getElementById("id_annee_scolaire");
+    const niveauSelect = document.getElementById("id_niveau");
+    const currentNiveau = "{{ form.niveau.value|default:'' }}";
+
+    function resetSelect(selectElement, placeholder) {
+        selectElement.innerHTML = "";
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = placeholder;
+        selectElement.appendChild(option);
+    }
+
+    function loadNiveaux(anneeId, selectedValue = "") {
+        resetSelect(niveauSelect, "---------");
+
+        if (!anneeId) return;
+
+        fetch("{% url 'ajax_niveaux_orientation' %}?annee_scolaire=" + anneeId)
+            .then(response => response.json())
+            .then(data => {
+                data.results.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.nom;
+                    if (selectedValue && selectedValue == item.id) {
+                        option.selected = true;
+                    }
+                    niveauSelect.appendChild(option);
+                });
+            });
+    }
+
+    anneeSelect.addEventListener("change", function () {
+        loadNiveaux(this.value);
+    });
+
+    if (anneeSelect.value) {
+        loadNiveaux(anneeSelect.value, currentNiveau);
+    }
+});
+</script>
+{% endblock %}

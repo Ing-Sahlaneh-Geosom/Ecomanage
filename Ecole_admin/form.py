@@ -1334,3 +1334,441 @@ class PromotionValidationForm(forms.ModelForm):
                 cleaned_data["prochaine_specialite"] = None
 
         return cleaned_data
+    
+
+
+
+
+
+
+from django import forms
+from .models import ProgrammeOrientation
+
+
+class ProgrammeOrientationForm(forms.ModelForm):
+    class Meta:
+        model = ProgrammeOrientation
+        fields = ["code", "libelle", "ordre", "actif"]
+        widgets = {
+            "code": forms.TextInput(attrs={"class": "form-control"}),
+            "libelle": forms.TextInput(attrs={"class": "form-control"}),
+            "ordre": forms.NumberInput(attrs={"class": "form-control", "min": "1"}),
+            "actif": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+
+    def clean_code(self):
+        code = (self.cleaned_data.get("code") or "").strip().upper()
+        if not code:
+            raise forms.ValidationError("Le code est obligatoire.")
+        return code
+    
+
+
+
+from .models import OrientationScolaire, Niveau, ProgrammeOrientation
+
+
+class OrientationScolaireForm(forms.ModelForm):
+    class Meta:
+        model = OrientationScolaire
+        fields = ["niveau", "programmes", "date_debut", "date_fin", "actif"]
+        widgets = {
+            "niveau": forms.Select(attrs={"class": "form-select"}),
+            "programmes": forms.SelectMultiple(attrs={"class": "form-select", "size": "6"}),
+            "date_debut": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "date_fin": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "actif": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        if ecole:
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True
+            ).order_by("ordre", "nom")
+
+            self.fields["programmes"].queryset = ProgrammeOrientation.objects.filter(
+                ecole=ecole,
+                actif=True
+            ).order_by("ordre", "code")
+
+
+
+from django import forms
+from Ecole_admin.models import AnneeScolaire, Niveau, Classe, OrientationScolaire
+
+
+class FicheVoeuxFilterForm(forms.Form):
+    annee_scolaire = forms.ModelChoiceField(
+        queryset=AnneeScolaire.objects.all().order_by("-debut"),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_annee_scolaire"})
+    )
+
+    niveau = forms.ModelChoiceField(
+        queryset=Niveau.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_niveau"})
+    )
+
+    classe = forms.ModelChoiceField(
+        queryset=Classe.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_classe"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        annee_id = self.data.get("annee_scolaire") or self.initial.get("annee_scolaire")
+        niveau_id = self.data.get("niveau") or self.initial.get("niveau")
+
+        if ecole and annee_id:
+            niveau_ids = OrientationScolaire.objects.filter(
+                ecole=ecole,
+                annee_scolaire_id=annee_id,
+                actif=True
+            ).values_list("niveau_id", flat=True)
+
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True,
+                id__in=niveau_ids
+            ).order_by("ordre", "nom")
+        else:
+            self.fields["niveau"].queryset = Niveau.objects.none()
+
+        if ecole and niveau_id:
+            self.fields["classe"].queryset = Classe.objects.filter(
+                ecole=ecole,
+                actif=True,
+                niveau_id=niveau_id
+            ).order_by("nom")
+        else:
+            self.fields["classe"].queryset = Classe.objects.none()
+
+
+from django import forms
+from Ecole_admin.models import AnneeScolaire, Niveau, Classe, OrientationScolaire
+
+
+class SaisieVoeuxFilterForm(forms.Form):
+    annee_scolaire = forms.ModelChoiceField(
+        queryset=AnneeScolaire.objects.all().order_by("-debut"),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_annee_scolaire"})
+    )
+
+    niveau = forms.ModelChoiceField(
+        queryset=Niveau.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_niveau"})
+    )
+
+    classe = forms.ModelChoiceField(
+        queryset=Classe.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_classe"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        annee_id = self.data.get("annee_scolaire") or self.initial.get("annee_scolaire")
+        niveau_id = self.data.get("niveau") or self.initial.get("niveau")
+
+        if ecole and annee_id:
+            niveau_ids = OrientationScolaire.objects.filter(
+                ecole=ecole,
+                annee_scolaire_id=annee_id,
+                actif=True
+            ).values_list("niveau_id", flat=True)
+
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True,
+                id__in=niveau_ids
+            ).order_by("ordre", "nom")
+        else:
+            self.fields["niveau"].queryset = Niveau.objects.none()
+
+        if ecole and niveau_id:
+            self.fields["classe"].queryset = Classe.objects.filter(
+                ecole=ecole,
+                actif=True,
+                niveau_id=niveau_id
+            ).order_by("nom")
+        else:
+            self.fields["classe"].queryset = Classe.objects.none()
+
+
+
+from django import forms
+from Ecole_admin.models import AnneeScolaire, Niveau, Classe, OrientationScolaire
+
+
+class AffichageVoeuxFilterForm(forms.Form):
+    annee_scolaire = forms.ModelChoiceField(
+        queryset=AnneeScolaire.objects.all().order_by("-debut"),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_annee_scolaire"})
+    )
+
+    niveau = forms.ModelChoiceField(
+        queryset=Niveau.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_niveau"})
+    )
+
+    classe = forms.ModelChoiceField(
+        queryset=Classe.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_classe"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        annee_id = self.data.get("annee_scolaire") or self.initial.get("annee_scolaire")
+        niveau_id = self.data.get("niveau") or self.initial.get("niveau")
+
+        if ecole and annee_id:
+            niveau_ids = OrientationScolaire.objects.filter(
+                ecole=ecole,
+                annee_scolaire_id=annee_id,
+                actif=True
+            ).values_list("niveau_id", flat=True)
+
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True,
+                id__in=niveau_ids
+            ).order_by("ordre", "nom")
+        else:
+            self.fields["niveau"].queryset = Niveau.objects.none()
+
+        if ecole and niveau_id:
+            self.fields["classe"].queryset = Classe.objects.filter(
+                ecole=ecole,
+                actif=True,
+                niveau_id=niveau_id
+            ).order_by("nom")
+        else:
+            self.fields["classe"].queryset = Classe.objects.none()
+
+
+
+from django import forms
+from Ecole_admin.models import AnneeScolaire, Niveau, Classe, OrientationScolaire
+
+
+class OrientationFinaleFilterForm(forms.Form):
+    annee_scolaire = forms.ModelChoiceField(
+        queryset=AnneeScolaire.objects.all().order_by("-debut"),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_annee_scolaire"})
+    )
+
+    niveau = forms.ModelChoiceField(
+        queryset=Niveau.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_niveau"})
+    )
+
+    classe = forms.ModelChoiceField(
+        queryset=Classe.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_classe"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        annee_id = self.data.get("annee_scolaire") or self.initial.get("annee_scolaire")
+        niveau_id = self.data.get("niveau") or self.initial.get("niveau")
+
+        if ecole and annee_id:
+            niveau_ids = OrientationScolaire.objects.filter(
+                ecole=ecole,
+                annee_scolaire_id=annee_id,
+                actif=True
+            ).values_list("niveau_id", flat=True)
+
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True,
+                id__in=niveau_ids
+            ).order_by("ordre", "nom")
+        else:
+            self.fields["niveau"].queryset = Niveau.objects.none()
+
+        if ecole and niveau_id:
+            self.fields["classe"].queryset = Classe.objects.filter(
+                ecole=ecole,
+                actif=True,
+                niveau_id=niveau_id
+            ).order_by("nom")
+        else:
+            self.fields["classe"].queryset = Classe.objects.none()
+
+
+
+
+from django import forms
+from .models import AnneeScolaire, Niveau, OrientationScolaire
+
+
+class RapportOrientationFilterForm(forms.Form):
+    annee_scolaire = forms.ModelChoiceField(
+        queryset=AnneeScolaire.objects.all().order_by("-debut"),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_annee_scolaire"})
+    )
+
+    niveau = forms.ModelChoiceField(
+        queryset=Niveau.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_niveau"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        annee_id = self.data.get("annee_scolaire") or self.initial.get("annee_scolaire")
+
+        if ecole and annee_id:
+            niveau_ids = OrientationScolaire.objects.filter(
+                ecole=ecole,
+                annee_scolaire_id=annee_id,
+                actif=True
+            ).values_list("niveau_id", flat=True)
+
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True,
+                id__in=niveau_ids
+            ).order_by("ordre", "nom")
+        else:
+            self.fields["niveau"].queryset = Niveau.objects.none()
+
+
+
+from django import forms
+from .models import AnneeScolaire, Niveau, Classe, OrientationScolaire
+
+
+class DecisionEleveFilterForm(forms.Form):
+    annee_scolaire = forms.ModelChoiceField(
+        queryset=AnneeScolaire.objects.all().order_by("-debut"),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_annee_scolaire"})
+    )
+
+    niveau = forms.ModelChoiceField(
+        queryset=Niveau.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_niveau"})
+    )
+
+    classe = forms.ModelChoiceField(
+        queryset=Classe.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_classe"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        annee_id = self.data.get("annee_scolaire") or self.initial.get("annee_scolaire")
+        niveau_id = self.data.get("niveau") or self.initial.get("niveau")
+
+        if ecole and annee_id:
+            niveau_ids = OrientationScolaire.objects.filter(
+                ecole=ecole,
+                annee_scolaire_id=annee_id,
+                actif=True
+            ).values_list("niveau_id", flat=True)
+
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True,
+                id__in=niveau_ids
+            ).order_by("ordre", "nom")
+        else:
+            self.fields["niveau"].queryset = Niveau.objects.none()
+
+        if ecole and niveau_id:
+            self.fields["classe"].queryset = Classe.objects.filter(
+                ecole=ecole,
+                actif=True,
+                niveau_id=niveau_id
+            ).order_by("nom")
+        else:
+            self.fields["classe"].queryset = Classe.objects.none()
+
+
+
+
+
+from django import forms
+from .models import AnneeScolaire, Niveau, Classe, OrientationScolaire
+
+
+class RapportDecisionFinaleFilterForm(forms.Form):
+    annee_scolaire = forms.ModelChoiceField(
+        queryset=AnneeScolaire.objects.all().order_by("-debut"),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_annee_scolaire"})
+    )
+
+    niveau = forms.ModelChoiceField(
+        queryset=Niveau.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_niveau"})
+    )
+
+    classe = forms.ModelChoiceField(
+        queryset=Classe.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={"class": "form-select", "id": "id_classe"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        ecole = kwargs.pop("ecole", None)
+        super().__init__(*args, **kwargs)
+
+        annee_id = self.data.get("annee_scolaire") or self.initial.get("annee_scolaire")
+        niveau_id = self.data.get("niveau") or self.initial.get("niveau")
+
+        if ecole and annee_id:
+            niveau_ids = OrientationScolaire.objects.filter(
+                ecole=ecole,
+                annee_scolaire_id=annee_id,
+                actif=True
+            ).values_list("niveau_id", flat=True)
+
+            self.fields["niveau"].queryset = Niveau.objects.filter(
+                ecole=ecole,
+                actif=True,
+                id__in=niveau_ids
+            ).order_by("ordre", "nom")
+        else:
+            self.fields["niveau"].queryset = Niveau.objects.none()
+
+        if ecole and niveau_id:
+            self.fields["classe"].queryset = Classe.objects.filter(
+                ecole=ecole,
+                actif=True,
+                niveau_id=niveau_id
+            ).order_by("nom")
+        else:
+            self.fields["classe"].queryset = Classe.objects.none()

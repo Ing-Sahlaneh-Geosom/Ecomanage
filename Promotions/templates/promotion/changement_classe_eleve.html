@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<style>
+    .decision-page .page-title {
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: #1f2d3d;
+        margin-bottom: 1rem;
+    }
+
+    .decision-page .main-card,
+    .decision-page .student-card {
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        background: #fff;
+    }
+
+    .decision-page .form-label {
+        font-size: .92rem;
+        font-weight: 600;
+        color: #3b4958;
+        margin-bottom: .4rem;
+    }
+
+    .decision-page .form-select,
+    .decision-page .form-control {
+        height: 46px;
+        border-radius: 12px;
+        border: 1px solid #d8dee6;
+        font-size: .95rem;
+        box-shadow: none !important;
+    }
+
+    .decision-page .btn-show {
+        height: 46px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .decision-page .student-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .decision-page .student-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #213245;
+    }
+
+    .decision-page .student-meta {
+        font-size: .9rem;
+        color: #64748b;
+    }
+
+    .decision-page .decision-badge {
+        display: inline-block;
+        padding: .4rem .8rem;
+        border-radius: 999px;
+        font-size: .85rem;
+        font-weight: 700;
+        background: #eef4ff;
+        color: #2457c5;
+    }
+
+    .decision-page .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 1rem;
+    }
+
+    .decision-page .mini-box {
+        background: #f8fafc;
+        border: 1px solid #e8edf3;
+        border-radius: 14px;
+        padding: 12px;
+    }
+
+    .decision-page .mini-label {
+        font-size: .8rem;
+        color: #64748b;
+        margin-bottom: .25rem;
+    }
+
+    .decision-page .mini-value {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #1f2d3d;
+    }
+
+    .decision-page .table-wrap {
+        border: 1px solid #edf1f5;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .decision-page .table {
+        margin-bottom: 0;
+    }
+
+    .decision-page .table thead th {
+        background: #fafbfd;
+        font-size: .88rem;
+        font-weight: 700;
+        color: #25313f;
+        padding: 12px;
+        border-bottom: 1px solid #e9edf2;
+        white-space: nowrap;
+    }
+
+    .decision-page .table tbody td {
+        font-size: .9rem;
+        color: #334155;
+        padding: 12px;
+        border-top: 1px solid #f1f4f7;
+        vertical-align: middle;
+    }
+
+    .decision-page .empty-row {
+        text-align: center;
+        color: #7a8794;
+        padding: 2rem 1rem !important;
+    }
+
+    @media (max-width: 1200px) {
+        .decision-page .mini-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .decision-page .mini-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
+
+<div class="container-fluid py-3 decision-page">
+
+    <div class="page-title">
+        {% trans "Afficher la décision finale" %}
+    </div>
+
+    <div class="card main-card mb-4">
+        <div class="card-body p-4">
+            <form method="get">
+                <div class="row g-4 align-items-end">
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">{% trans "Niveau" %} <span class="text-danger">*</span></label>
+                        <select name="niveau" class="form-select">
+                            <option value="">{% trans "Sélectionner..." %}</option>
+                            {% for niveau in niveaux %}
+                                <option value="{{ niveau.id }}" {% if selected_niveau == niveau.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ niveau.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">{% trans "La liste des classes" %} <span class="text-danger">*</span></label>
+                        <select name="classe" class="form-select">
+                            <option value="">{% trans "Sélectionner..." %}</option>
+                            {% for classe in classes %}
+                                <option value="{{ classe.id }}" {% if selected_classe == classe.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ classe.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">{% trans "Année scolaire" %} <span class="text-danger">*</span></label>
+                        <select name="annee_scolaire" class="form-select">
+                            <option value="">{% trans "Sélectionner..." %}</option>
+                            {% for annee in annees %}
+                                <option value="{{ annee.id }}" {% if selected_annee == annee.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ annee.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <button type="submit" class="btn btn-success w-100 btn-show">
+                            {% trans "Afficher" %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% for item in eleves_data %}
+        <div class="card student-card mb-4">
+            <div class="card-body p-4">
+                <div class="student-head">
+                    <div>
+                        <div class="student-name">{{ item.eleve.nom }}</div>
+                        <div class="student-meta">
+                            {% trans "Matricule" %} : {{ item.eleve.identifiant|default:"-" }},
+                            {% trans "Classe" %} : {{ item.promotion.classe_actuelle.nom|default:"-" }}
+                        </div>
+                    </div>
+
+                    <div class="decision-badge">
+                        {{ item.promotion.get_decision_finale_display }}
+                    </div>
+                </div>
+
+                <div class="table-wrap mb-3">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Matière" %}</th>
+                                    <th>{% trans "Trimestre" %}</th>
+                                    <th>{% trans "Devoir" %}</th>
+                                    <th>{% trans "Note" %}</th>
+                                    <th>{% trans "Coefficient" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in item.notes %}
+                                    <tr>
+                                        <td>{{ note.matiere.nom }}</td>
+                                        <td>{{ note.get_trimestre_display }}</td>
+                                        <td>{{ note.devoir.nom|default:"-" }}</td>
+                                        <td>{{ note.note }}</td>
+                                        <td>{{ note.coefficient }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="empty-row">
+                                            {% trans "Aucune note à afficher" %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mini-grid">
+                    <div class="mini-box">
+                        <div class="mini-label">{% trans "Moyenne générale" %}</div>
+                        <div class="mini-value">{{ item.moyenne|default:"0.00" }}</div>
+                    </div>
+
+                    <div class="mini-box">
+                        <div class="mini-label">{% trans "Absences" %}</div>
+                        <div class="mini-value">{{ item.absences }}</div>
+                    </div>
+
+                    <div class="mini-box">
+                        <div class="mini-label">{% trans "Retards" %}</div>
+                        <div class="mini-value">{{ item.retards }}</div>
+                    </div>
+
+                    <div class="mini-box">
+                        <div class="mini-label">{% trans "Décision proposée" %}</div>
+                        <div class="mini-value">{{ item.promotion.get_decision_proposee_display }}</div>
+                    </div>
+
+                    <div class="mini-box">
+                        <div class="mini-label">{% trans "État" %}</div>
+                        <div class="mini-value">{{ item.promotion.get_etat_display }}</div>
+                    </div>
+
+                    <div class="mini-box">
+                        <div class="mini-label">{% trans "Prochaine classe" %}</div>
+                        <div class="mini-value">{{ item.promotion.prochaine_classe.nom|default:"-" }}</div>
+                    </div>
+                </div>
+
+                {% if item.promotion.commentaire %}
+                    <div class="mt-3">
+                        <div class="mini-label">{% trans "Commentaire" %}</div>
+                        <div class="p-3 rounded-3 border bg-light">{{ item.promotion.commentaire }}</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="card student-card">
+            <div class="card-body">
+                <div class="empty-row">
+                    {% trans "Aucun enregistrement à afficher" %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="mb-4">
+            <h3 class="fw-bold text-dark mb-1">{% trans "Saisie des préférences d'orientation" %}</h3>
+            <p class="text-muted mb-0">
+                {% trans "Sélectionnez le contexte scolaire, chargez les élèves, puis cochez les filières retenues pour chacun." %}
+            </p>
+        </div>
+
+        <form method="get" id="filter-form">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{% trans "Année scolaire" %}</label>
+                    {{ form.annee_scolaire }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{% trans "Niveau concerné" %}</label>
+                    {{ form.niveau }}
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">{% trans "Classe" %}</label>
+                    {{ form.classe }}
+                </div>
+
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success w-100">
+                        {% trans "Charger" %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if orientation and rows %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body py-3">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Année scolaire" %}</div>
+                <div class="fw-semibold">{{ annee_scolaire.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Niveau concerné" %}</div>
+                <div class="fw-semibold">{{ niveau.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Classe" %}</div>
+                <div class="fw-semibold">{{ classe.nom }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted">{% trans "Période active" %}</div>
+                <div class="fw-semibold">
+                    {{ orientation.date_debut|date:"Y-m-d" }} {% trans "à" %} {{ orientation.date_fin|date:"Y-m-d" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="annee_scolaire" value="{{ annee_scolaire.id }}">
+    <input type="hidden" name="niveau" value="{{ niveau.id }}">
+    <input type="hidden" name="classe" value="{{ classe.id }}">
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body table-responsive">
+            <table class="table align-middle table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">{% trans "Matricule" %}</th>
+                        <th style="width: 35%;">{% trans "Élève" %}</th>
+                        <th style="width: 10%;">{% trans "Sexe" %}</th>
+                        <th style="width: 40%;">{% trans "Choix à retenir" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row.eleve.identifiant }}</td>
+                        <td>{{ row.eleve.nom }}</td>
+                        <td>{{ row.eleve.Sexe }}</td>
+                        <td>
+                            <div class="choice-wrap">
+                                {% for programme in programmes %}
+                                <label class="choice-pill">
+                                    <input
+                                        type="checkbox"
+                                        name="choix_{{ row.eleve.id }}_{{ programme.id }}"
+                                        {% if programme.id in row.selected_program_ids %}checked{% endif %}
+                                    >
+                                    <span>{{ programme.code }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            {% trans "Aucun élève trouvé pour cette sélection." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="mt-4 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                    {% trans "Enregistrer les choix" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% elif form.is_bound %}
+<div class="alert alert-warning">
+    {% trans "Aucune orientation active ou aucun élève n'a été trouvé pour cette sélection." %}
+</div>
+{% endif %}
+
+<style>
+.choice-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.choice-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    background: #f8f9fa;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.choice-pill input {
+    margin: 0;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const anneeSelect = document.getElementById("id_annee_scolaire");
+    const niveauSelect = document.getElementById("id_niveau");
+    const classeSelect = document.getElementById("id_classe");
+
+    const currentNiveau = "{{ form.niveau.value|default:'' }}";
+    const currentClasse = "{{ form.classe.value|default:'' }}";
+
+    function resetSelect(selectElement, placeholder) {
+        selectElement.innerHTML = "";
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = placeholder;
+        selectElement.appendChild(option);
+    }
+
+    function loadNiveaux(anneeId, selectedValue = "") {
+        resetSelect(niveauSelect, "---------");
+        resetSelect(classeSelect, "---------");
+
+        if (!anneeId) return;
+
+        fetch("{% url 'ajax_niveaux_orientation' %}?annee_scolaire=" + anneeId)
+            .then(response => response.json())
+            .then(data => {
+                data.results.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.nom;
+                    if (selectedValue && selectedValue == item.id) {
+                        option.selected = true;
+                    }
+                    niveauSelect.appendChild(option);
+                });
+
+                if (selectedValue) {
+                    loadClasses(selectedValue, currentClasse);
+                }
+            });
+    }
+
+    function loadClasses(niveauId, selectedValue = "") {
+        resetSelect(classeSelect, "---------");
+
+        if (!niveauId) return;
+
+        fetch("{% url 'ajax_classes_par_niveau' %}?niveau=" + niveauId)
+            .then(response => response.json())
+            .then(data => {
+                data.results.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.nom;
+                    if (selectedValue && selectedValue == item.id) {
+                        option.selected = true;
+                    }
+                    classeSelect.appendChild(option);
+                });
+            });
+    }
+
+    anneeSelect.addEventListener("change", function () {
+        loadNiveaux(this.value);
+    });
+
+    niveauSelect.addEventListener("change", function () {
+        loadClasses(this.value);
+    });
+
+    if (anneeSelect.value) {
+        loadNiveaux(anneeSelect.value, currentNiveau);
+    }
+});
+</script>
+{% endblock %}
